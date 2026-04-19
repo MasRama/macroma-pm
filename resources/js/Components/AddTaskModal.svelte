@@ -55,14 +55,14 @@
 
 <div 
   data-testid="add-task-modal" 
-  class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+  class="fixed inset-0 bg-black/30 dark:bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
   onclick={handleBackdropClick}
   onkeydown={(e) => e.key === 'Escape' && handleBackdropClick()}
   role="presentation"
   transition:fade={{ duration: 150 }}
 >
   <div 
-    class="bg-[#0a0a0a]/98 backdrop-blur-xl border border-white/[0.08] rounded-2xl p-6 w-full max-w-md shadow-2xl" 
+    class="bg-white dark:bg-[#0a0a0a]/98 backdrop-blur-xl border border-slate-200 dark:border-white/[0.08] rounded-2xl p-6 w-full max-w-md shadow-2xl" 
     transition:fly={{ y: 20, duration: 200 }}
     onclick={(e) => e.stopPropagation()}
     onkeydown={(e) => e.stopPropagation()}
@@ -71,70 +71,70 @@
     tabindex="-1"
   >
     <div class="mb-6">
-      <h2 class="text-xl font-bold text-white mb-1 tracking-wide">Buat Task Baru</h2>
-      <p class="text-sm text-slate-400 mt-1">Tambahkan task ke backlog project ini</p>
+      <h2 class="text-xl font-bold text-slate-900 dark:text-white mb-1 tracking-wide">Buat Task Baru</h2>
+      <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Tambahkan task ke backlog project ini</p>
     </div>
     
     <div class="space-y-5">
       <div>
-        <label class="block text-[10px] uppercase tracking-wider font-semibold text-slate-400 mb-2" for="task-title">Judul <span class="text-red-400">*</span></label>
+        <label class="block text-[10px] uppercase tracking-wider font-semibold text-slate-500 dark:text-slate-400 mb-2" for="task-title">Judul <span class="text-red-400">*</span></label>
         <input 
           id="task-title" 
           data-testid="task-title-input" 
           bind:value={title} 
           type="text" 
           placeholder="Apa yang perlu dikerjakan?" 
-          class="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition-all placeholder:text-slate-500" 
+          class="w-full bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500" 
           required 
         />
       </div>
       
       <div class="grid grid-cols-2 gap-4">
         <div>
-          <label class="block text-[10px] uppercase tracking-wider font-semibold text-slate-400 mb-2" for="task-priority">Prioritas</label>
+          <label class="block text-[10px] uppercase tracking-wider font-semibold text-slate-500 dark:text-slate-400 mb-2" for="task-priority">Prioritas</label>
           <div class="relative">
             <select 
               id="task-priority" 
               bind:value={priority} 
-              class="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition-all appearance-none [&>option]:bg-slate-900"
+              class="w-full bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition-all appearance-none [&>option]:bg-white dark:[&>option]:bg-slate-900"
             >
               <option value="low">Low</option>
               <option value="medium">Medium</option>
               <option value="high">High</option>
             </select>
-            <div class="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-slate-400">
+            <div class="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-slate-400 dark:text-slate-500">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
             </div>
           </div>
         </div>
-
+ 
         <div>
-          <label class="block text-[10px] uppercase tracking-wider font-semibold text-slate-400 mb-2" for="task-assignee">Assignee</label>
+          <label class="block text-[10px] uppercase tracking-wider font-semibold text-slate-500 dark:text-slate-400 mb-2" for="task-assignee">Assignee</label>
           <div class="relative">
             <select 
               id="task-assignee" 
               bind:value={assigneeId} 
-              class="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition-all appearance-none [&>option]:bg-slate-900"
+              class="w-full bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition-all appearance-none [&>option]:bg-white dark:[&>option]:bg-slate-900"
             >
               <option value="">Unassigned</option>
               {#each members as m}
                 <option value={m.user_id}>{m.user?.name || m.user?.email || m.user_id}</option>
               {/each}
             </select>
-            <div class="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-slate-400">
+            <div class="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-slate-400 dark:text-slate-500">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
             </div>
           </div>
         </div>
       </div>
-
+ 
       <div>
-        <label class="block text-[10px] uppercase tracking-wider font-semibold text-slate-400 mb-2" for="task-desc">Deskripsi</label>
+        <label class="block text-[10px] uppercase tracking-wider font-semibold text-slate-500 dark:text-slate-400 mb-2" for="task-desc">Deskripsi</label>
         <textarea 
           id="task-desc" 
           bind:value={description} 
           placeholder="Detail tambahan (opsional)..." 
-          class="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-3 text-sm text-slate-200 resize-none min-h-[100px] focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition-all placeholder:text-slate-500"
+          class="w-full bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-slate-200 resize-none min-h-[100px] focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500"
         ></textarea>
       </div>
 
@@ -148,7 +148,7 @@
         <button 
           type="button" 
           onclick={onClose} 
-          class="px-5 py-2.5 text-sm font-medium text-slate-300 hover:text-white hover:bg-white/[0.08] rounded-xl transition-all"
+          class="px-5 py-2.5 text-sm font-medium text-slate-500 dark:text-slate-300 hover:text-slate-800 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.08] rounded-xl transition-all"
         >
           Batal
         </button>

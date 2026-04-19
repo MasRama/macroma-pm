@@ -181,17 +181,17 @@
 <AppLayout title={project.name} {projects} activeProjectId={project.id}>
   <!-- Background decorations -->
   <div class="fixed inset-0 pointer-events-none z-0">
-    <div class="absolute top-0 right-0 w-[600px] h-[600px] bg-primary-500/10 rounded-full blur-3xl -mr-64 -mt-64"></div>
-    <div class="absolute bottom-0 left-0 w-[400px] h-[400px] bg-accent-500/10 rounded-full blur-3xl -ml-32 -mb-32"></div>
-    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-info-500/10 rounded-full blur-3xl"></div>
+    <div class="absolute top-0 right-0 w-[600px] h-[600px] bg-primary-500/20 dark:bg-primary-500/10 rounded-full blur-3xl -mr-64 -mt-64"></div>
+    <div class="absolute bottom-0 left-0 w-[400px] h-[400px] bg-accent-500/20 dark:bg-accent-500/10 rounded-full blur-3xl -ml-32 -mb-32"></div>
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-info-500/20 dark:bg-info-500/10 rounded-full blur-3xl"></div>
   </div>
 
   <!-- Header: Project name + Batch dropdown + Add task button -->
-  <header class="relative z-10 flex items-center justify-between px-8 py-5 border-b border-white/5">
+  <header class="relative z-10 flex items-center justify-between px-8 py-5 border-b border-slate-200 dark:border-white/5">
     <div>
-      <h1 class="text-xl font-bold">{project.name}</h1>
+      <h1 class="text-xl font-bold text-slate-900 dark:text-white">{project.name}</h1>
       {#if project.description}
-        <p class="text-xs text-slate-400 mt-0.5">{project.description}</p>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{project.description}</p>
       {/if}
     </div>
     
@@ -200,7 +200,7 @@
       <div class="relative">
         <select
           data-testid="batch-dropdown"
-          class="appearance-none bg-white/5 border border-white/10 rounded-lg px-4 py-2 pr-8 text-sm text-slate-200 focus:outline-none focus:border-primary-400/50 cursor-pointer"
+          class="appearance-none bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-lg px-4 py-2 pr-8 text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:border-primary-400/50 cursor-pointer"
           onchange={(e) => {
             const val = (e.currentTarget as HTMLSelectElement).value;
             switchBatch(val === '' ? null : batches.find(b => b.id === val) || null);
@@ -216,7 +216,7 @@
       <button
         onclick={() => showActivity = true}
         title="Project Activity"
-        class="flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white text-sm font-medium px-4 py-2 rounded-lg transition-all"
+        class="flex items-center gap-2 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white text-sm font-medium px-4 py-2 rounded-lg transition-all"
       >
         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
         Activity
@@ -238,7 +238,7 @@
   <div class="relative z-10 grid grid-cols-3 gap-5 p-8 min-h-[calc(100vh-80px)]">
     {#each COLUMNS as col}
       {@const colTasks = col.ref()}
-      {@const bgClass = col.color === 'blue' ? 'bg-blue-500/[0.08] border-blue-500/20' : col.color === 'orange' ? 'bg-orange-500/[0.08] border-orange-500/20' : 'bg-emerald-500/[0.08] border-emerald-500/20'}
+      {@const bgClass = col.color === 'blue' ? 'bg-blue-50 border-blue-200 dark:bg-blue-500/[0.08] dark:border-blue-500/20' : col.color === 'orange' ? 'bg-orange-50 border-orange-200 dark:bg-orange-500/[0.08] dark:border-orange-500/20' : 'bg-emerald-50 border-emerald-200 dark:bg-emerald-500/[0.08] dark:border-emerald-500/20'}
       {@const textClass = col.color === 'blue' ? 'text-blue-400' : col.color === 'orange' ? 'text-orange-400' : 'text-emerald-400'}
       {@const badgeClass = col.color === 'blue' ? 'bg-blue-500/20 text-blue-300' : col.color === 'orange' ? 'bg-orange-500/20 text-orange-300' : 'bg-emerald-500/20 text-emerald-300'}
       {@const addBtnClass = col.color === 'blue' ? 'border-blue-500/20 hover:border-blue-400/50 hover:text-blue-400' : col.color === 'orange' ? 'border-orange-500/20 hover:border-orange-400/50 hover:text-orange-400' : 'border-emerald-500/20 hover:border-emerald-400/50 hover:text-emerald-400'}

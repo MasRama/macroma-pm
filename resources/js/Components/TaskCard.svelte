@@ -37,9 +37,9 @@
   );
 
   let themeClasses = $derived(
-    columnColor === 'blue' ? 'bg-gradient-to-br from-blue-500/10 to-slate-900/60 border border-blue-500/20 hover:border-blue-400/40 border-l-2 border-l-blue-400' :
-    columnColor === 'orange' ? 'bg-gradient-to-br from-orange-500/10 to-slate-900/60 border border-orange-500/20 hover:border-orange-400/40 border-l-2 border-l-orange-400' :
-    'bg-gradient-to-br from-emerald-500/10 to-slate-900/60 border border-emerald-500/20 hover:border-emerald-400/40 border-l-2 border-l-emerald-400'
+    columnColor === 'blue' ? 'bg-white border border-blue-200 hover:border-blue-300 border-l-2 border-l-blue-400 dark:bg-gradient-to-br dark:from-blue-500/10 dark:to-slate-900/60 dark:border-blue-500/20 dark:hover:border-blue-400/40' :
+    columnColor === 'orange' ? 'bg-white border border-orange-200 hover:border-orange-300 border-l-2 border-l-orange-400 dark:bg-gradient-to-br dark:from-orange-500/10 dark:to-slate-900/60 dark:border-orange-500/20 dark:hover:border-orange-400/40' :
+    'bg-white border border-emerald-200 hover:border-emerald-300 border-l-2 border-l-emerald-400 dark:bg-gradient-to-br dark:from-emerald-500/10 dark:to-slate-900/60 dark:border-emerald-500/20 dark:hover:border-emerald-400/40'
   );
 
   let btnColorClass = $derived(
@@ -56,7 +56,7 @@
     </span>
   </div>
 
-  <p class="text-sm font-medium text-slate-100 mt-2 mb-3 leading-snug">
+  <p class="text-sm font-medium text-slate-800 dark:text-slate-100 mt-2 mb-3 leading-snug">
     {task.title}
   </p>
 
