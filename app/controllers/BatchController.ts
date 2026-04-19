@@ -8,6 +8,7 @@ import {
 } from "@core";
 import { Project, ProjectMember, ProjectBatch, versionString } from "@models";
 import DB from "@services/DB";
+import { logActivity } from "@helpers/activity";
 
 class BatchController extends BaseController {
   async index(req: NaraRequest, res: NaraResponse) {
@@ -58,6 +59,14 @@ class BatchController extends BaseController {
         is_active: false,
       });
 
+      await logActivity({
+        projectId,
+        eventType: "batch.created",
+        description: `Batch ${versionString(batch)}${batch.label ? ` "${batch.label}"` : ""} dibuat`,
+        actorId: req.user.id,
+        batchId: batch.id,
+      });
+
       return jsonCreated(res, "Batch created", {
         batch: { ...batch, version_string: versionString(batch) },
       });
@@ -98,6 +107,16 @@ class BatchController extends BaseController {
       });
 
       const updated = await ProjectBatch.findById(batchId);
+
+      if (updated) {
+        await logActivity({
+          projectId,
+          eventType: "batch.activated",
+          description: `Batch ${versionString(updated)}${updated.label ? ` "${updated.label}"` : ""} diaktifkan`,
+          actorId: req.user.id,
+          batchId,
+        });
+      }
 
       return jsonSuccess(res, "Batch activated", {
         batch: updated ? { ...updated, version_string: versionString(updated) } : null,

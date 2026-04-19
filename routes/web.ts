@@ -71,6 +71,7 @@ Route.get("/dashboard", [Auth], ProjectController.index);
 Route.get("/projects", [Auth], ProjectController.index);
 Route.post("/projects", [Auth], ProjectController.store);
 Route.get("/projects/:id", [Auth], ProjectController.show);
+Route.get("/projects/:id/activity", [Auth], ProjectController.activity);
 Route.patch("/projects/:id", [Auth], ProjectController.update);
 Route.delete("/projects/:id", [Auth], ProjectController.destroy);
 

@@ -8,6 +8,7 @@ import {
 } from "@core";
 import { ProjectMember, ProjectBatch, Task, TaskLog, taskVersionString } from "@models";
 import DB from "@services/DB";
+import { logActivity } from "@helpers/activity";
 
 const VALID_COLUMNS = ["ongoing", "revisi", "done"] as const;
 type ColumnId = typeof VALID_COLUMNS[number];
@@ -98,6 +99,14 @@ class TaskController extends BaseController {
         });
       });
 
+      await logActivity({
+        projectId,
+        eventType: "task.created",
+        description: `Task "${String(body.title).trim()}" dibuat`,
+        actorId: req.user.id,
+        taskId,
+      });
+
       return res.redirect(`/projects/${projectId}`);
     } catch (err) {
       return jsonServerError(res, "Failed to create task");
@@ -172,6 +181,16 @@ class TaskController extends BaseController {
       updatedTask = await Task.findById(taskId);
       log = await TaskLog.findBy({ task_id: taskId, version: newVersion });
 
+      const columnNames: Record<string, string> = { ongoing: "On Going", revisi: "Revisi", done: "Done" };
+      await logActivity({
+        projectId: task.project_id,
+        eventType: "task.moved",
+        description: `Task "${task.title}" dipindah dari ${columnNames[task.column_id] ?? task.column_id} → ${columnNames[body.column_id!] ?? body.column_id} (${newVersion})`,
+        actorId: req.user.id,
+        taskId,
+        meta: { from: task.column_id, to: body.column_id, note: String(body.note).trim(), version: newVersion },
+      });
+
       return jsonSuccess(res, "Task moved", {
         task: updatedTask,
         log,
@@ -238,6 +257,15 @@ class TaskController extends BaseController {
 
       log = await TaskLog.findBy({ task_id: taskId, version: newVersion });
       const updatedTask = await Task.findById(taskId);
+
+      await logActivity({
+        projectId: task.project_id,
+        eventType: "task.log_added",
+        description: `Task "${task.title}" diupdate (${newVersion}): ${String(body.note).trim()}`,
+        actorId: req.user.id,
+        taskId,
+        meta: { note: String(body.note).trim(), version: newVersion },
+      });
 
       return jsonSuccess(res, "Log added", {
         log,

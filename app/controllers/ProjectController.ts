@@ -6,8 +6,9 @@ import {
   jsonError,
   jsonServerError,
 } from "@core";
-import { Project, ProjectMember, ProjectBatch, Task } from "@models";
+import { Project, ProjectMember, ProjectBatch, Task, ProjectActivityLog } from "@models";
 import DB from "@services/DB";
+import { logActivity } from "@helpers/activity";
 
 class ProjectController extends BaseController {
   async index(req: NaraRequest, res: NaraResponse) {
@@ -126,6 +127,13 @@ class ProjectController extends BaseController {
         created_at: now,
       });
 
+      await logActivity({
+        projectId,
+        eventType: "project.created",
+        description: `Project "${String(body.name).trim()}" dibuat`,
+        actorId: req.user.id,
+      });
+
       return res.redirect(`/projects/${projectId}`);
     } catch (err) {
       return jsonServerError(res, "Failed to create project");
@@ -178,6 +186,35 @@ class ProjectController extends BaseController {
     await Project.delete(projectId);
 
     return jsonSuccess(res, "Project deleted");
+  }
+
+  async activity(req: NaraRequest, res: NaraResponse) {
+    this.requireAuth(req);
+
+    const projectId = this.getRequiredParam(req, "id");
+
+    const isMember = await ProjectMember.isMember(projectId, req.user.id);
+    if (!isMember) {
+      return jsonError(res, "Forbidden", 403);
+    }
+
+    const logs = await ProjectActivityLog.findByProject(projectId, 50);
+
+    const logsWithActor = await Promise.all(
+      logs.map(async (log) => {
+        let actorName: string | null = null;
+        if (log.actor_id) {
+          const actor = await DB.from("users")
+            .where("id", log.actor_id)
+            .select("name", "email")
+            .first();
+          actorName = actor?.name || actor?.email || null;
+        }
+        return { ...log, actor_name: actorName };
+      })
+    );
+
+    return jsonSuccess(res, "Activity logs retrieved", { logs: logsWithActor });
   }
 }
 
