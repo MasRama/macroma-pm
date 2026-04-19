@@ -1,5 +1,6 @@
 <script lang="ts">
   import { inertia, page as inertiaPage } from '@inertiajs/svelte';
+  import DarkModeToggle from './DarkModeToggle.svelte';
 
   let { 
     projects = [], 
@@ -17,7 +18,7 @@
   ];
 </script>
 
-<aside data-testid="sidebar" class="fixed left-0 top-0 h-screen w-[260px] bg-white dark:bg-[#0a0a0a]/95 backdrop-blur-xl border-r border-slate-200 dark:border-white/[0.06] flex flex-col z-40 transition-all duration-300 overflow-hidden">
+<aside data-testid="sidebar" class="fixed left-0 top-0 h-screen w-[260px] bg-white dark:bg-surface-dark backdrop-blur-xl border-r border-slate-200 dark:border-white/[0.06] flex flex-col z-40 transition-all duration-300 overflow-hidden">
   <!-- Subtle radial glow -->
   <div class="absolute top-0 left-0 w-[400px] h-[400px] bg-primary-500/5 rounded-full blur-[80px] -translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
 
@@ -70,6 +71,7 @@
           {($inertiaPage.props.user as any)?.name || ($inertiaPage.props.user as any)?.email || 'User'}
         </p>
       </div>
+      <DarkModeToggle />
     </div>
   </div>
 </aside>
