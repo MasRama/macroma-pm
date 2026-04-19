@@ -172,17 +172,18 @@
   }
 
   const COLUMNS = [
-    { id: 'ongoing' as const, name: 'On Going', ref: () => ongoingTasks },
-    { id: 'revisi' as const, name: 'Revisi', ref: () => revisiTasks },
-    { id: 'done' as const, name: 'Done', ref: () => doneTasks },
+    { id: 'ongoing' as const, name: 'On Going', ref: () => ongoingTasks, color: 'blue' as const },
+    { id: 'revisi' as const, name: 'Revisi', ref: () => revisiTasks, color: 'orange' as const },
+    { id: 'done' as const, name: 'Done', ref: () => doneTasks, color: 'emerald' as const },
   ];
 </script>
 
 <AppLayout title={project.name} {projects} activeProjectId={project.id}>
   <!-- Background decorations -->
   <div class="fixed inset-0 pointer-events-none z-0">
-    <div class="absolute top-0 right-0 w-[600px] h-[600px] bg-primary-500/5 rounded-full blur-3xl -mr-64 -mt-64"></div>
-    <div class="absolute bottom-0 left-0 w-[400px] h-[400px] bg-accent-500/5 rounded-full blur-3xl -ml-32 -mb-32"></div>
+    <div class="absolute top-0 right-0 w-[600px] h-[600px] bg-primary-500/10 rounded-full blur-3xl -mr-64 -mt-64"></div>
+    <div class="absolute bottom-0 left-0 w-[400px] h-[400px] bg-accent-500/10 rounded-full blur-3xl -ml-32 -mb-32"></div>
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-info-500/10 rounded-full blur-3xl"></div>
   </div>
 
   <!-- Header: Project name + Batch dropdown + Add task button -->
@@ -237,11 +238,16 @@
   <div class="relative z-10 grid grid-cols-3 gap-5 p-8 min-h-[calc(100vh-80px)]">
     {#each COLUMNS as col}
       {@const colTasks = col.ref()}
-      <div data-testid="kanban-column-{col.id}" class="flex flex-col gap-3 bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl p-4">
+      {@const bgClass = col.color === 'blue' ? 'bg-blue-500/[0.08] border-blue-500/20' : col.color === 'orange' ? 'bg-orange-500/[0.08] border-orange-500/20' : 'bg-emerald-500/[0.08] border-emerald-500/20'}
+      {@const textClass = col.color === 'blue' ? 'text-blue-400' : col.color === 'orange' ? 'text-orange-400' : 'text-emerald-400'}
+      {@const badgeClass = col.color === 'blue' ? 'bg-blue-500/20 text-blue-300' : col.color === 'orange' ? 'bg-orange-500/20 text-orange-300' : 'bg-emerald-500/20 text-emerald-300'}
+      {@const addBtnClass = col.color === 'blue' ? 'border-blue-500/20 hover:border-blue-400/50 hover:text-blue-400' : col.color === 'orange' ? 'border-orange-500/20 hover:border-orange-400/50 hover:text-orange-400' : 'border-emerald-500/20 hover:border-emerald-400/50 hover:text-emerald-400'}
+      
+      <div data-testid="kanban-column-{col.id}" class="flex flex-col gap-3 backdrop-blur-sm border rounded-xl p-4 {bgClass}">
         <!-- Column header -->
         <div class="flex items-center justify-between mb-2">
-          <h3 class="text-sm font-semibold uppercase tracking-wider text-slate-400">{col.name}</h3>
-          <span class="text-xs bg-white/10 px-2 py-0.5 rounded-full text-slate-400">{colTasks.length}</span>
+          <h3 class="text-sm font-semibold uppercase tracking-wider {textClass}">{col.name}</h3>
+          <span class="text-xs px-2 py-0.5 rounded-full {badgeClass}">{colTasks.length}</span>
         </div>
 
         <!-- DnD container -->
@@ -256,6 +262,7 @@
               <TaskCard
                 {task}
                 assignee={getAssignee(task.assignee_id)}
+                columnColor={col.color}
                 onAddLog={() => addLogTask = task}
               />
             </div>
@@ -265,7 +272,7 @@
         <!-- Add task shortcut -->
         <button
           onclick={() => { addTaskColumn = col.id; showAddTask = true; }}
-          class="w-full mt-1 py-2 text-xs text-slate-500 border border-dashed border-white/10 rounded-lg hover:border-primary-400/50 hover:text-primary-400 transition-all"
+          class="w-full mt-1 py-2 text-xs text-slate-500 border border-dashed rounded-lg transition-all {addBtnClass}"
         >
           + Add Task
         </button>
