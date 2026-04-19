@@ -134,27 +134,43 @@ export async function seed(knex: Knex): Promise<void> {
 	await knex("role_permissions").insert(userPermissions);
 
 	// ==========================================
-	// 4. Create Admin User using Factory
+	// 4. Create Users
 	// ==========================================
-	const hashedPassword = await Authenticate.hash("nara");
+	const adminPassword = await Authenticate.hash("ram");
+	const userPassword = await Authenticate.hash("user");
 
 	const adminUser = await UserFactory
 		.merge({
-			name: "Nara",
-			email: "nara@ramaren.com",
-			password: hashedPassword,
+			name: "Ram",
+			email: "ram@ram.com",
+			password: adminPassword,
+			is_verified: true,
+		})
+		.create();
+
+	const regularUser = await UserFactory
+		.merge({
+			name: "User",
+			email: "user@user.com",
+			password: userPassword,
 			is_verified: true,
 		})
 		.create();
 
 	// ==========================================
-	// 5. Assign Admin Role to Admin User
+	// 5. Assign Roles
 	// ==========================================
 	await knex("user_roles").insert([
 		{
 			id: randomUUID(),
 			user_id: adminUser.id,
 			role_id: adminRole.id,
+			created_at: now,
+		},
+		{
+			id: randomUUID(),
+			user_id: regularUser.id,
+			role_id: userRole.id,
 			created_at: now,
 		},
 	]);
