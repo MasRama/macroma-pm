@@ -6,7 +6,7 @@ import {
   jsonError,
   jsonServerError,
 } from "@core";
-import { ProjectMember, ProjectBatch, Task, TaskLog, taskVersionString } from "@models";
+import { ProjectMember, ProjectBatch, Task, TaskLog, taskVersionString, ProjectVersionCounter } from "@models";
 import DB from "@services/DB";
 import { logActivity } from "@helpers/activity";
 
@@ -148,15 +148,17 @@ class TaskController extends BaseController {
       return jsonError(res, "Catatan wajib diisi saat memindah task", 422);
     }
 
-    const newPatch = task.version_patch + 1;
-    const newVersion = `v${task.version_major}.${task.version_minor}.${newPatch}`;
     const now = Date.now();
 
     try {
       let updatedTask: Awaited<ReturnType<typeof Task.findById>>;
       let log: Awaited<ReturnType<typeof TaskLog.findById>>;
+      let newVersion: string = "";
 
       await DB.transaction(async (trx) => {
+        const newPatch = await ProjectVersionCounter.incrementAndGet(task.project_id, trx);
+        newVersion = `v0.0.${newPatch}`;
+
         await trx("tasks")
           .where("id", taskId)
           .update({
@@ -180,7 +182,7 @@ class TaskController extends BaseController {
       });
 
       updatedTask = await Task.findById(taskId);
-      log = await TaskLog.findBy({ task_id: taskId, version: newVersion });
+      log = await TaskLog.findBy({ task_id: taskId, version: newVersion! });
 
       const columnNames: Record<string, string> = { ongoing: "On Going", revisi: "Revisi", done: "Done" };
       await logActivity({

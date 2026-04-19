@@ -6,7 +6,7 @@ import {
   jsonError,
   jsonServerError,
 } from "@core";
-import { Project, ProjectMember, ProjectBatch, Task, ProjectActivityLog } from "@models";
+import { Project, ProjectMember, ProjectBatch, Task, ProjectActivityLog, ProjectVersionCounter } from "@models";
 import DB from "@services/DB";
 import { logActivity } from "@helpers/activity";
 
@@ -129,6 +129,8 @@ class ProjectController extends BaseController {
         role: "owner",
         created_at: now,
       });
+
+      await ProjectVersionCounter.ensureExists(projectId);
 
       await logActivity({
         projectId,
