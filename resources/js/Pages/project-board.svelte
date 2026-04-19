@@ -9,6 +9,7 @@
   import AddLogModal from '../Components/AddLogModal.svelte';
   import AddTaskModal from '../Components/AddTaskModal.svelte';
   import VersionLogAccordion from '../Components/VersionLogAccordion.svelte';
+  import ActivityPanel from '../Components/ActivityPanel.svelte';
   import { buildCSRFHeaders, Toast } from '../Components/helper';
 
   interface TaskRecord { id: string; project_id: string; batch_id: string | null; title: string; description: string | null; priority: 'low' | 'medium' | 'high'; assignee_id: string | null; column_id: 'ongoing' | 'revisi' | 'done'; sort_order: number; version_major: number; version_minor: number; version_patch: number; created_at: number; updated_at: number; }
@@ -41,6 +42,9 @@
 
   // Version log accordion state
   let expandedTaskId = $state<string | null>(null);
+
+  // Activity panel
+  let showActivity = $state(false);
 
   let ongoingTasks = $state<TaskRecord[]>([]);
   let revisiTasks = $state<TaskRecord[]>([]);
@@ -207,6 +211,15 @@
         </select>
       </div>
 
+      <button
+        onclick={() => showActivity = true}
+        title="Project Activity"
+        class="flex items-center gap-2 bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white text-sm font-medium px-4 py-2 rounded-lg transition-all"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        Activity
+      </button>
+
       <!-- Add Task button -->
       <button 
         data-testid="add-task-btn-header"
@@ -288,4 +301,10 @@
       onCancel={() => addLogTask = null}
     />
   {/if}
+
+  <ActivityPanel
+    projectId={project.id}
+    isOpen={showActivity}
+    onClose={() => showActivity = false}
+  />
 </AppLayout>
