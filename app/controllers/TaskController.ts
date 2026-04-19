@@ -98,8 +98,7 @@ class TaskController extends BaseController {
         });
       });
 
-      const task = await Task.findById(taskId);
-      return jsonCreated(res, "Task created", { task });
+      return res.redirect(`/projects/${projectId}`);
     } catch (err) {
       return jsonServerError(res, "Failed to create task");
     }

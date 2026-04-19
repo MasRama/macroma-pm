@@ -126,7 +126,7 @@ class ProjectController extends BaseController {
         created_at: now,
       });
 
-      return jsonCreated(res, "Project created", { project });
+      return res.redirect(`/projects/${projectId}`);
     } catch (err) {
       return jsonServerError(res, "Failed to create project");
     }
