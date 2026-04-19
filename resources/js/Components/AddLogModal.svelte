@@ -23,8 +23,8 @@
   let note = $state('');
   let canSubmit = $derived(note.trim().length > 0);
 
-  let currentVersion = $derived(`v${task.version_major}.${task.version_minor}.${task.version_patch}`);
-  let nextVersion = $derived(`v${task.version_major}.${task.version_minor}.${task.version_patch + 1}`);
+  let currentVersion = $derived(`v0.0.${task.version_patch}`);
+  let nextVersion = `v0.0.?`;
 
   function handleSubmit() {
     if (!canSubmit) return;
@@ -45,7 +45,7 @@
   transition:fade={{ duration: 150 }}
 >
   <div
-    class="bg-white dark:bg-[#0a0a0a]/98 backdrop-blur-xl border border-slate-200 dark:border-white/[0.08] rounded-2xl p-6 w-full max-w-md shadow-2xl"
+    class="bg-white dark:bg-surface-dark backdrop-blur-xl border border-slate-200 dark:border-white/[0.08] rounded-2xl p-6 w-full max-w-md shadow-2xl"
     transition:fly={{ y: 20, duration: 200 }}
     onclick={(e) => e.stopPropagation()}
     onkeydown={(e) => e.stopPropagation()}

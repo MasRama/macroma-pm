@@ -92,8 +92,8 @@
     if (!pendingMove || !moveModalTask) return;
     const { taskId, toColumn } = pendingMove;
     
-    // Optimistic update
-    tasks = tasks.map(t => t.id === taskId ? { ...t, column_id: toColumn as any, version_patch: t.version_patch + 1 } : t);
+    // Optimistic update (column only — version comes from server)
+    tasks = tasks.map(t => t.id === taskId ? { ...t, column_id: toColumn as any } : t);
     pendingMove = null;
     moveModalTask = null;
 

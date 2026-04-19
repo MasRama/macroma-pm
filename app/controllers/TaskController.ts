@@ -60,16 +60,17 @@ class TaskController extends BaseController {
       ? await ProjectBatch.findById(body.batch_id)
       : await ProjectBatch.findActive(projectId);
 
-    const versionMajor = activeBatch ? activeBatch.major : 0;
-    const versionMinor = activeBatch ? activeBatch.minor : 1;
-
     const maxSortOrder = await Task.getMaxSortOrder(projectId, "ongoing");
 
     try {
       const taskId = crypto.randomUUID();
       const now = Date.now();
+      let newVersion = "";
 
       await DB.transaction(async (trx) => {
+        const newPatch = await ProjectVersionCounter.incrementAndGet(projectId, trx);
+        newVersion = `v0.0.${newPatch}`;
+
         await trx("tasks").insert({
           id: taskId,
           project_id: projectId,
@@ -80,9 +81,9 @@ class TaskController extends BaseController {
           assignee_id: body.assignee_id || null,
           column_id: "ongoing",
           sort_order: maxSortOrder + 1,
-          version_major: versionMajor,
-          version_minor: versionMinor,
-          version_patch: 0,
+          version_major: 0,
+          version_minor: 0,
+          version_patch: newPatch,
           created_at: now,
           updated_at: now,
         });
@@ -90,7 +91,7 @@ class TaskController extends BaseController {
         await trx("task_logs").insert({
           id: crypto.randomUUID(),
           task_id: taskId,
-          version: `v${versionMajor}.${versionMinor}.0`,
+          version: newVersion,
           column_from: null,
           column_to: "ongoing",
           note: "Tugas dibuat",
@@ -105,7 +106,7 @@ class TaskController extends BaseController {
         description: `Task "${String(body.title).trim()}" dibuat`,
         actorId: req.user.id,
         taskId,
-        meta: { version: `v${versionMajor}.${versionMinor}.0` },
+        meta: { version: newVersion },
       });
 
       return res.redirect(`/projects/${projectId}`);
@@ -230,14 +231,16 @@ class TaskController extends BaseController {
       return jsonError(res, "Catatan wajib diisi", 422);
     }
 
-    const newPatch = task.version_patch + 1;
-    const newVersion = `v${task.version_major}.${task.version_minor}.${newPatch}`;
     const now = Date.now();
+    let newVersion = "";
 
     try {
       let log: Awaited<ReturnType<typeof TaskLog.findBy>>;
 
       await DB.transaction(async (trx) => {
+        const newPatch = await ProjectVersionCounter.incrementAndGet(task.project_id, trx);
+        newVersion = `v0.0.${newPatch}`;
+
         await trx("tasks")
           .where("id", taskId)
           .update({

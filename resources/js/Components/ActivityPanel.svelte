@@ -86,7 +86,7 @@
 
   <!-- Panel -->
   <div
-    class="fixed right-0 top-0 h-screen w-96 bg-white dark:bg-[#0a0a0a]/98 backdrop-blur-2xl border-l border-slate-200 dark:border-white/[0.06] z-50 flex flex-col shadow-2xl"
+    class="fixed right-0 top-0 h-screen w-96 bg-white dark:bg-surface-dark backdrop-blur-2xl border-l border-slate-200 dark:border-white/[0.06] z-50 flex flex-col shadow-2xl"
     transition:fly={{ x: 384, duration: 250 }}
   >
     <!-- Header -->
@@ -138,7 +138,7 @@
              </svg>
           </div>
           <p class="text-sm font-medium text-slate-700 dark:text-slate-300">Belum ada aktivitas</p>
-          <p class="text-xs text-slate-500 mt-2 max-w-[200px]">Aktivitas akan muncul saat project mulai berjalan</p>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-2 max-w-[200px]">Aktivitas akan muncul saat project mulai berjalan</p>
         </div>
       {:else}
         <!-- Timeline -->
@@ -168,9 +168,9 @@
                   <div class="flex items-center gap-2">
                     {#if log.actor_name}
                       <span class="text-[10px] text-slate-500 dark:text-slate-500 font-medium">{log.actor_name}</span>
-                      <span class="text-[10px] text-slate-300 dark:text-slate-600">·</span>
+                      <span class="text-[10px] text-slate-300 dark:text-slate-500">·</span>
                     {/if}
-                    <span class="text-[10px] text-slate-400 dark:text-slate-600">{formatTime(log.created_at)}</span>
+                    <span class="text-[10px] text-slate-400 dark:text-slate-500">{formatTime(log.created_at)}</span>
                   </div>
                 </div>
               </div>

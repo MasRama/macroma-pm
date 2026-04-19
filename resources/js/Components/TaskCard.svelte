@@ -37,9 +37,9 @@
   );
 
   let themeClasses = $derived(
-    columnColor === 'blue' ? 'bg-white border border-blue-200 hover:border-blue-300 border-l-2 border-l-blue-400 dark:bg-gradient-to-br dark:from-blue-500/10 dark:to-slate-900/60 dark:border-blue-500/20 dark:hover:border-blue-400/40' :
-    columnColor === 'orange' ? 'bg-white border border-orange-200 hover:border-orange-300 border-l-2 border-l-orange-400 dark:bg-gradient-to-br dark:from-orange-500/10 dark:to-slate-900/60 dark:border-orange-500/20 dark:hover:border-orange-400/40' :
-    'bg-white border border-emerald-200 hover:border-emerald-300 border-l-2 border-l-emerald-400 dark:bg-gradient-to-br dark:from-emerald-500/10 dark:to-slate-900/60 dark:border-emerald-500/20 dark:hover:border-emerald-400/40'
+    columnColor === 'blue' ? 'bg-white dark:bg-blue-950/40 border-l-2 border-l-blue-400 border border-blue-200 hover:border-blue-300 dark:border-blue-500/30 dark:hover:border-blue-400/50' :
+    columnColor === 'orange' ? 'bg-white dark:bg-orange-950/40 border-l-2 border-l-orange-400 border border-orange-200 hover:border-orange-300 dark:border-orange-500/30 dark:hover:border-orange-400/50' :
+    'bg-white dark:bg-emerald-950/40 border-l-2 border-l-emerald-400 border border-emerald-200 hover:border-emerald-300 dark:border-emerald-500/30 dark:hover:border-emerald-400/50'
   );
 
   let btnColorClass = $derived(
