@@ -91,7 +91,7 @@
       <div>
           <a href="/" class="text-2xl font-bold tracking-tighter flex items-center gap-2 justify-end lg:justify-start">
               <NaraIcon />
-              <span>NARA.</span>
+              <span>PM Macroma</span>
           </a>
       </div>
 

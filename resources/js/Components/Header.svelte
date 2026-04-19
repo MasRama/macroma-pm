@@ -32,7 +32,7 @@
   let scrolled = $derived(scrollY > 50);
 
   let menuLinks = $derived([
-    { href: '/dashboard', label: 'Overview', group: 'dashboard', show: true },
+    { href: '/projects', label: 'Projects', group: 'dashboard', show: true },
     { href: '/users', label: 'Users', group: 'users', show: Array.isArray(user?.roles) && user.roles.includes('admin') },
     { href: '/profile', label: 'Profile', group: 'profile', show: !!user },
   ] as MenuLink[]);
@@ -64,7 +64,7 @@
         class="group flex items-center gap-3"
       >
         <span class="text-xl font-bold tracking-tighter text-slate-900 dark:text-white group-hover:text-primary-500 transition-colors">
-          NARA.
+          PM Macroma
         </span>
         <span class="hidden sm:block text-[9px] uppercase tracking-[0.3em] text-slate-400 dark:text-slate-500 font-medium">
           Dashboard

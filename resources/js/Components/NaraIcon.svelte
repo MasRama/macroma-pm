@@ -1,3 +1,8 @@
 <span class="flex gap-2 items-center">
-    <img class="h-12 w-12 rounded-2xl" src="/public/nara.png" alt="Nara logo">
-  </span>
+  <svg class="h-8 w-8 text-primary-600 dark:text-primary-400" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="2" y="2" width="12" height="12" rx="3" fill="currentColor" opacity="0.9"/>
+    <rect x="18" y="2" width="12" height="12" rx="3" fill="currentColor" opacity="0.6"/>
+    <rect x="2" y="18" width="12" height="12" rx="3" fill="currentColor" opacity="0.6"/>
+    <rect x="18" y="18" width="12" height="12" rx="3" fill="currentColor" opacity="0.3"/>
+  </svg>
+</span>

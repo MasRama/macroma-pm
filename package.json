@@ -1,11 +1,11 @@
 {
-  "name": "nara",
-  "version": "1.2.11",
+  "name": "pm-macroma",
+  "version": "1.0.0",
   "private": true,
   "workspaces": [
     "packages/*"
   ],
-  "description": "Nara is a high-performance TypeScript web framework combining HyperExpress, Svelte 5, and Inertia.js. Features include type-safe routing, comprehensive security (CSRF, rate limiting, login throttling), structured logging with Pino, graceful shutdown, and a powerful CLI with 21+ commands for scaffolding, database management, and project health checks.",
+  "description": "PM Macroma — Web-based project management with Kanban board, version control per task, and batch release tracking.",
   "main": "server.ts",
   "scripts": {
     "dev": "clear && rm -rf dist && rm -rf build && npx concurrently 'vite'  'sleep 1 && npx nodemon --legacy-watch'",
@@ -37,6 +37,7 @@
     "pino-pretty": "^13.1.2",
     "pino-roll": "^4.0.0",
     "sharp": "^0.34.4",
+    "svelte-dnd-action": "^0.9.69",
     "uuid": "^13.0.0"
   },
   "devDependencies": {
