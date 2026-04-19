@@ -1,40 +1,25 @@
 var fs = require("fs");
+var { spawn } = require("child_process");
 
-(async ()=>{
-    
-    const natives = fs.readdirSync("./commands/native");
-    
-    if(natives.length)
-    {
-        const { exec } = require("child_process");
+(async () => {
+  const natives = fs.readdirSync("./commands/native");
 
-        const args = process.argv.slice(2);
+  if (natives.length) {
+    const args = process.argv.slice(2);
 
+    const child = spawn(
+      "npx",
+      ["tsx", "./commands/index.ts", ...args],
+      { stdio: "inherit", shell: true }
+    );
 
-        if(natives[0].includes("js"))
-        {
-            
-            exec("npx tsx ./commands/index.ts "+args.join(" "), (err, stdout, stderr)=>{   
-                if(err)
-                {
-                    console.log(err);
-                }else{
-                    console.log(stdout);
-                }
-            })
+    child.on("error", (err) => {
+      console.error(err.message);
+      process.exit(1);
+    });
 
-        }else if(natives[0].includes("ts")){
-      
-          
-            exec("npx tsx ./commands/index.ts "+args.join(" "), (err, stdout, stderr)=>{   
-                if(err)
-                {
-                    console.log(err);
-                }else{
-                    console.log(stdout);
-                }
-            })
-        }
-    }
-  
-})()
+    child.on("close", (code) => {
+      process.exit(code ?? 0);
+    });
+  }
+})();
