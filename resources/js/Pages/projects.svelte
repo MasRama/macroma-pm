@@ -186,7 +186,7 @@
 
     <!-- Modal Panel -->
     <div 
-      class="relative bg-white dark:bg-[#0a0a0a]/98 backdrop-blur-xl border border-slate-200 dark:border-white/10 shadow-2xl rounded-2xl w-full max-w-md overflow-hidden flex flex-col"
+      class="relative bg-white dark:bg-surface-dark backdrop-blur-xl border border-slate-200 dark:border-white/10 shadow-2xl dark:shadow-black/40 rounded-2xl w-full max-w-md overflow-hidden flex flex-col"
       transition:scale={{ duration: 200, start: 0.95 }}
     >
       <div class="px-6 py-5 border-b border-slate-200 dark:border-white/10">
@@ -220,7 +220,7 @@
         </div>
       </div>
       
-      <div class="px-6 py-5 bg-slate-50 dark:bg-white/[0.02] border-t border-slate-200 dark:border-white/10 flex items-center justify-end space-x-3">
+      <div class="px-6 py-5 bg-slate-50 dark:bg-white/[0.04] border-t border-slate-200 dark:border-white/10 flex items-center justify-end space-x-3">
         <button 
           type="button" 
           onclick={() => showCreateModal = false}
