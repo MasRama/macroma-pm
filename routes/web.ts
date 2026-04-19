@@ -10,6 +10,10 @@ import UserController from "@controllers/UserController";
 import OAuthController from "@controllers/OAuthController";
 import HomeController from "@controllers/HomeController";
 import AssetController from "@controllers/AssetController";
+import ProjectController from "@controllers/ProjectController";
+import ProjectMemberController from "@controllers/ProjectMemberController";
+import BatchController from "@controllers/BatchController";
+import TaskController from "@controllers/TaskController";
 import Auth from "@middlewares/auth";
 import { strictRateLimit } from "@middlewares/rateLimit";
 
@@ -62,7 +66,26 @@ Route.get("/google/callback", OAuthController.googleCallback);
  * PUT    /users/:id       - Update user (admin only)
  * DELETE /users           - Delete users (admin only)
  */
-Route.get("/dashboard", [Auth], UserController.homePage);
+Route.get("/dashboard", [Auth], ProjectController.index);
+
+Route.get("/projects", [Auth], ProjectController.index);
+Route.post("/projects", [Auth], ProjectController.store);
+Route.get("/projects/:id", [Auth], ProjectController.show);
+Route.patch("/projects/:id", [Auth], ProjectController.update);
+Route.delete("/projects/:id", [Auth], ProjectController.destroy);
+
+Route.post("/projects/:id/members", [Auth], ProjectMemberController.store);
+Route.delete("/projects/:id/members/:userId", [Auth], ProjectMemberController.destroy);
+
+Route.get("/projects/:id/batches", [Auth], BatchController.index);
+Route.post("/projects/:id/batches", [Auth], BatchController.store);
+Route.patch("/projects/:id/batches/:batchId/activate", [Auth], BatchController.activate);
+
+Route.post("/projects/:id/tasks", [Auth], TaskController.store);
+Route.patch("/tasks/:id/move", [Auth], TaskController.move);
+Route.post("/tasks/:id/logs", [Auth], TaskController.addLog);
+Route.delete("/tasks/:id", [Auth], TaskController.destroy);
+Route.get("/tasks/:id/logs", [Auth], TaskController.getLogs);
 Route.get("/users", [Auth], UserController.usersPage);
 Route.get("/profile", [Auth], UserController.profilePage);
 Route.post("/change-profile", [Auth], UserController.changeProfile);

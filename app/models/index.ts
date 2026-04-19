@@ -14,3 +14,9 @@ export { PasswordResetToken, PasswordResetTokenRecord, CreatePasswordResetTokenD
 export { Asset, AssetRecord, CreateAssetData, UpdateAssetData } from "./Asset";
 export { Role, RoleRecord, CreateRoleData, UpdateRoleData } from "./Role";
 export { Permission, PermissionRecord, CreatePermissionData, UpdatePermissionData } from "./Permission";
+
+export { Project, ProjectRecord } from "./Project";
+export { ProjectMember, ProjectMemberRecord } from "./ProjectMember";
+export { ProjectBatch, ProjectBatchRecord, versionString } from "./ProjectBatch";
+export { Task, TaskRecord, taskVersionString } from "./Task";
+export { TaskLog, TaskLogRecord } from "./TaskLog";
