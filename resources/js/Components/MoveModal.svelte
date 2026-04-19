@@ -46,14 +46,14 @@
 
 <div
   data-testid="move-modal"
-  class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+  class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4"
   onclick={handleBackdropClick}
   onkeydown={(e) => e.key === 'Escape' && handleBackdropClick()}
   role="presentation"
   transition:fade={{ duration: 150 }}
 >
   <div
-    class="bg-slate-900/95 backdrop-blur-xl border border-white/10 rounded-2xl p-6 w-full max-w-md shadow-2xl"
+    class="bg-[#0a0a0a]/98 backdrop-blur-xl border border-white/[0.08] rounded-2xl p-6 w-full max-w-md shadow-2xl"
     transition:fly={{ y: 20, duration: 200 }}
     onclick={(e) => e.stopPropagation()}
     onkeydown={(e) => e.stopPropagation()}
@@ -62,41 +62,48 @@
     tabindex="-1"
   >
     <div class="mb-6">
-      <h2 class="text-xl font-bold text-white mb-1">Pindah Task</h2>
-      <p class="text-sm text-slate-400">
-        {columnNames[task.column_id] ?? task.column_id} → {columnNames[targetColumn] ?? targetColumn}
-      </p>
+      <h2 class="text-xl font-bold text-white mb-1 tracking-wide">Pindah Task</h2>
+      <div class="flex items-center gap-2 text-sm text-slate-400 mt-2">
+        <span class="px-2 py-0.5 rounded-md bg-white/[0.04] border border-white/[0.08]">{columnNames[task.column_id] ?? task.column_id}</span>
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        <span class="px-2 py-0.5 rounded-md bg-white/[0.04] border border-white/[0.08]">{columnNames[targetColumn] ?? targetColumn}</span>
+      </div>
     </div>
 
-    <div class="bg-white/5 border border-white/10 rounded-lg p-3 mb-4">
-      <p class="text-sm font-medium text-slate-200">{task.title}</p>
+    <div class="bg-white/[0.04] border border-white/[0.08] rounded-xl p-4 mb-5 shadow-inner">
+      <p class="text-sm font-medium text-slate-200 leading-relaxed">{task.title}</p>
     </div>
 
-    <p class="text-xs text-slate-400 mb-4">
-      Versi: <span class="font-mono">{currentVersion}</span> → <span class="font-mono text-primary-400">{nextVersion}</span>
-    </p>
+    <div class="flex items-center gap-3 mb-5 px-1">
+      <span class="text-xs text-slate-400 uppercase tracking-wider">Versi:</span>
+      <div class="flex items-center gap-2">
+        <span class="font-mono text-xs text-slate-300 bg-white/[0.04] px-2 py-1 rounded border border-white/[0.08]">{currentVersion}</span>
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        <span class="font-mono text-xs text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded border border-emerald-500/20">{nextVersion}</span>
+      </div>
+    </div>
 
     <div class="mb-6">
       <textarea
         data-testid="move-modal-note"
         bind:value={note}
-        placeholder="Tambahkan catatan..."
-        class="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-sm text-slate-200 resize-none h-28 focus:outline-none focus:border-primary-400/50 transition-colors"
+        placeholder="Tambahkan catatan (wajib)..."
+        class="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl p-4 text-sm text-slate-200 resize-none min-h-[100px] focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition-all placeholder:text-slate-500"
         required
       ></textarea>
-      {#if !canSubmit && note.length > 0}
-        <p class="text-xs text-red-400 mt-1">Catatan wajib diisi</p>
-      {:else if !canSubmit}
-        <p class="text-xs text-red-400 mt-1 opacity-0">Catatan wajib diisi</p>
-      {/if}
+      <div class="h-4 mt-1">
+        {#if !canSubmit && note.length > 0}
+          <p class="text-xs text-red-400" transition:fade={{duration: 150}}>Catatan wajib diisi</p>
+        {/if}
+      </div>
     </div>
 
-    <div class="flex justify-end gap-3">
+    <div class="flex justify-end gap-3 pt-2">
       <button
         type="button"
         data-testid="move-modal-cancel"
         onclick={onCancel}
-        class="px-4 py-2 text-sm font-medium text-slate-300 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
+        class="px-5 py-2.5 text-sm font-medium text-slate-300 hover:text-white hover:bg-white/[0.08] rounded-xl transition-all"
       >
         Batal
       </button>
@@ -105,7 +112,7 @@
         data-testid="move-modal-submit"
         onclick={handleSubmit}
         disabled={!canSubmit}
-        class="px-4 py-2 text-sm font-medium bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+        class="px-5 py-2.5 text-sm font-medium bg-emerald-500 hover:bg-emerald-400 text-white rounded-xl transition-all disabled:opacity-40 disabled:hover:bg-emerald-500 disabled:cursor-not-allowed shadow-[0_0_15px_rgba(16,185,129,0.2)]"
       >
         Simpan & Pindah
       </button>
