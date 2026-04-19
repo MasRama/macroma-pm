@@ -105,6 +105,7 @@ class TaskController extends BaseController {
         description: `Task "${String(body.title).trim()}" dibuat`,
         actorId: req.user.id,
         taskId,
+        meta: { version: `v${versionMajor}.${versionMinor}.0` },
       });
 
       return res.redirect(`/projects/${projectId}`);

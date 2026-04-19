@@ -54,6 +54,16 @@
     return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
   }
 
+  function getVersion(log: ActivityLog): string | null {
+    if (!log.meta) return null;
+    try {
+      const parsed = JSON.parse(log.meta);
+      return parsed.version ?? null;
+    } catch {
+      return null;
+    }
+  }
+
   const EVENT_CONFIG: Record<string, { icon: string; color: string; label: string }> = {
     'project.created': { icon: '🏗️', color: 'text-primary-400', label: 'Project' },
     'task.created':    { icon: '✅', color: 'text-green-400',   label: 'Task Baru' },
@@ -142,11 +152,13 @@
                 </div>
 
                 <div class="flex-1 min-w-0 pt-0.5">
-                  <!-- Event label badge -->
-                  <span class="text-[9px] font-bold uppercase tracking-wider {cfg.color} opacity-80">{cfg.label}</span>
-                  <!-- Description -->
+                  <div class="flex items-center gap-2">
+                    <span class="text-[9px] font-bold uppercase tracking-wider {cfg.color} opacity-80">{cfg.label}</span>
+                    {#if getVersion(log)}
+                      <span class="font-mono text-[9px] bg-slate-700/60 text-slate-300 px-1.5 py-0.5 rounded border border-white/5">{getVersion(log)}</span>
+                    {/if}
+                  </div>
                   <p class="text-xs text-slate-200 leading-relaxed mt-0.5">{log.description}</p>
-                  <!-- Footer: actor + time -->
                   <div class="flex items-center gap-2 mt-1">
                     {#if log.actor_name}
                       <span class="text-[10px] text-slate-500">{log.actor_name}</span>
