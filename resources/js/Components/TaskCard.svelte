@@ -22,12 +22,10 @@
     task,
     assignee,
     onAddLog,
-    onShowLogs
   }: {
     task: TaskRecord;
     assignee?: UserRecord;
     onAddLog?: (task: TaskRecord) => void;
-    onShowLogs?: (task: TaskRecord) => void;
   } = $props();
 
   let priorityClass = $derived(
@@ -41,9 +39,6 @@
   <div class="flex items-center justify-between">
     <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full border {priorityClass}">
       {task.priority}
-    </span>
-    <span class="font-mono text-[10px] bg-slate-700/50 dark:bg-slate-800/80 text-slate-300 px-1.5 py-0.5 rounded" data-testid="version-chip">
-      v{task.version_major}.{task.version_minor}.{task.version_patch}
     </span>
   </div>
 
@@ -64,14 +59,9 @@
       {/if}
     </div>
 
-    <div class="flex items-center gap-2">
-      <button onclick={() => onShowLogs?.(task)} class="opacity-0 group-hover:opacity-100 transition-opacity text-[10px] text-slate-400 hover:text-primary-400">
-        Version Log
-      </button>
-      <button onclick={() => onAddLog?.(task)} class="opacity-0 group-hover:opacity-100 transition-opacity text-xs text-slate-400 hover:text-primary-400 flex items-center gap-1">
-        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
-        Log
-      </button>
-    </div>
+    <button onclick={() => onAddLog?.(task)} class="opacity-0 group-hover:opacity-100 transition-opacity text-xs text-slate-400 hover:text-primary-400 flex items-center gap-1">
+      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+      Log
+    </button>
   </div>
 </div>

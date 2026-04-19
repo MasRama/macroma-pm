@@ -8,7 +8,6 @@
   import MoveModal from '../Components/MoveModal.svelte';
   import AddLogModal from '../Components/AddLogModal.svelte';
   import AddTaskModal from '../Components/AddTaskModal.svelte';
-  import VersionLogAccordion from '../Components/VersionLogAccordion.svelte';
   import ActivityPanel from '../Components/ActivityPanel.svelte';
   import { buildCSRFHeaders, Toast } from '../Components/helper';
 
@@ -33,15 +32,17 @@
   let showAddTask = $state(false);
   let addTaskColumn = $state<string>('ongoing');
 
+  // Sync tasks when Inertia navigates back to this page (e.g. after create task redirect)
+  $effect(() => {
+    tasks = [...initialTasks];
+  });
+
   // Move modal state
   let pendingMove = $state<{ taskId: string; fromColumn: string; toColumn: string; items: TaskRecord[] } | null>(null);
   let moveModalTask = $state<TaskRecord | null>(null);
 
   // Add log modal
   let addLogTask = $state<TaskRecord | null>(null);
-
-  // Version log accordion state
-  let expandedTaskId = $state<string | null>(null);
 
   // Activity panel
   let showActivity = $state(false);
@@ -256,11 +257,7 @@
                 {task}
                 assignee={getAssignee(task.assignee_id)}
                 onAddLog={() => addLogTask = task}
-                onShowLogs={() => expandedTaskId = expandedTaskId === task.id ? null : task.id}
               />
-              {#if expandedTaskId === task.id}
-                <VersionLogAccordion taskId={task.id} />
-              {/if}
             </div>
           {/each}
         </div>
