@@ -52,10 +52,12 @@
     
     <div class="flex items-center gap-3 px-2">
       <div class="w-8 h-8 rounded-full bg-accent-500/20 text-accent-600 dark:text-accent-400 flex items-center justify-center font-bold text-sm border border-accent-500/30">
-        U
+        {(($inertiaPage.props.user as any)?.name || ($inertiaPage.props.user as any)?.email || 'U')[0].toUpperCase()}
       </div>
       <div class="flex-1 truncate">
-        <p class="text-sm font-medium text-slate-700 dark:text-slate-200 truncate">User</p>
+        <p class="text-sm font-medium text-slate-700 dark:text-slate-200 truncate">
+          {($inertiaPage.props.user as any)?.name || ($inertiaPage.props.user as any)?.email || 'User'}
+        </p>
       </div>
     </div>
   </div>

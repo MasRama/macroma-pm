@@ -75,6 +75,8 @@ class ProjectController extends BaseController {
       })
     );
 
+    const allProjects = await Project.findAllForUser(req.user.id);
+
     this.requireInertia(res);
     return res.inertia("project-board", {
       project,
@@ -90,6 +92,7 @@ class ProjectController extends BaseController {
           }
         : null,
       members,
+      projects: allProjects,
       user: req.user,
     });
   }
