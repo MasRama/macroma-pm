@@ -52,17 +52,17 @@
 
 <AppLayout title="Projects" {projects} activeProjectId="">
   <!-- Aurora blur blobs background -->
-  <div class="fixed inset-0 overflow-hidden pointer-events-none -z-10 bg-[#020617]">
-    <div class="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] rounded-full bg-primary-500/10 blur-[120px]"></div>
-    <div class="absolute top-[20%] -right-[10%] w-[40%] h-[40%] rounded-full bg-accent-500/10 blur-[120px]"></div>
-    <div class="absolute bottom-[0%] left-[20%] w-[40%] h-[40%] rounded-full bg-info-500/5 blur-[120px]"></div>
+  <div class="fixed inset-0 overflow-hidden pointer-events-none -z-10 bg-slate-50 dark:bg-[#020617]">
+    <div class="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] rounded-full bg-primary-500/10 blur-[120px] opacity-30 dark:opacity-100"></div>
+    <div class="absolute top-[20%] -right-[10%] w-[40%] h-[40%] rounded-full bg-accent-500/10 blur-[120px] opacity-30 dark:opacity-100"></div>
+    <div class="absolute bottom-[0%] left-[20%] w-[40%] h-[40%] rounded-full bg-info-500/5 blur-[120px] opacity-30 dark:opacity-100"></div>
   </div>
 
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
     <!-- Page Header -->
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
       <div>
-        <h1 class="text-2xl font-bold text-white">Projects</h1>
+        <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Projects</h1>
         <p class="text-sm text-slate-500 mt-1">Manage your team projects and batches.</p>
       </div>
       <button 
@@ -80,19 +80,19 @@
     <!-- Content -->
     {#if projects.length === 0}
       <!-- Empty State -->
-      <div class="flex flex-col items-center justify-center py-20 px-4 bg-white/[0.04] backdrop-blur-xl border border-white/[0.08] rounded-2xl text-center shadow-lg">
-        <div class="w-16 h-16 bg-white/[0.05] border border-white/[0.08] rounded-2xl flex items-center justify-center mb-5">
+      <div class="flex flex-col items-center justify-center py-20 px-4 bg-white dark:bg-white/[0.04] backdrop-blur-xl border border-slate-200 dark:border-white/[0.08] rounded-2xl text-center shadow-lg">
+        <div class="w-16 h-16 bg-slate-50 dark:bg-white/[0.05] border border-slate-200 dark:border-white/[0.08] rounded-2xl flex items-center justify-center mb-5">
           <svg class="w-8 h-8 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
           </svg>
         </div>
-        <h3 class="text-xl font-semibold text-slate-100">No projects yet</h3>
+        <h3 class="text-xl font-semibold text-slate-900 dark:text-slate-100">No projects yet</h3>
         <p class="text-sm text-slate-500 mt-2 mb-6 max-w-sm leading-relaxed">
           Get started by creating a new project to organize tasks, batches, and your team members.
         </p>
         <button 
           onclick={() => showCreateModal = true}
-          class="inline-flex items-center px-4 py-2.5 text-sm font-medium text-white bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.1] rounded-xl transition-all"
+          class="inline-flex items-center px-4 py-2.5 text-sm font-medium text-slate-700 dark:text-white bg-slate-50 dark:bg-white/[0.05] hover:bg-slate-100 dark:hover:bg-white/[0.1] border border-slate-200 dark:border-white/[0.1] rounded-xl transition-all"
         >
           Create your first project
         </button>
@@ -112,14 +112,14 @@
             use:inertia 
             href="/projects/{project.id}"
             data-testid="project-card" 
-            class="group relative flex flex-col h-full bg-white/[0.04] backdrop-blur-xl border border-white/[0.08] hover:border-white/[0.2] rounded-2xl p-6 transition-all duration-300 hover:scale-[1.01] overflow-hidden cursor-pointer border-l-2 {borderColors[colorIndex]}"
+            class="group relative flex flex-col h-full bg-white dark:bg-white/[0.04] backdrop-blur-xl border border-slate-200 dark:border-white/[0.08] hover:border-slate-300 dark:hover:border-white/[0.2] hover:bg-slate-50 dark:hover:bg-white/[0.07] rounded-2xl p-6 transition-all duration-300 hover:scale-[1.01] overflow-hidden cursor-pointer border-l-2 {borderColors[colorIndex]}"
           >
             <!-- Glow effect on hover -->
             <div class="absolute inset-0 bg-gradient-to-br {glowColors[colorIndex]} to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
 
             <div class="relative z-10 flex flex-col h-full">
               <div class="flex justify-between items-start mb-3 gap-3">
-                <h3 class="text-base font-semibold text-slate-100 group-hover:text-white transition-colors line-clamp-1">{project.name}</h3>
+                <h3 class="text-base font-semibold text-slate-900 dark:text-slate-100 group-hover:text-primary-600 dark:group-hover:text-white transition-colors line-clamp-1">{project.name}</h3>
                 {#if project.active_batch_label}
                   <span class="text-[10px] font-mono {badgeBgColors[colorIndex]} {badgeTextColors[colorIndex]} px-2 py-0.5 rounded-full whitespace-nowrap shrink-0 border {badgeBorderColors[colorIndex]}">
                     {project.active_batch_label}
@@ -134,22 +134,22 @@
               <div class="mt-auto space-y-5">
                 <!-- Task Stats -->
                 <div class="flex flex-wrap gap-2">
-                  <div class="flex items-center space-x-1.5 bg-white/[0.03] border border-white/[0.05] px-2 py-1 rounded-lg" title="Ongoing Tasks">
+                  <div class="flex items-center space-x-1.5 bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.05] px-2 py-1 rounded-lg" title="Ongoing Tasks">
                     <div class="w-1.5 h-1.5 rounded-full bg-blue-400 shadow-[0_0_8px_rgba(96,165,250,0.6)]"></div>
-                    <span class="text-xs text-slate-300 font-medium">{project.task_counts.ongoing}</span>
+                    <span class="text-xs text-slate-700 dark:text-slate-300 font-medium">{project.task_counts.ongoing}</span>
                   </div>
-                  <div class="flex items-center space-x-1.5 bg-white/[0.03] border border-white/[0.05] px-2 py-1 rounded-lg" title="Revisi Tasks">
+                  <div class="flex items-center space-x-1.5 bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.05] px-2 py-1 rounded-lg" title="Revisi Tasks">
                     <div class="w-1.5 h-1.5 rounded-full bg-orange-400 shadow-[0_0_8px_rgba(251,146,60,0.6)]"></div>
-                    <span class="text-xs text-slate-300 font-medium">{project.task_counts.revisi}</span>
+                    <span class="text-xs text-slate-700 dark:text-slate-300 font-medium">{project.task_counts.revisi}</span>
                   </div>
-                  <div class="flex items-center space-x-1.5 bg-white/[0.03] border border-white/[0.05] px-2 py-1 rounded-lg" title="Done Tasks">
+                  <div class="flex items-center space-x-1.5 bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.05] px-2 py-1 rounded-lg" title="Done Tasks">
                     <div class="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]"></div>
-                    <span class="text-xs text-slate-300 font-medium">{project.task_counts.done}</span>
+                    <span class="text-xs text-slate-700 dark:text-slate-300 font-medium">{project.task_counts.done}</span>
                   </div>
                 </div>
 
                 <!-- Footer (Members & Action) -->
-                <div class="flex items-center justify-between pt-4 border-t border-white/[0.08]">
+                <div class="flex items-center justify-between pt-4 border-t border-slate-200 dark:border-white/[0.08]">
                   <div class="flex items-center text-xs font-medium text-slate-400">
                     <svg class="w-4 h-4 mr-1.5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
@@ -157,7 +157,7 @@
                     {project.member_count} {project.member_count === 1 ? 'member' : 'members'}
                   </div>
                   
-                  <div class="text-xs font-semibold text-slate-300 group-hover:text-white transition-colors inline-flex items-center">
+                  <div class="text-xs font-semibold text-slate-600 dark:text-slate-300 group-hover:text-primary-600 dark:group-hover:text-white transition-colors inline-flex items-center">
                     Open Board
                     <svg class="w-4 h-4 ml-1 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
@@ -178,7 +178,7 @@
   <div class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-0">
     <!-- Backdrop -->
     <div 
-      class="fixed inset-0 bg-black/60 backdrop-blur-sm" 
+      class="fixed inset-0 bg-black/20 dark:bg-black/60 backdrop-blur-sm" 
       transition:fly={{ duration: 200, opacity: 0 }}
       onclick={() => showCreateModal = false}
       aria-hidden="true"
@@ -186,45 +186,45 @@
 
     <!-- Modal Panel -->
     <div 
-      class="relative bg-[#0a0a0a]/98 backdrop-blur-xl border border-white/10 shadow-2xl rounded-2xl w-full max-w-md overflow-hidden flex flex-col"
+      class="relative bg-white dark:bg-[#0a0a0a]/98 backdrop-blur-xl border border-slate-200 dark:border-white/10 shadow-2xl rounded-2xl w-full max-w-md overflow-hidden flex flex-col"
       transition:scale={{ duration: 200, start: 0.95 }}
     >
-      <div class="px-6 py-5 border-b border-white/10">
-        <h3 class="text-lg font-semibold text-white">Create New Project</h3>
+      <div class="px-6 py-5 border-b border-slate-200 dark:border-white/10">
+        <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Create New Project</h3>
       </div>
       
       <div class="px-6 py-6 space-y-5">
         <div>
-          <label for="name" class="block text-sm font-medium text-slate-300 mb-1.5">Project Name</label>
+          <label for="name" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Project Name</label>
           <input 
             type="text" 
             id="name"
             data-testid="project-name-input" 
             bind:value={newProjectName} 
             placeholder="e.g. Website Redesign"
-            class="block w-full px-4 py-2.5 bg-white/[0.05] border border-white/10 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 sm:text-sm transition-colors"
+            class="block w-full px-4 py-2.5 bg-slate-50 dark:bg-white/[0.05] border border-slate-200 dark:border-white/10 rounded-xl text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 sm:text-sm transition-colors"
             onkeydown={(e) => e.key === 'Enter' && handleCreate()}
           >
         </div>
         
         <div>
-          <label for="description" class="block text-sm font-medium text-slate-300 mb-1.5">Description <span class="text-slate-500 font-normal">(Optional)</span></label>
+          <label for="description" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Description <span class="text-slate-500 font-normal">(Optional)</span></label>
           <textarea 
             id="description"
             data-testid="project-desc-input" 
             bind:value={newProjectDesc} 
             placeholder="What is this project about?"
             rows="3"
-            class="block w-full px-4 py-2.5 bg-white/[0.05] border border-white/10 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 sm:text-sm transition-colors resize-none"
+            class="block w-full px-4 py-2.5 bg-slate-50 dark:bg-white/[0.05] border border-slate-200 dark:border-white/10 rounded-xl text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 sm:text-sm transition-colors resize-none"
           ></textarea>
         </div>
       </div>
       
-      <div class="px-6 py-5 bg-white/[0.02] border-t border-white/10 flex items-center justify-end space-x-3">
+      <div class="px-6 py-5 bg-slate-50 dark:bg-white/[0.02] border-t border-slate-200 dark:border-white/10 flex items-center justify-end space-x-3">
         <button 
           type="button" 
           onclick={() => showCreateModal = false}
-          class="px-4 py-2 text-sm font-medium text-slate-300 hover:text-white bg-transparent hover:bg-white/[0.05] rounded-xl transition-colors"
+          class="px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white bg-transparent hover:bg-slate-100 dark:hover:bg-white/[0.05] rounded-xl transition-colors"
         >
           Cancel
         </button>
