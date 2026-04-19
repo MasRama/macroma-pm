@@ -18,7 +18,7 @@
   <title>{title} — PM Macroma</title>
 </svelte:head>
 
-<div class="flex min-h-screen bg-surface-light dark:bg-surface-dark text-slate-900 dark:text-slate-100 transition-colors duration-300">
+<div class="flex min-h-screen bg-[#020617] text-slate-100 transition-colors duration-300">
   <Sidebar {projects} {activeProjectId} />
 
   <main class="flex-1 ml-[260px] min-h-screen">
