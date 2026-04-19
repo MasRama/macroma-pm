@@ -21,3 +21,4 @@ export { ProjectBatch, ProjectBatchRecord, versionString } from "./ProjectBatch"
 export { Task, TaskRecord, taskVersionString } from "./Task";
 export { TaskLog, TaskLogRecord } from "./TaskLog";
 export { ProjectActivityLog, ProjectActivityLogRecord, ActivityEventType } from "./ProjectActivityLog";
+export { ProjectVersionCounter, ProjectVersionCounterRecord } from "./ProjectVersionCounter";
