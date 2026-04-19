@@ -1,0 +1,61 @@
+{
+  "name": "nara",
+  "version": "1.2.11",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "description": "Nara is a high-performance TypeScript web framework combining HyperExpress, Svelte 5, and Inertia.js. Features include type-safe routing, comprehensive security (CSRF, rate limiting, login throttling), structured logging with Pino, graceful shutdown, and a powerful CLI with 21+ commands for scaffolding, database management, and project health checks.",
+  "main": "server.ts",
+  "scripts": {
+    "dev": "clear && rm -rf dist && rm -rf build && npx concurrently 'vite'  'sleep 1 && npx nodemon --legacy-watch'",
+    "build": "mkdir -p dist/views && cp -rf resources/views/* dist/views && vite build && tsc && tsc-alias -p tsconfig.json && cp -rf dist build && cp -rf public build",
+    "start": "node build/server.js",
+    "test": "echo 'No test framework configured. Install vitest or jest to run tests.'",
+    "lint": "npx tsc --noEmit",
+    "typecheck": "npx tsc --noEmit"
+  },
+  "author": "MasRama",
+  "license": "ISC",
+  "dependencies": {
+    "@inertiajs/svelte": "^2.2.10",
+    "@tailwindcss/typography": "^0.5.16",
+    "axios": "^1.13.2",
+    "better-sqlite3": "^12.4.1",
+    "compression": "^1.8.1",
+    "cors": "^2.8.5",
+    "dayjs": "^1.11.13",
+    "dotenv": "^16.4.5",
+    "googleapis": "^144.0.0",
+    "hashids": "^2.3.0",
+    "hyper-express": "github:MasRama/hyper-express",
+    "ioredis": "^5.4.1",
+    "isomorphic-dompurify": "^3.0.0-rc.2",
+    "knex": "^3.1.0",
+    "nodemailer": "^6.9.15",
+    "pino": "^10.1.0",
+    "pino-pretty": "^13.1.2",
+    "pino-roll": "^4.0.0",
+    "sharp": "^0.34.4",
+    "uuid": "^13.0.0"
+  },
+  "devDependencies": {
+    "@faker-js/faker": "^9.5.0",
+    "@sveltejs/vite-plugin-svelte": "^4.0.0",
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/compression": "^1.8.1",
+    "@types/cors": "^2.8.19",
+    "@types/node": "^22.7.9",
+    "autoprefixer": "^10.4.20",
+    "concurrently": "^9.0.1",
+    "nodemon": "^3.1.7",
+    "svelte": "^5.41.3",
+    "tailwindcss": "^3.4.14",
+    "terser": "^5.46.0",
+    "ts-node": "^10.9.2",
+    "tsc-alias": "^1.8.16",
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.10"
+  }
+}
