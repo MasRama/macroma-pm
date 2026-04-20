@@ -1,6 +1,7 @@
 <script lang="ts">
   import { router, page as inertiaPage, inertia } from '@inertiajs/svelte';
-  import { buildCSRFHeaders, Toast } from '../Components/helper';
+  import { buildCSRFHeaders, Toast, api } from '../Components/helper';
+  import axios from 'axios';
   import { fly, scale } from 'svelte/transition';
   import AppLayout from '../Components/AppLayout.svelte';
 
@@ -29,6 +30,19 @@
   let newProjectName = $state('');
   let newProjectDesc = $state('');
   let isCreating = $state(false);
+  let deletingProjectId = $state<string | null>(null);
+
+  async function handleDelete(e: MouseEvent, projectId: string) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!confirm('Yakin ingin menghapus project ini? Semua task dan data akan ikut terhapus.')) return;
+    deletingProjectId = projectId;
+    const result = await api(() => axios.delete(`/projects/${projectId}`, { headers: buildCSRFHeaders() }));
+    deletingProjectId = null;
+    if (result.success) {
+      router.visit('/projects', { preserveScroll: true });
+    }
+  }
 
   function handleCreate() {
     if (!newProjectName.trim()) return;
@@ -120,11 +134,29 @@
             <div class="relative z-10 flex flex-col h-full">
               <div class="flex justify-between items-start mb-3 gap-3">
                 <h3 class="text-base font-semibold text-slate-900 dark:text-slate-100 group-hover:text-primary-600 dark:group-hover:text-white transition-colors line-clamp-1">{project.name}</h3>
-                {#if project.active_batch_label}
-                  <span class="text-[10px] font-mono {badgeBgColors[colorIndex]} {badgeTextColors[colorIndex]} px-2 py-0.5 rounded-full whitespace-nowrap shrink-0 border {badgeBorderColors[colorIndex]}">
-                    {project.active_batch_label}
-                  </span>
-                {/if}
+                <div class="flex items-center gap-1.5 shrink-0">
+                  {#if project.active_batch_label}
+                    <span class="text-[10px] font-mono {badgeBgColors[colorIndex]} {badgeTextColors[colorIndex]} px-2 py-0.5 rounded-full whitespace-nowrap border {badgeBorderColors[colorIndex]}">
+                      {project.active_batch_label}
+                    </span>
+                  {/if}
+                  {#if user.id === project.owner_id}
+                    <button
+                      onclick={(e) => handleDelete(e, project.id)}
+                      disabled={deletingProjectId === project.id}
+                      class="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-lg text-slate-400 hover:text-danger-500 hover:bg-danger-500/10 disabled:opacity-40"
+                      title="Hapus project"
+                    >
+                      {#if deletingProjectId === project.id}
+                        <svg class="animate-spin w-3.5 h-3.5" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                      {:else}
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      {/if}
+                    </button>
+                  {/if}
+                </div>
               </div>
               
               <p class="text-xs text-slate-500 mt-1 mb-6 line-clamp-2 flex-grow leading-relaxed">

@@ -9,7 +9,8 @@
   import AddLogModal from '../Components/AddLogModal.svelte';
   import AddTaskModal from '../Components/AddTaskModal.svelte';
   import ActivityPanel from '../Components/ActivityPanel.svelte';
-  import { buildCSRFHeaders, Toast } from '../Components/helper';
+  import { buildCSRFHeaders, Toast, api } from '../Components/helper';
+  import axios from 'axios';
 
   interface TaskRecord { id: string; project_id: string; batch_id: string | null; title: string; description: string | null; priority: 'low' | 'medium' | 'high'; assignee_id: string | null; column_id: 'ongoing' | 'revisi' | 'done'; sort_order: number; version_major: number; version_minor: number; version_patch: number; created_at: number; updated_at: number; }
   interface BatchRecord { id: string; project_id: string; major: number; minor: number; label: string | null; is_active: boolean; version_string: string; }
@@ -46,6 +47,25 @@
 
   // Activity panel
   let showActivity = $state(false);
+
+  // Bump version
+  let isBumping = $state(false);
+
+  async function bumpVersion(bumpMajor: boolean) {
+    if (isBumping) return;
+    const label = bumpMajor ? 'major' : 'minor';
+    if (!confirm(`Bump ${label} version? Ini akan membuat batch versi baru.`)) return;
+    isBumping = true;
+    const result = await api(() => axios.post(
+      `/projects/${project.id}/batches`,
+      { bump_major: bumpMajor },
+      { headers: buildCSRFHeaders() }
+    ));
+    isBumping = false;
+    if (result.success) {
+      router.reload({ only: ['batches', 'activeBatch'] });
+    }
+  }
 
   let ongoingTasks = $state<TaskRecord[]>([]);
   let revisiTasks = $state<TaskRecord[]>([]);
@@ -213,6 +233,29 @@
         </select>
       </div>
 
+      {#if user.id === project.owner_id}
+        <div class="flex items-center gap-1.5">
+          <button
+            onclick={() => bumpVersion(false)}
+            disabled={isBumping}
+            title="Bump minor version (x.N.x)"
+            class="flex items-center gap-1.5 bg-slate-100 dark:bg-white/5 hover:bg-info-500/10 dark:hover:bg-info-500/10 border border-slate-200 dark:border-white/10 hover:border-info-500/40 text-slate-600 dark:text-slate-300 hover:text-info-500 dark:hover:text-info-400 text-xs font-medium px-3 py-2 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 11 12 6 7 11"/><polyline points="17 18 12 13 7 18"/></svg>
+            Minor
+          </button>
+          <button
+            onclick={() => bumpVersion(true)}
+            disabled={isBumping}
+            title="Bump major version (N.x.x)"
+            class="flex items-center gap-1.5 bg-slate-100 dark:bg-white/5 hover:bg-accent-500/10 dark:hover:bg-accent-500/10 border border-slate-200 dark:border-white/10 hover:border-accent-500/40 text-slate-600 dark:text-slate-300 hover:text-accent-500 dark:hover:text-accent-400 text-xs font-medium px-3 py-2 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 11 12 6 7 11"/><line x1="12" y1="18" x2="12" y2="6"/></svg>
+            Major
+          </button>
+        </div>
+      {/if}
+
       <button
         onclick={() => showActivity = true}
         title="Project Activity"
@@ -285,6 +328,7 @@
     <AddTaskModal
       projectId={project.id}
       {members}
+      batchId={selectedBatch?.id ?? null}
       onClose={() => { showAddTask = false; router.reload({ only: ['tasks'] }); }}
     />
   {/if}

@@ -68,8 +68,8 @@ class TaskController extends BaseController {
       let newVersion = "";
 
       await DB.transaction(async (trx) => {
-        const newPatch = await ProjectVersionCounter.incrementAndGet(projectId, trx);
-        newVersion = `v0.0.${newPatch}`;
+        const ver = await ProjectVersionCounter.incrementAndGet(projectId, trx);
+        newVersion = ver.string;
 
         await trx("tasks").insert({
           id: taskId,
@@ -81,9 +81,9 @@ class TaskController extends BaseController {
           assignee_id: body.assignee_id || null,
           column_id: "ongoing",
           sort_order: maxSortOrder + 1,
-          version_major: 0,
-          version_minor: 0,
-          version_patch: newPatch,
+          version_major: ver.major,
+          version_minor: ver.minor,
+          version_patch: ver.patch,
           created_at: now,
           updated_at: now,
         });
@@ -157,14 +157,16 @@ class TaskController extends BaseController {
       let newVersion: string = "";
 
       await DB.transaction(async (trx) => {
-        const newPatch = await ProjectVersionCounter.incrementAndGet(task.project_id, trx);
-        newVersion = `v0.0.${newPatch}`;
+        const ver = await ProjectVersionCounter.incrementAndGet(task.project_id, trx);
+        newVersion = ver.string;
 
         await trx("tasks")
           .where("id", taskId)
           .update({
             column_id: body.column_id,
-            version_patch: newPatch,
+            version_major: ver.major,
+            version_minor: ver.minor,
+            version_patch: ver.patch,
             sort_order: body.sort_order ?? 0,
             updated_at: now,
           });
@@ -238,13 +240,15 @@ class TaskController extends BaseController {
       let log: Awaited<ReturnType<typeof TaskLog.findBy>>;
 
       await DB.transaction(async (trx) => {
-        const newPatch = await ProjectVersionCounter.incrementAndGet(task.project_id, trx);
-        newVersion = `v0.0.${newPatch}`;
+        const ver = await ProjectVersionCounter.incrementAndGet(task.project_id, trx);
+        newVersion = ver.string;
 
         await trx("tasks")
           .where("id", taskId)
           .update({
-            version_patch: newPatch,
+            version_major: ver.major,
+            version_minor: ver.minor,
+            version_patch: ver.patch,
             updated_at: now,
           });
 

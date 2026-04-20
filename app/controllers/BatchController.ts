@@ -6,7 +6,7 @@ import {
   jsonError,
   jsonServerError,
 } from "@core";
-import { Project, ProjectMember, ProjectBatch, versionString } from "@models";
+import { Project, ProjectMember, ProjectBatch, ProjectVersionCounter, versionString } from "@models";
 import DB from "@services/DB";
 import { logActivity } from "@helpers/activity";
 
@@ -58,6 +58,8 @@ class BatchController extends BaseController {
         label: body.label ? String(body.label).trim() : null,
         is_active: false,
       });
+
+      await ProjectVersionCounter.bump(projectId, bumpMajor);
 
       await logActivity({
         projectId,

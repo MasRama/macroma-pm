@@ -10,9 +10,10 @@
     user?: { id: string; name: string | null; email: string; }
   }
 
-  let { projectId, members = [], onClose }: {
+  let { projectId, members = [], batchId = null, onClose }: {
     projectId: string;
     members: Member[];
+    batchId?: string | null;
     onClose: () => void;
   } = $props();
 
@@ -35,6 +36,7 @@
       priority,
       assignee_id: assigneeId || null,
       description: description.trim() || null,
+      batch_id: batchId || null,
     }, {
       headers: buildCSRFHeaders(),
       onSuccess: () => { 
