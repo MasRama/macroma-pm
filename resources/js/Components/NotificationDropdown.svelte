@@ -1,0 +1,159 @@
+<script lang="ts">
+  import { onMount } from 'svelte';
+  import axios from 'axios';
+  import { buildCSRFHeaders, Toast, api } from './helper';
+
+  let { unread_count = 0 }: { unread_count?: number } = $props();
+
+  let isOpen = $state(false);
+  let notifications = $state<any[]>([]);
+  let isLoading = $state(false);
+  let dropdownRef = $state<HTMLDivElement | null>(null);
+  let buttonRef = $state<HTMLButtonElement | null>(null);
+
+  function toggleDropdown() {
+    isOpen = !isOpen;
+    if (isOpen) {
+      fetchNotifications();
+    }
+  }
+
+  async function fetchNotifications() {
+    isLoading = true;
+    try {
+      const response = await axios.get('/notifications');
+      const data = response.data?.data;
+      notifications = (Array.isArray(data) ? data : data?.notifications ?? []).slice(0, 10);
+    } catch (error) {
+      console.error('Failed to fetch notifications:', error);
+      Toast('Gagal memuat notifikasi', 'error');
+    } finally {
+      isLoading = false;
+    }
+  }
+
+  async function respondToInvitation(token: string, action: 'accept' | 'decline') {
+    try {
+      await axios.post(`/invitations/${token}/respond`, { action }, { headers: buildCSRFHeaders() });
+      Toast(action === 'accept' ? 'Undangan diterima' : 'Undangan ditolak', 'success');
+      await fetchNotifications();
+      document.dispatchEvent(new CustomEvent('notification-read'));
+    } catch (error) {
+      console.error(`Failed to ${action} invitation:`, error);
+      Toast('Terjadi kesalahan', 'error');
+    }
+  }
+
+  $effect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        isOpen &&
+        dropdownRef &&
+        !dropdownRef.contains(event.target as Node) &&
+        buttonRef &&
+        !buttonRef.contains(event.target as Node)
+      ) {
+        isOpen = false;
+      }
+    }
+
+    if (isOpen) {
+      document.addEventListener('click', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  });
+</script>
+
+<div class="relative">
+  <button
+    bind:this={buttonRef}
+    onclick={toggleDropdown}
+    class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/[0.05] transition-colors relative"
+    aria-label="Notifications"
+  >
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+    </svg>
+    
+    {#if unread_count > 0}
+      <span class="absolute top-0 right-0 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center translate-x-1/3 -translate-y-1/3">
+        {unread_count > 99 ? '99+' : unread_count}
+      </span>
+    {/if}
+  </button>
+
+  {#if isOpen}
+    <div
+      bind:this={dropdownRef}
+      class="absolute bottom-full left-0 mb-2 w-80 bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/[0.08] rounded-2xl shadow-xl dark:shadow-black/40 overflow-hidden z-50 flex flex-col max-h-[400px]"
+    >
+      <div class="p-3 border-b border-slate-100 dark:border-white/[0.05] flex items-center justify-between shrink-0">
+        <h3 class="font-semibold text-slate-800 dark:text-slate-100 text-sm">Notifikasi</h3>
+        <button class="text-xs text-primary-500 hover:text-primary-600 dark:text-primary-400 dark:hover:text-primary-300 font-medium">
+          Tandai semua dibaca
+        </button>
+      </div>
+
+      <div class="overflow-y-auto flex-1 custom-scrollbar">
+        {#if isLoading}
+          <div class="p-8 flex justify-center items-center">
+            <svg class="animate-spin h-6 w-6 text-primary-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          </div>
+        {:else if notifications.length === 0}
+          <div class="p-8 text-center text-slate-500 dark:text-slate-400 text-sm">
+            Tidak ada notifikasi
+          </div>
+        {:else}
+          {#each notifications as notification}
+            <div class="p-3 hover:bg-slate-50 dark:hover:bg-white/[0.03] border-b border-slate-100 dark:border-white/[0.05] transition-colors {notification.read_at ? '' : 'bg-primary-50/50 dark:bg-primary-500/5'}">
+              {#if notification.type === 'workspace_invitation'}
+                <div class="text-sm text-slate-700 dark:text-slate-300 mb-2">
+                  <span class="font-medium text-slate-900 dark:text-slate-100">{notification.data?.inviter_name || 'Seseorang'}</span>
+                  mengundang Anda ke workspace
+                  <span class="font-medium text-slate-900 dark:text-slate-100">{notification.data?.workspace_name || 'Workspace'}</span>
+                </div>
+                {#if !notification.read_at}
+                  <div class="flex gap-2 mt-2">
+                    <button 
+                      onclick={() => respondToInvitation(notification.data?.token, 'accept')}
+                      class="flex-1 flex justify-center items-center gap-1 text-xs px-2 py-1.5 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
+                    >
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                      Terima
+                    </button>
+                    <button 
+                      onclick={() => respondToInvitation(notification.data?.token, 'decline')}
+                      class="flex-1 flex justify-center items-center gap-1 text-xs px-2 py-1.5 bg-slate-100 dark:bg-white/[0.05] text-slate-600 dark:text-slate-400 rounded-lg hover:bg-slate-200 dark:hover:bg-white/[0.1] transition-colors"
+                    >
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                      Tolak
+                    </button>
+                  </div>
+                {/if}
+              {:else if notification.type === 'invitation_accepted'}
+                <div class="text-sm text-slate-700 dark:text-slate-300">
+                  <span class="font-medium text-slate-900 dark:text-slate-100">{notification.data?.user_name || 'Seseorang'}</span>
+                  bergabung ke workspace
+                  <span class="font-medium text-slate-900 dark:text-slate-100">{notification.data?.workspace_name || 'Workspace'}</span>
+                </div>
+              {:else}
+                <div class="text-sm text-slate-700 dark:text-slate-300">
+                  {notification.data?.message || 'Notifikasi baru'}
+                </div>
+              {/if}
+              <div class="text-[10px] text-slate-400 mt-1.5">
+                {new Date(notification.created_at).toLocaleDateString()}
+              </div>
+            </div>
+          {/each}
+        {/if}
+      </div>
+    </div>
+  {/if}
+</div>

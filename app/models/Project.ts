@@ -6,6 +6,7 @@ export interface ProjectRecord extends BaseRecord {
   name: string;
   description: string | null;
   owner_id: string;
+  workspace_id: string | null;
   created_at: number;
   updated_at: number;
 }

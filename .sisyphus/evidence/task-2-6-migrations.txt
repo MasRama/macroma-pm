@@ -1,0 +1,7 @@
+All 5 PM migrations ran successfully:
+- 20260419000001_create_projects_table.ts: Ran
+- 20260419000002_create_project_members_table.ts: Ran
+- 20260419000003_create_project_batches_table.ts: Ran
+- 20260419000004_create_tasks_table.ts: Ran
+- 20260419000005_create_task_logs_table.ts: Ran
+Total: 13 migrations, 0 pending

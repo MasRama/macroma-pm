@@ -22,3 +22,8 @@ export { Task, TaskRecord, taskVersionString } from "./Task";
 export { TaskLog, TaskLogRecord } from "./TaskLog";
 export { ProjectActivityLog, ProjectActivityLogRecord, ActivityEventType } from "./ProjectActivityLog";
 export { ProjectVersionCounter, ProjectVersionCounterRecord } from "./ProjectVersionCounter";
+
+export { Workspace, WorkspaceRecord, CreateWorkspaceData, UpdateWorkspaceData } from "./Workspace";
+export { WorkspaceMember, WorkspaceMemberRecord, CreateWorkspaceMemberData } from "./WorkspaceMember";
+export { WorkspaceInvitation, WorkspaceInvitationRecord, CreateWorkspaceInvitationData } from "./WorkspaceInvitation";
+export { Notification, NotificationRecord, CreateNotificationData } from "./Notification";

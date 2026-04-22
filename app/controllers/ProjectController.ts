@@ -9,6 +9,7 @@ import {
 import { Project, ProjectMember, ProjectBatch, Task, ProjectActivityLog, ProjectVersionCounter } from "@models";
 import DB from "@services/DB";
 import { logActivity } from "@helpers/activity";
+import { buildNavData } from "@helpers/nav";
 
 class ProjectController extends BaseController {
   async index(req: NaraRequest, res: NaraResponse) {
@@ -36,10 +37,13 @@ class ProjectController extends BaseController {
       })
     );
 
+    const nav = await buildNavData(req.user.id);
+
     this.requireInertia(res);
     return res.inertia("projects", {
       projects: projectsWithMeta,
       user: req.user,
+      ...nav,
     });
   }
 
@@ -75,7 +79,7 @@ class ProjectController extends BaseController {
       })
     );
 
-    const allProjects = await Project.findAllForUser(req.user.id);
+    const nav = await buildNavData(req.user.id);
 
     this.requireInertia(res);
     return res.inertia("project-board", {
@@ -92,15 +96,15 @@ class ProjectController extends BaseController {
           }
         : null,
       members,
-      projects: allProjects,
       user: req.user,
+      ...nav,
     });
   }
 
   async store(req: NaraRequest, res: NaraResponse) {
     this.requireAuth(req);
 
-    let body: { name?: string; description?: string };
+    let body: { name?: string; description?: string; workspace_id?: string };
     try {
       body = await req.json();
     } catch {
@@ -120,6 +124,7 @@ class ProjectController extends BaseController {
         name: String(body.name).trim(),
         description: body.description ? String(body.description).trim() : null,
         owner_id: req.user.id,
+        workspace_id: body.workspace_id ? String(body.workspace_id) : null,
       });
 
       await DB.table("project_members").insert({
@@ -139,7 +144,7 @@ class ProjectController extends BaseController {
         actorId: req.user.id,
       });
 
-      return res.redirect(`/projects/${projectId}`);
+      return jsonCreated(res, "Project berhasil dibuat", { id: projectId });
     } catch (err) {
       return jsonServerError(res, "Failed to create project");
     }

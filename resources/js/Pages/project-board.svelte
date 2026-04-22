@@ -18,14 +18,16 @@
   interface Project { id: string; name: string; description: string | null; owner_id: string; }
   interface User { id: string; name: string | null; email: string; avatar: string | null; }
 
-  let { project, tasks: initialTasks = [], batches = [], activeBatch, members = [], user, projects = [] }: {
+  let { project, tasks: initialTasks = [], batches = [], activeBatch, members = [], user, nav_workspaces = [], nav_projects_standalone = [], unread_count = 0 }: {
     project: Project;
     tasks: TaskRecord[];
     batches: BatchRecord[];
     activeBatch: BatchRecord | null;
     members: Member[];
     user: User;
-    projects: any[];
+    nav_workspaces: any[];
+    nav_projects_standalone: any[];
+    unread_count: number;
   } = $props();
 
   let tasks = $state<TaskRecord[]>([...initialTasks]);
@@ -198,7 +200,7 @@
   ];
 </script>
 
-<AppLayout title={project.name} {projects} activeProjectId={project.id}>
+<AppLayout title={project.name} {nav_workspaces} {nav_projects_standalone} {unread_count} activeProjectId={project.id}>
   <!-- Background decorations -->
   <div class="fixed inset-0 pointer-events-none z-0">
     <div class="absolute top-0 right-0 w-[600px] h-[600px] bg-primary-500/20 dark:bg-primary-500/10 rounded-full blur-3xl -mr-64 -mt-64"></div>

@@ -11,9 +11,13 @@ import OAuthController from "@controllers/OAuthController";
 import HomeController from "@controllers/HomeController";
 import AssetController from "@controllers/AssetController";
 import ProjectController from "@controllers/ProjectController";
+import DashboardController from "@controllers/DashboardController";
 import ProjectMemberController from "@controllers/ProjectMemberController";
 import BatchController from "@controllers/BatchController";
 import TaskController from "@controllers/TaskController";
+import WorkspaceController from "@controllers/WorkspaceController";
+import WorkspaceInvitationController from "@controllers/WorkspaceInvitationController";
+import NotificationController from "@controllers/NotificationController";
 import Auth from "@middlewares/auth";
 import { strictRateLimit } from "@middlewares/rateLimit";
 
@@ -66,7 +70,7 @@ Route.get("/google/callback", OAuthController.googleCallback);
  * PUT    /users/:id       - Update user (admin only)
  * DELETE /users           - Delete users (admin only)
  */
-Route.get("/dashboard", [Auth], ProjectController.index);
+Route.get("/dashboard", [Auth], DashboardController.index);
 
 Route.get("/projects", [Auth], ProjectController.index);
 Route.post("/projects", [Auth], ProjectController.store);
@@ -87,6 +91,20 @@ Route.patch("/tasks/:id/move", [Auth], TaskController.move);
 Route.post("/tasks/:id/logs", [Auth], TaskController.addLog);
 Route.delete("/tasks/:id", [Auth], TaskController.destroy);
 Route.get("/tasks/:id/logs", [Auth], TaskController.getLogs);
+Route.get("/workspaces", [Auth], WorkspaceController.index);
+Route.post("/workspaces", [Auth], WorkspaceController.store);
+Route.get("/workspaces/:id", [Auth], WorkspaceController.show);
+Route.patch("/workspaces/:id", [Auth], WorkspaceController.update);
+Route.delete("/workspaces/:id", [Auth], WorkspaceController.destroy);
+Route.post("/workspaces/:id/invite", [Auth], WorkspaceController.invite);
+Route.delete("/workspaces/:id/members/:userId", [Auth], WorkspaceController.removeMember);
+
+Route.post("/invitations/:token/respond", [Auth], WorkspaceInvitationController.respond);
+
+Route.get("/notifications", [Auth], NotificationController.index);
+Route.patch("/notifications/:id/read", [Auth], NotificationController.markRead);
+Route.post("/notifications/mark-all-read", [Auth], NotificationController.markAllRead);
+
 Route.get("/users", [Auth], UserController.usersPage);
 Route.get("/profile", [Auth], UserController.profilePage);
 Route.post("/change-profile", [Auth], UserController.changeProfile);
