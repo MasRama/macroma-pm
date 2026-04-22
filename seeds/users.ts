@@ -138,6 +138,7 @@ export async function seed(knex: Knex): Promise<void> {
 	// ==========================================
 	const adminPassword = await Authenticate.hash("ram");
 	const userPassword = await Authenticate.hash("user");
+	const ferPassword = await Authenticate.hash("fer");
 
 	const adminUser = await UserFactory
 		.merge({
@@ -157,6 +158,15 @@ export async function seed(knex: Knex): Promise<void> {
 		})
 		.create();
 
+	const ferUser = await UserFactory
+		.merge({
+			name: "Fer",
+			email: "fer@fer.com",
+			password: ferPassword,
+			is_verified: true,
+		})
+		.create();
+
 	// ==========================================
 	// 5. Assign Roles
 	// ==========================================
@@ -171,6 +181,12 @@ export async function seed(knex: Knex): Promise<void> {
 			id: randomUUID(),
 			user_id: regularUser.id,
 			role_id: userRole.id,
+			created_at: now,
+		},
+		{
+			id: randomUUID(),
+			user_id: ferUser.id,
+			role_id: adminRole.id,
 			created_at: now,
 		},
 	]);
