@@ -2,6 +2,7 @@
   import axios from 'axios';
   import { buildCSRFHeaders } from './helper';
   import { scale, fly } from 'svelte/transition';
+  import { page as inertiaPage } from '@inertiajs/svelte';
 
   let { workspace_id, workspace_name = 'Workspace' }: {
     workspace_id: string;
@@ -30,9 +31,61 @@
   let isLoading = $state(false);
   let isSending = $state(false);
   let hasLoaded = $state(false);
+  let unreadCount = $state(0);
   let chatBodyEl = $state<HTMLElement | null>(null);
   let inputEl = $state<HTMLInputElement | null>(null);
   let pollInterval: ReturnType<typeof setInterval> | null = null;
+
+  const currentUserId = $derived(($inertiaPage.props.user as any)?.id ?? '');
+
+  function playNotificationSound() {
+    try {
+      const ctx = new AudioContext();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(1047, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(784, ctx.currentTime + 0.06);
+      gain.gain.setValueAtTime(0.18, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.35);
+    } catch {
+      // AudioContext not available
+    }
+  }
+
+  async function requestNotificationPermission() {
+    if ('Notification' in window && Notification.permission === 'default') {
+      await Notification.requestPermission();
+    }
+  }
+
+  function showDesktopNotification(msg: ChatMessage) {
+    if (!('Notification' in window) || Notification.permission !== 'granted') return;
+    const senderName = msg.user.name || msg.user.email;
+    const notif = new Notification(`${senderName} · ${workspace_name}`, {
+      body: msg.message.length > 80 ? msg.message.slice(0, 80) + '…' : msg.message,
+      tag: `workspace-chat-${workspace_id}`,
+    });
+    notif.onclick = () => {
+      window.focus();
+      isOpen = true;
+      unreadCount = 0;
+      notif.close();
+    };
+  }
+
+  function handleIncomingMessages(incoming: ChatMessage[]) {
+    if (isOpen) return;
+    const fromOthers = incoming.filter(m => m.user_id !== currentUserId);
+    if (fromOthers.length === 0) return;
+    unreadCount += fromOthers.length;
+    playNotificationSound();
+    showDesktopNotification(fromOthers[fromOthers.length - 1]);
+  }
 
   function portal(node: HTMLElement) {
     document.body.appendChild(node);
@@ -55,19 +108,18 @@
       const res = await axios.get(`/workspaces/${workspace_id}/messages`);
       const fetched: ChatMessage[] = res.data?.data?.messages ?? [];
 
-      // Merge: avoid duplicates, preserve order
       const existingIds = new Set(messages.map(m => m.id));
       const newOnes = fetched.filter(m => !existingIds.has(m.id));
       if (newOnes.length > 0) {
+        if (hasLoaded) handleIncomingMessages(newOnes);
         messages = fetched;
-        // Only auto-scroll if we were already near the bottom
-        setTimeout(() => scrollToBottom('smooth'), 60);
+        if (isOpen) setTimeout(() => scrollToBottom('smooth'), 60);
       } else if (!hasLoaded) {
         messages = fetched;
       }
       hasLoaded = true;
     } catch {
-      // Silent fail for polling
+      // silent
     } finally {
       if (!silent) isLoading = false;
     }
@@ -121,6 +173,8 @@
   function toggleChat() {
     isOpen = !isOpen;
     if (isOpen) {
+      unreadCount = 0;
+      requestNotificationPermission();
       if (!hasLoaded) fetchMessages();
       startPolling();
       setTimeout(() => {
@@ -340,7 +394,7 @@
 
   <button
     onclick={toggleChat}
-    class="fixed bottom-6 right-6 w-14 h-14 rounded-2xl bg-primary-500 hover:bg-primary-600 dark:bg-primary-500 dark:hover:bg-primary-400 text-white shadow-lg shadow-primary-500/30 dark:shadow-primary-500/20 flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 z-[9989]"
+    class="fixed bottom-6 right-6 w-14 h-14 rounded-2xl bg-primary-500 hover:bg-primary-600 dark:bg-primary-500 dark:hover:bg-primary-400 text-white shadow-lg shadow-primary-500/30 dark:shadow-primary-500/20 flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 z-[9989] relative"
     aria-label={isOpen ? 'Tutup chat' : 'Buka workspace chat'}
     title={isOpen ? 'Tutup chat' : `Chat ${workspace_name}`}
   >
@@ -352,6 +406,12 @@
       <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
       </svg>
+    {/if}
+
+    {#if !isOpen && unreadCount > 0}
+      <span class="absolute -top-1.5 -right-1.5 min-w-[20px] h-5 px-1 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-md">
+        {unreadCount > 99 ? '99+' : unreadCount}
+      </span>
     {/if}
   </button>
 </div>
