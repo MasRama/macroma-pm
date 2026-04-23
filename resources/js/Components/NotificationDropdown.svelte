@@ -3,6 +3,8 @@
   import { buildCSRFHeaders, Toast } from './helper';
 
   let { unread_count = 0 }: { unread_count?: number } = $props();
+  let localUnreadCount = $state(unread_count);
+  $effect(() => { localUnreadCount = unread_count; });
 
   let isOpen = $state(false);
   let notifications = $state<any[]>([]);
@@ -48,6 +50,16 @@
       Toast('Gagal memuat notifikasi', 'error');
     } finally {
       isLoading = false;
+    }
+  }
+
+  async function markAllRead() {
+    try {
+      await axios.post('/notifications/mark-all-read', {}, { headers: buildCSRFHeaders() });
+      localUnreadCount = 0;
+      notifications = notifications.map(n => ({ ...n, read_at: n.read_at ?? Date.now() }));
+    } catch {
+      Toast('Gagal menandai notifikasi', 'error');
     }
   }
 
@@ -97,9 +109,9 @@
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
     </svg>
     
-    {#if unread_count > 0}
+    {#if localUnreadCount > 0}
       <span class="absolute top-0 right-0 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center translate-x-1/3 -translate-y-1/3">
-        {unread_count > 99 ? '99+' : unread_count}
+        {localUnreadCount > 99 ? '99+' : localUnreadCount}
       </span>
     {/if}
   </button>
@@ -113,7 +125,10 @@
     >
       <div class="p-3 border-b border-slate-100 dark:border-white/[0.05] flex items-center justify-between shrink-0">
         <h3 class="font-semibold text-slate-800 dark:text-slate-100 text-sm">Notifikasi</h3>
-        <button class="text-xs text-primary-500 hover:text-primary-600 dark:text-primary-400 dark:hover:text-primary-300 font-medium">
+        <button
+          onclick={markAllRead}
+          class="text-xs text-primary-500 hover:text-primary-600 dark:text-primary-400 dark:hover:text-primary-300 font-medium"
+        >
           Tandai semua dibaca
         </button>
       </div>
