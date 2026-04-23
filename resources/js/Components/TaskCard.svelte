@@ -25,11 +25,13 @@
     assignee,
     columnColor = 'blue',
     onAddLog,
+    onOpenDetail,
   }: {
     task: TaskRecord;
     assignee?: UserRecord;
     columnColor?: 'blue' | 'orange' | 'emerald';
     onAddLog?: (task: TaskRecord) => void;
+    onOpenDetail?: (task: TaskRecord) => void;
   } = $props();
 
   let priorityClass = $derived(
@@ -52,33 +54,48 @@
 </script>
 
 <div data-task-card class="group relative backdrop-blur-sm rounded-xl p-4 transition-all duration-200 cursor-grab active:cursor-grabbing hover:-translate-y-0.5 {themeClasses}">
-  <div class="flex items-center justify-between">
-    <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full border {priorityClass}">
-      {task.priority}
-    </span>
-  </div>
-
-  <p class="text-sm font-medium text-slate-800 dark:text-slate-100 mt-2 mb-3 leading-snug">
-    {task.title}
-  </p>
-
-  <div class="flex items-center justify-between mt-auto">
-    <div class="flex items-center">
-      {#if assignee}
-        <div class="w-6 h-6 rounded-full bg-slate-700 flex items-center justify-center text-[10px] font-bold text-slate-300 overflow-hidden" title={assignee.name || assignee.email}>
-          {#if assignee.avatar}
-            <img src={assignee.avatar} alt={assignee.name || assignee.email} class="w-full h-full object-cover" />
-          {:else}
-            {((assignee.name || assignee.email)[0] || '').toUpperCase()}
-          {/if}
-        </div>
-      {/if}
+  <div
+    role="button"
+    tabindex="0"
+    class="cursor-pointer"
+    onmousedown={(e) => e.stopPropagation()}
+    ontouchstart={(e) => e.stopPropagation()}
+    onclick={() => onOpenDetail?.(task)}
+    onkeydown={(e) => e.key === 'Enter' && onOpenDetail?.(task)}
+  >
+    <div class="flex items-center justify-between">
+      <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full border {priorityClass}">
+        {task.priority}
+      </span>
     </div>
 
-    <button onclick={() => onAddLog?.(task)} class="opacity-0 group-hover:opacity-100 transition-opacity text-xs text-slate-400 flex items-center gap-1 {btnColorClass}">
-      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
-      Log
-    </button>
+    <p class="text-sm font-medium text-slate-800 dark:text-slate-100 mt-2 mb-3 leading-snug">
+      {task.title}
+    </p>
+
+    <div class="flex items-center justify-between mt-auto">
+      <div class="flex items-center">
+        {#if assignee}
+          <div class="w-6 h-6 rounded-full bg-slate-700 flex items-center justify-center text-[10px] font-bold text-slate-300 overflow-hidden" title={assignee.name || assignee.email}>
+            {#if assignee.avatar}
+              <img src={assignee.avatar} alt={assignee.name || assignee.email} class="w-full h-full object-cover" />
+            {:else}
+              {((assignee.name || assignee.email)[0] || '').toUpperCase()}
+            {/if}
+          </div>
+        {/if}
+      </div>
+
+      <button
+        onmousedown={(e) => e.stopPropagation()}
+        ontouchstart={(e) => e.stopPropagation()}
+        onclick={(e) => { e.stopPropagation(); onAddLog?.(task); }}
+        class="opacity-0 group-hover:opacity-100 transition-opacity text-xs text-slate-400 flex items-center gap-1 {btnColorClass}"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+        Log
+      </button>
+    </div>
   </div>
 
   <!-- svelte-ignore a11y_no_static_element_interactions -->

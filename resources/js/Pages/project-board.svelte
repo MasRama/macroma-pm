@@ -9,6 +9,7 @@
   import AddLogModal from '../Components/AddLogModal.svelte';
   import AddTaskModal from '../Components/AddTaskModal.svelte';
   import ActivityPanel from '../Components/ActivityPanel.svelte';
+  import TaskDetailModal from '../Components/TaskDetailModal.svelte';
   import { buildCSRFHeaders, Toast, api } from '../Components/helper';
   import axios from 'axios';
 
@@ -49,6 +50,9 @@
 
   // Activity panel
   let showActivity = $state(false);
+
+  // Task detail modal
+  let detailTask = $state<TaskRecord | null>(null);
 
   // Delete project
   let isDeletingProject = $state(false);
@@ -343,6 +347,7 @@
                 assignee={getAssignee(task.assignee_id)}
                 columnColor={col.color}
                 onAddLog={() => addLogTask = task}
+                onOpenDetail={() => detailTask = task}
               />
             </div>
           {/each}
@@ -395,6 +400,19 @@
       task={addLogTask}
       onConfirm={commitAddLog}
       onCancel={() => addLogTask = null}
+    />
+  {/if}
+
+  {#if detailTask}
+    <TaskDetailModal
+      task={detailTask}
+      assignee={getAssignee(detailTask.assignee_id)}
+      isOwner={user.id === project.owner_id}
+      onClose={() => detailTask = null}
+      onDeleted={(id) => {
+        tasks = tasks.filter(t => t.id !== id);
+        detailTask = null;
+      }}
     />
   {/if}
 
