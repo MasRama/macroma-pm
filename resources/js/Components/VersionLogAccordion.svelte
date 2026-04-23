@@ -17,6 +17,17 @@
   let isOpen = $state(false);
   let logs = $state<LogRecord[]>([]);
   let isLoading = $state(false);
+  let copiedId = $state<string | null>(null);
+
+  async function copyNote(log: LogRecord) {
+    try {
+      await navigator.clipboard.writeText(log.note);
+      copiedId = log.id;
+      setTimeout(() => { copiedId = null; }, 1500);
+    } catch {
+      copiedId = null;
+    }
+  }
 
   const columnNames: Record<string, string> = { 
     ongoing: 'On Going', 
@@ -65,7 +76,25 @@
               </span>
             </div>
             {#if log.note}
-              <div class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{log.note}</div>
+              <div class="flex items-start justify-between gap-2 mt-0.5 group/note">
+                <p class="text-xs text-slate-500 dark:text-slate-400 flex-1">{log.note}</p>
+                <button
+                  onclick={() => copyNote(log)}
+                  title="Copy catatan"
+                  class="shrink-0 p-1 rounded text-slate-300 dark:text-slate-600 hover:text-slate-500 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/[0.06] transition-colors opacity-0 group-hover/note:opacity-100 focus:opacity-100"
+                >
+                  {#if copiedId === log.id}
+                    <svg class="w-3 h-3 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                    </svg>
+                  {:else}
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <rect x="9" y="9" width="13" height="13" rx="2" ry="2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></rect>
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
+                    </svg>
+                  {/if}
+                </button>
+              </div>
             {/if}
             <div class="text-[10px] text-slate-400 dark:text-slate-500 mt-1">
               {new Date(log.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
