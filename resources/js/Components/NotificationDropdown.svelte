@@ -1,15 +1,34 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
   import axios from 'axios';
-  import { buildCSRFHeaders, Toast, api } from './helper';
+  import { buildCSRFHeaders, Toast } from './helper';
 
   let { unread_count = 0 }: { unread_count?: number } = $props();
 
   let isOpen = $state(false);
   let notifications = $state<any[]>([]);
   let isLoading = $state(false);
-  let dropdownRef = $state<HTMLDivElement | null>(null);
   let buttonRef = $state<HTMLButtonElement | null>(null);
+
+  // Portal action — moves element out of sidebar DOM into <body>
+  function portal(node: HTMLElement) {
+    document.body.appendChild(node);
+    return {
+      destroy() {
+        node.remove();
+      },
+    };
+  }
+
+  function getDropdownStyle(): string {
+    if (!buttonRef) return '';
+    const rect = buttonRef.getBoundingClientRect();
+    const dropdownWidth = 320;
+    let left = rect.left;
+    if (left + dropdownWidth > window.innerWidth - 8) {
+      left = window.innerWidth - dropdownWidth - 8;
+    }
+    return `position:fixed; bottom:${window.innerHeight - rect.top + 8}px; left:${left}px; z-index:9999;`;
+  }
 
   function toggleDropdown() {
     isOpen = !isOpen;
@@ -46,12 +65,12 @@
 
   $effect(() => {
     function handleClickOutside(event: MouseEvent) {
+      if (!isOpen) return;
+      const target = event.target as Node;
+      const dropdown = document.getElementById('notif-dropdown-portal');
       if (
-        isOpen &&
-        dropdownRef &&
-        !dropdownRef.contains(event.target as Node) &&
-        buttonRef &&
-        !buttonRef.contains(event.target as Node)
+        buttonRef && !buttonRef.contains(target) &&
+        dropdown && !dropdown.contains(target)
       ) {
         isOpen = false;
       }
@@ -87,8 +106,10 @@
 
   {#if isOpen}
     <div
-      bind:this={dropdownRef}
-      class="absolute bottom-full left-0 mb-2 w-80 bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/[0.08] rounded-2xl shadow-xl dark:shadow-black/40 overflow-hidden z-50 flex flex-col max-h-[400px]"
+      use:portal
+      id="notif-dropdown-portal"
+      style={getDropdownStyle()}
+      class="w-80 bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/[0.08] rounded-2xl shadow-xl dark:shadow-black/40 overflow-hidden flex flex-col max-h-[400px]"
     >
       <div class="p-3 border-b border-slate-100 dark:border-white/[0.05] flex items-center justify-between shrink-0">
         <h3 class="font-semibold text-slate-800 dark:text-slate-100 text-sm">Notifikasi</h3>
