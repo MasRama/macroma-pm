@@ -38,7 +38,7 @@ class WorkspaceInvitationModel extends BaseModel<WorkspaceInvitationRecord> {
   }
 
   async findByWorkspace(workspaceId: string): Promise<WorkspaceInvitationRecord[]> {
-    return this.query().where({ workspace_id: workspaceId }).orderBy('created_at', 'desc');
+    return this.query().where({ workspace_id: workspaceId, status: 'pending' }).orderBy('created_at', 'desc');
   }
 
   async hasPendingInvitation(workspaceId: string, email: string): Promise<boolean> {
