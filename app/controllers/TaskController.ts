@@ -23,8 +23,8 @@ class TaskController extends BaseController {
 
     const projectId = this.getRequiredParam(req, "id");
 
-    const isMember = await ProjectMember.isMember(projectId, req.user.id);
-    if (!isMember) {
+    const canAccess = await ProjectMember.canAccessProject(projectId, req.user.id);
+    if (!canAccess) {
       return jsonError(res, "Forbidden", 403);
     }
 
@@ -50,9 +50,9 @@ class TaskController extends BaseController {
       : "medium";
 
     if (body.assignee_id) {
-      const assigneeMember = await ProjectMember.isMember(projectId, body.assignee_id);
-      if (!assigneeMember) {
-        return jsonError(res, "Assignee must be a project member", 422);
+      const assigneeCanAccess = await ProjectMember.canAccessProject(projectId, body.assignee_id);
+      if (!assigneeCanAccess) {
+        return jsonError(res, "Assignee must be a project or workspace member", 422);
       }
     }
 
@@ -125,8 +125,8 @@ class TaskController extends BaseController {
       return jsonError(res, "Task not found", 404);
     }
 
-    const isMember = await ProjectMember.isMember(task.project_id, req.user.id);
-    if (!isMember) {
+    const canAccess = await ProjectMember.canAccessProject(task.project_id, req.user.id);
+    if (!canAccess) {
       return jsonError(res, "Forbidden", 403);
     }
 
@@ -217,8 +217,8 @@ class TaskController extends BaseController {
       return jsonError(res, "Task not found", 404);
     }
 
-    const isMember = await ProjectMember.isMember(task.project_id, req.user.id);
-    if (!isMember) {
+    const canAccess = await ProjectMember.canAccessProject(task.project_id, req.user.id);
+    if (!canAccess) {
       return jsonError(res, "Forbidden", 403);
     }
 
@@ -317,8 +317,8 @@ class TaskController extends BaseController {
       return jsonError(res, "Task not found", 404);
     }
 
-    const isMember = await ProjectMember.isMember(task.project_id, req.user.id);
-    if (!isMember) {
+    const canAccess = await ProjectMember.canAccessProject(task.project_id, req.user.id);
+    if (!canAccess) {
       return jsonError(res, "Forbidden", 403);
     }
 

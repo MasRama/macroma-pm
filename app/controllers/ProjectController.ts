@@ -6,7 +6,7 @@ import {
   jsonError,
   jsonServerError,
 } from "@core";
-import { Project, ProjectMember, ProjectBatch, Task, ProjectActivityLog, ProjectVersionCounter } from "@models";
+import { Project, ProjectMember, WorkspaceMember, ProjectBatch, Task, ProjectActivityLog, ProjectVersionCounter } from "@models";
 import DB from "@services/DB";
 import { logActivity } from "@helpers/activity";
 import { buildNavData } from "@helpers/nav";
@@ -52,14 +52,14 @@ class ProjectController extends BaseController {
 
     const projectId = this.getRequiredParam(req, "id");
 
-    const isMember = await ProjectMember.isMember(projectId, req.user.id);
-    if (!isMember) {
-      return jsonError(res, "Forbidden", 403);
-    }
-
     const project = await Project.findById(projectId);
     if (!project) {
       return jsonError(res, "Project not found", 404);
+    }
+
+    const canAccess = await ProjectMember.canAccessProject(projectId, req.user.id);
+    if (!canAccess) {
+      return jsonError(res, "Forbidden", 403);
     }
 
     const activeBatch = await ProjectBatch.findActive(projectId);
@@ -69,13 +69,28 @@ class ProjectController extends BaseController {
     const batches = await ProjectBatch.findByProject(projectId);
 
     const memberRecords = await ProjectMember.findByProject(projectId);
+
+    const userIdSet = new Set<string>(memberRecords.map((m) => m.user_id));
+    if (project.workspace_id) {
+      const workspaceMemberRecords = await WorkspaceMember.findByWorkspace(project.workspace_id);
+      workspaceMemberRecords.forEach((m) => userIdSet.add(m.user_id));
+    }
+
     const members = await Promise.all(
-      memberRecords.map(async (m) => {
+      Array.from(userIdSet).map(async (userId) => {
+        const projectMember = memberRecords.find((m) => m.user_id === userId);
         const user = await DB.from("users")
-          .where("id", m.user_id)
+          .where("id", userId)
           .select("id", "name", "email", "avatar")
           .first();
-        return { ...m, user };
+        return {
+          id: projectMember?.id ?? userId,
+          project_id: projectId,
+          user_id: userId,
+          role: projectMember?.role ?? "member",
+          created_at: projectMember?.created_at ?? 0,
+          user,
+        };
       })
     );
 
@@ -203,8 +218,8 @@ class ProjectController extends BaseController {
 
     const projectId = this.getRequiredParam(req, "id");
 
-    const isMember = await ProjectMember.isMember(projectId, req.user.id);
-    if (!isMember) {
+    const canAccess = await ProjectMember.canAccessProject(projectId, req.user.id);
+    if (!canAccess) {
       return jsonError(res, "Forbidden", 403);
     }
 

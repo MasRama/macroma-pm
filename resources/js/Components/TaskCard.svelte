@@ -1,4 +1,6 @@
 <script lang="ts">
+  import VersionLogAccordion from './VersionLogAccordion.svelte';
+
   interface TaskRecord {
     id: string;
     title: string;
@@ -77,5 +79,13 @@
       <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
       Log
     </button>
+  </div>
+
+  <!-- svelte-ignore a11y_no_static_element_interactions -->
+  <div
+    onmousedown={(e) => e.stopPropagation()}
+    ontouchstart={(e) => e.stopPropagation()}
+  >
+    <VersionLogAccordion taskId={task.id} />
   </div>
 </div>

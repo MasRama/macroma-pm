@@ -83,6 +83,9 @@
   // Cancel Invitation State
   let cancellingInviteId = $state<string | null>(null);
 
+  // Delete Workspace State
+  let isDeletingWorkspace = $state(false);
+
   // Actions
   async function handleCreateProject() {
     if (!newProjectName.trim()) return;
@@ -138,6 +141,16 @@
     }
   }
 
+  async function handleDeleteWorkspace() {
+    if (!confirm('Yakin ingin menghapus workspace ini? Semua project dan data di dalamnya akan ikut terhapus.')) return;
+    isDeletingWorkspace = true;
+    const result = await api(() => axios.delete(`/workspaces/${workspace.id}`, { headers: buildCSRFHeaders() }));
+    isDeletingWorkspace = false;
+    if (result.success) {
+      router.visit('/workspaces');
+    }
+  }
+
   async function handleCancelInvite(invitationId: string) {
     if (!confirm('Yakin ingin membatalkan undangan ini?')) return;
     cancellingInviteId = invitationId;
@@ -181,6 +194,24 @@
             <p class="text-sm text-slate-500 mt-2 max-w-2xl">{workspace.description}</p>
           {/if}
         </div>
+        {#if workspace.owner_id === user.id}
+          <button
+            onclick={handleDeleteWorkspace}
+            disabled={isDeletingWorkspace}
+            class="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-danger-600 dark:text-danger-400 bg-danger-50 dark:bg-danger-500/10 hover:bg-danger-100 dark:hover:bg-danger-500/20 border border-danger-200 dark:border-danger-500/20 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            title="Hapus workspace"
+          >
+            {#if isDeletingWorkspace}
+              <svg class="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+              Menghapus...
+            {:else}
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+              Hapus Workspace
+            {/if}
+          </button>
+        {/if}
       </div>
     </div>
 

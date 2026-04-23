@@ -1,4 +1,5 @@
 import { BaseModel, BaseRecord } from "./BaseModel";
+import DB from "@services/DB";
 
 export interface ProjectMemberRecord extends BaseRecord {
   id: string;
@@ -36,6 +37,19 @@ class ProjectMemberModel extends BaseModel<ProjectMemberRecord> {
     await this.query().insert(insertData);
     const record = await this.findById(data.id);
     return record as ProjectMemberRecord;
+  }
+
+  async canAccessProject(projectId: string, userId: string): Promise<boolean> {
+    const directMember = await this.findMembership(projectId, userId);
+    if (directMember) return true;
+
+    const project = await DB.from("projects").where("id", projectId).select("workspace_id").first();
+    if (!project?.workspace_id) return false;
+
+    const workspaceMember = await DB.from("workspace_members")
+      .where({ workspace_id: project.workspace_id, user_id: userId })
+      .first();
+    return !!workspaceMember;
   }
 }
 
