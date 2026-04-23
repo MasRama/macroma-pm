@@ -73,7 +73,7 @@
   transition:fade={{ duration: 150 }}
 >
   <div
-    class="bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/[0.08] rounded-2xl w-full max-w-md shadow-2xl overflow-hidden"
+    class="bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/[0.08] rounded-2xl w-full max-w-md shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
     transition:fly={{ y: 20, duration: 200 }}
     onclick={(e) => e.stopPropagation()}
     onkeydown={(e) => e.stopPropagation()}
@@ -81,7 +81,7 @@
     aria-modal="true"
     tabindex="-1"
   >
-    <div class="px-6 pt-6 pb-4 border-b border-slate-100 dark:border-white/[0.06] flex items-start justify-between gap-3">
+    <div class="px-6 pt-6 pb-4 border-b border-slate-100 dark:border-white/[0.06] flex items-start justify-between gap-3 shrink-0">
       <div class="flex-1 min-w-0">
         <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-1">v{versionString}</p>
         <h2 class="text-base font-semibold text-slate-900 dark:text-white leading-snug">{task.title}</h2>
@@ -94,7 +94,7 @@
       </button>
     </div>
 
-    <div class="px-6 py-4 space-y-4">
+    <div class="px-6 py-4 space-y-4 overflow-y-auto flex-1">
       <div class="flex items-center gap-2 flex-wrap">
         <span class="text-[10px] font-bold uppercase px-2.5 py-1 rounded-full border {priorityClass}">
           {priorityLabel}
@@ -131,7 +131,7 @@
     </div>
 
     {#if isOwner}
-      <div class="px-6 pb-5 pt-1 flex justify-end">
+      <div class="px-6 pb-5 pt-1 flex justify-end shrink-0 border-t border-slate-100 dark:border-white/[0.06]">
         <button
           onclick={handleDelete}
           disabled={isDeleting}
