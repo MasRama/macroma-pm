@@ -117,24 +117,15 @@
     e.preventDefault();
     if (!inviteEmail.trim()) return;
     isInviting = true;
-    try {
-      const res = await fetch(`/workspaces/${workspace.id}/invite`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...buildCSRFHeaders() },
-        body: JSON.stringify({ email: inviteEmail.trim() }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        inviteEmail = '';
-        Toast('Undangan berhasil dikirim!', 'success');
-        router.reload();
-      } else {
-        Toast(data.message || 'Gagal mengirim undangan', 'error');
-      }
-    } catch {
-      Toast('Gagal mengirim undangan', 'error');
-    } finally {
-      isInviting = false;
+    const result = await api(() => axios.post(
+      `/workspaces/${workspace.id}/invite`,
+      { email: inviteEmail.trim() },
+      { headers: buildCSRFHeaders() }
+    ));
+    isInviting = false;
+    if (result.success) {
+      inviteEmail = '';
+      router.reload();
     }
   }
 
