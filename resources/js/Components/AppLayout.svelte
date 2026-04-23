@@ -1,5 +1,6 @@
 <script lang="ts">
   import Sidebar from './Sidebar.svelte';
+  import WorkspaceChatWidget from './WorkspaceChatWidget.svelte';
 
   interface NavProject {
     id: string;
@@ -21,6 +22,8 @@
     activeProjectId = '',
     activeWorkspaceId = '',
     unread_count = 0,
+    chat_workspace_id = '',
+    chat_workspace_name = '',
   }: {
     title?: string;
     children: import('svelte').Snippet;
@@ -29,6 +32,8 @@
     activeProjectId?: string;
     activeWorkspaceId?: string;
     unread_count?: number;
+    chat_workspace_id?: string;
+    chat_workspace_name?: string;
   } = $props();
 </script>
 
@@ -43,3 +48,7 @@
     {@render children()}
   </main>
 </div>
+
+{#if chat_workspace_id}
+  <WorkspaceChatWidget workspace_id={chat_workspace_id} workspace_name={chat_workspace_name} />
+{/if}

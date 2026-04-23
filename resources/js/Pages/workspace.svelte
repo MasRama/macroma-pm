@@ -168,7 +168,7 @@
   }
 </script>
 
-<AppLayout title={workspace.name} {nav_workspaces} {nav_projects_standalone} {unread_count} activeWorkspaceId={workspace.id} activeProjectId="">
+<AppLayout title={workspace.name} {nav_workspaces} {nav_projects_standalone} {unread_count} activeWorkspaceId={workspace.id} activeProjectId="" chat_workspace_id={workspace.id} chat_workspace_name={workspace.name}>
   <!-- Aurora blur blobs background -->
   <div class="fixed inset-0 overflow-hidden pointer-events-none -z-10 bg-slate-50 dark:bg-[#020617]">
     <div class="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] rounded-full bg-primary-500/10 blur-[120px] opacity-30 dark:opacity-100"></div>

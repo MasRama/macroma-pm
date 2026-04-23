@@ -27,3 +27,4 @@ export { Workspace, WorkspaceRecord, CreateWorkspaceData, UpdateWorkspaceData } 
 export { WorkspaceMember, WorkspaceMemberRecord, CreateWorkspaceMemberData } from "./WorkspaceMember";
 export { WorkspaceInvitation, WorkspaceInvitationRecord, CreateWorkspaceInvitationData } from "./WorkspaceInvitation";
 export { Notification, NotificationRecord, CreateNotificationData } from "./Notification";
+export { WorkspaceMessage, WorkspaceMessageRecord, CreateWorkspaceMessageData, WorkspaceMessageWithUser } from "./WorkspaceMessage";

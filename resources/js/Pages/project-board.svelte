@@ -16,7 +16,7 @@
   interface TaskRecord { id: string; project_id: string; batch_id: string | null; title: string; description: string | null; priority: 'low' | 'medium' | 'high'; assignee_id: string | null; column_id: 'ongoing' | 'revisi' | 'done'; sort_order: number; version_major: number; version_minor: number; version_patch: number; created_at: number; updated_at: number; }
   interface BatchRecord { id: string; project_id: string; major: number; minor: number; label: string | null; is_active: boolean; version_string: string; }
   interface Member { id: string; project_id: string; user_id: string; role: string; user?: { id: string; name: string | null; email: string; avatar: string | null; } }
-  interface Project { id: string; name: string; description: string | null; owner_id: string; }
+  interface Project { id: string; name: string; description: string | null; owner_id: string; workspace_id: string | null; }
   interface User { id: string; name: string | null; email: string; avatar: string | null; }
 
   let { project, tasks: initialTasks = [], batches = [], activeBatch, members = [], user, nav_workspaces = [], nav_projects_standalone = [], unread_count = 0 }: {
@@ -30,6 +30,11 @@
     nav_projects_standalone: any[];
     unread_count: number;
   } = $props();
+
+  const chatWorkspaceId = project.workspace_id ?? '';
+  const chatWorkspaceName = chatWorkspaceId
+    ? (nav_workspaces.find((w: any) => w.id === chatWorkspaceId)?.name ?? '')
+    : '';
 
   let tasks = $state<TaskRecord[]>([...initialTasks]);
   let selectedBatch = $state<BatchRecord | null>(activeBatch ? { ...activeBatch } : null);
@@ -217,7 +222,7 @@
   ];
 </script>
 
-<AppLayout title={project.name} {nav_workspaces} {nav_projects_standalone} {unread_count} activeProjectId={project.id}>
+<AppLayout title={project.name} {nav_workspaces} {nav_projects_standalone} {unread_count} activeProjectId={project.id} chat_workspace_id={chatWorkspaceId} chat_workspace_name={chatWorkspaceName}>
   <!-- Background decorations -->
   <div class="fixed inset-0 pointer-events-none z-0">
     <div class="absolute top-0 right-0 w-[600px] h-[600px] bg-primary-500/20 dark:bg-primary-500/10 rounded-full blur-3xl -mr-64 -mt-64"></div>

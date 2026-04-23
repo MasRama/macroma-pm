@@ -17,6 +17,7 @@ import BatchController from "@controllers/BatchController";
 import TaskController from "@controllers/TaskController";
 import WorkspaceController from "@controllers/WorkspaceController";
 import WorkspaceInvitationController from "@controllers/WorkspaceInvitationController";
+import WorkspaceChatController from "@controllers/WorkspaceChatController";
 import NotificationController from "@controllers/NotificationController";
 import Auth from "@middlewares/auth";
 import { strictRateLimit } from "@middlewares/rateLimit";
@@ -101,6 +102,9 @@ Route.delete("/workspaces/:id/invitations/:invitationId", [Auth], WorkspaceContr
 Route.delete("/workspaces/:id/members/:userId", [Auth], WorkspaceController.removeMember);
 
 Route.post("/invitations/:token/respond", [Auth], WorkspaceInvitationController.respond);
+
+Route.get("/workspaces/:id/messages", [Auth], WorkspaceChatController.index);
+Route.post("/workspaces/:id/messages", [Auth], WorkspaceChatController.store);
 
 Route.get("/notifications", [Auth], NotificationController.index);
 Route.patch("/notifications/:id/read", [Auth], NotificationController.markRead);
