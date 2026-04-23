@@ -237,6 +237,36 @@ class WorkspaceController extends BaseController {
     return jsonSuccess(res, "Undangan berhasil dikirim");
   }
 
+  async cancelInvite(req: NaraRequest, res: NaraResponse) {
+    this.requireAuth(req);
+
+    const workspaceId = this.getRequiredParam(req, "id");
+    const invitationId = this.getRequiredParam(req, "invitationId");
+
+    const workspace = await Workspace.findById(workspaceId);
+    if (!workspace) {
+      return jsonError(res, "Workspace not found", 404);
+    }
+
+    const isOwner = workspace.owner_id === req.user.id;
+    if (!isOwner) {
+      return jsonError(res, "Forbidden", 403);
+    }
+
+    const invitation = await WorkspaceInvitation.findById(invitationId);
+    if (!invitation || invitation.workspace_id !== workspaceId) {
+      return jsonError(res, "Undangan tidak ditemukan", 404);
+    }
+
+    if (invitation.status !== "pending") {
+      return jsonError(res, "Undangan sudah tidak aktif", 422);
+    }
+
+    await WorkspaceInvitation.delete(invitationId);
+
+    return jsonSuccess(res, "Undangan berhasil dibatalkan");
+  }
+
   async removeMember(req: NaraRequest, res: NaraResponse) {
     this.requireAuth(req);
 

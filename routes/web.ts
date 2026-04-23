@@ -97,6 +97,7 @@ Route.get("/workspaces/:id", [Auth], WorkspaceController.show);
 Route.patch("/workspaces/:id", [Auth], WorkspaceController.update);
 Route.delete("/workspaces/:id", [Auth], WorkspaceController.destroy);
 Route.post("/workspaces/:id/invite", [Auth], WorkspaceController.invite);
+Route.delete("/workspaces/:id/invitations/:invitationId", [Auth], WorkspaceController.cancelInvite);
 Route.delete("/workspaces/:id/members/:userId", [Auth], WorkspaceController.removeMember);
 
 Route.post("/invitations/:token/respond", [Auth], WorkspaceInvitationController.respond);

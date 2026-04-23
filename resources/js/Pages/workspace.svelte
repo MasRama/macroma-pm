@@ -80,6 +80,9 @@
   // Remove Member State
   let removingMemberId = $state<string | null>(null);
 
+  // Cancel Invitation State
+  let cancellingInviteId = $state<string | null>(null);
+
   // Actions
   async function handleCreateProject() {
     if (!newProjectName.trim()) return;
@@ -132,6 +135,17 @@
     removingMemberId = null;
     if (result.success) {
       Toast('Member berhasil dikeluarkan', 'success');
+      router.reload();
+    }
+  }
+
+  async function handleCancelInvite(invitationId: string) {
+    if (!confirm('Yakin ingin membatalkan undangan ini?')) return;
+    cancellingInviteId = invitationId;
+    const result = await api(() => axios.delete(`/workspaces/${workspace.id}/invitations/${invitationId}`, { headers: buildCSRFHeaders() }));
+    cancellingInviteId = null;
+    if (result.success) {
+      Toast('Undangan berhasil dibatalkan', 'success');
       router.reload();
     }
   }
@@ -367,7 +381,7 @@
             
             <ul class="divide-y divide-slate-100 dark:divide-white/[0.05] max-h-[300px] overflow-y-auto">
               {#each invitations as invite (invite.id)}
-                <li class="p-4 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors">
+                <li class="p-4 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors group">
                   <div class="min-w-0 flex-1">
                     <p class="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">{invite.invitee_email}</p>
                     <p class="text-xs text-slate-500 mt-0.5 flex items-center">
@@ -377,9 +391,25 @@
                       Expires {new Date(invite.expires_at).toLocaleDateString()}
                     </p>
                   </div>
-                  <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-slate-100 dark:bg-white/[0.05] text-slate-500 border border-slate-200 dark:border-white/[0.1]">
-                    Pending
-                  </span>
+                  <div class="flex items-center gap-2 pl-2">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-slate-100 dark:bg-white/[0.05] text-slate-500 border border-slate-200 dark:border-white/[0.1]">
+                      Pending
+                    </span>
+                    <button
+                      onclick={() => handleCancelInvite(invite.id)}
+                      disabled={cancellingInviteId === invite.id}
+                      class="p-1.5 text-slate-400 hover:text-danger-500 hover:bg-danger-500/10 rounded-md disabled:opacity-50 transition-colors"
+                      title="Batalkan undangan"
+                    >
+                      {#if cancellingInviteId === invite.id}
+                        <svg class="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                      {:else}
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      {/if}
+                    </button>
+                  </div>
                 </li>
               {/each}
             </ul>

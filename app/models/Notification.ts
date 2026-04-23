@@ -20,6 +20,7 @@ export interface CreateNotificationData {
 
 class NotificationModel extends BaseModel<NotificationRecord> {
   protected tableName = "notifications";
+  protected timestampOptions = { useTimestamps: false, timestampFormat: 'bigint' as const };
 
   async findForUser(userId: string, limit = 20): Promise<NotificationRecord[]> {
     return this.query()
@@ -48,7 +49,8 @@ class NotificationModel extends BaseModel<NotificationRecord> {
       user_id: userId,
       type,
       data: JSON.stringify(data),
-    });
+      created_at: Date.now(),
+    } as any);
   }
 }
 
