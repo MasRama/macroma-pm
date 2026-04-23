@@ -392,28 +392,30 @@
     </div>
   {/if}
 
-  <button
-    onclick={toggleChat}
-    class="fixed bottom-6 right-6 w-14 h-14 rounded-2xl bg-primary-500 hover:bg-primary-600 dark:bg-primary-500 dark:hover:bg-primary-400 text-white shadow-lg shadow-primary-500/30 dark:shadow-primary-500/20 flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 z-[9989] relative"
-    aria-label={isOpen ? 'Tutup chat' : 'Buka workspace chat'}
-    title={isOpen ? 'Tutup chat' : `Chat ${workspace_name}`}
-  >
-    {#if isOpen}
-      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" />
-      </svg>
-    {:else}
-      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-      </svg>
-    {/if}
+  <div class="fixed bottom-6 right-6 z-[9989] relative">
+    <button
+      onclick={toggleChat}
+      class="w-14 h-14 rounded-2xl bg-primary-500 hover:bg-primary-600 dark:bg-primary-500 dark:hover:bg-primary-400 text-white shadow-lg shadow-primary-500/30 dark:shadow-primary-500/20 flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95"
+      aria-label={isOpen ? 'Tutup chat' : 'Buka workspace chat'}
+      title={isOpen ? 'Tutup chat' : `Chat ${workspace_name}`}
+    >
+      {#if isOpen}
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7" />
+        </svg>
+      {:else}
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+        </svg>
+      {/if}
+    </button>
 
     {#if !isOpen && unreadCount > 0}
-      <span class="absolute -top-1.5 -right-1.5 min-w-[20px] h-5 px-1 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-md">
+      <span class="absolute -top-1.5 -right-1.5 min-w-[20px] h-5 px-1 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-md pointer-events-none">
         {unreadCount > 99 ? '99+' : unreadCount}
       </span>
     {/if}
-  </button>
+  </div>
 </div>
 
 <style>
