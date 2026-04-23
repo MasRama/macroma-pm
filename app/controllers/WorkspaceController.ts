@@ -206,6 +206,11 @@ class WorkspaceController extends BaseController {
       return jsonError(res, "User sudah menjadi member workspace ini", 422);
     }
 
+    const invitee = await DB.from("users").where({ email: inviteeEmail }).select("id").first();
+    if (!invitee) {
+      return jsonError(res, "User dengan email tersebut tidak ditemukan", 404);
+    }
+
     const hasPending = await WorkspaceInvitation.hasPendingInvitation(workspaceId, inviteeEmail);
     if (hasPending) {
       return jsonError(res, "Undangan sudah dikirim ke email ini", 422);
@@ -224,17 +229,14 @@ class WorkspaceController extends BaseController {
       expires_at: expiresAt,
     } as any);
 
-    const invitee = await DB.from("users").where({ email: inviteeEmail }).select("id").first();
-    if (invitee) {
-      await Notification.createForUser(invitee.id, "workspace_invitation", {
-        workspace_id: workspaceId,
-        workspace_name: workspace.name,
-        inviter_name: req.user.name || req.user.email,
-        token,
-      });
-    }
+    await Notification.createForUser(invitee.id, "workspace_invitation", {
+      workspace_id: workspaceId,
+      workspace_name: workspace.name,
+      inviter_name: req.user.name || req.user.email,
+      token,
+    });
 
-    return res.redirect(`/workspaces/${workspaceId}`);
+    return jsonSuccess(res, "Undangan berhasil dikirim");
   }
 
   async cancelInvite(req: NaraRequest, res: NaraResponse) {

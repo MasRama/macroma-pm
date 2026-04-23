@@ -113,22 +113,29 @@
     }
   }
 
-  function handleInviteMember(e: Event) {
+  async function handleInviteMember(e: Event) {
     e.preventDefault();
     if (!inviteEmail.trim()) return;
     isInviting = true;
-    router.post(`/workspaces/${workspace.id}/invite`, { email: inviteEmail.trim() }, {
-      headers: buildCSRFHeaders(),
-      onSuccess: () => {
+    try {
+      const res = await fetch(`/workspaces/${workspace.id}/invite`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...buildCSRFHeaders() },
+        body: JSON.stringify({ email: inviteEmail.trim() }),
+      });
+      const data = await res.json();
+      if (res.ok) {
         inviteEmail = '';
-        isInviting = false;
         Toast('Undangan berhasil dikirim!', 'success');
-      },
-      onError: () => {
-        isInviting = false;
-        Toast('Gagal mengirim undangan', 'error');
+        router.reload();
+      } else {
+        Toast(data.message || 'Gagal mengirim undangan', 'error');
       }
-    });
+    } catch {
+      Toast('Gagal mengirim undangan', 'error');
+    } finally {
+      isInviting = false;
+    }
   }
 
   async function handleRemoveMember(memberId: string, userId: string) {
