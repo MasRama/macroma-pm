@@ -134,7 +134,6 @@
     const result = await api(() => axios.delete(`/workspaces/${workspace.id}/members/${userId}`, { headers: buildCSRFHeaders() }));
     removingMemberId = null;
     if (result.success) {
-      Toast('Member berhasil dikeluarkan', 'success');
       router.reload();
     }
   }
@@ -145,7 +144,6 @@
     const result = await api(() => axios.delete(`/workspaces/${workspace.id}/invitations/${invitationId}`, { headers: buildCSRFHeaders() }));
     cancellingInviteId = null;
     if (result.success) {
-      Toast('Undangan berhasil dibatalkan', 'success');
       router.reload();
     }
   }

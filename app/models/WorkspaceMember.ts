@@ -18,6 +18,7 @@ export interface CreateWorkspaceMemberData {
 
 class WorkspaceMemberModel extends BaseModel<WorkspaceMemberRecord> {
   protected tableName = "workspace_members";
+  protected timestampOptions = { useTimestamps: false };
 
   async isMember(workspaceId: string, userId: string): Promise<boolean> {
     const record = await this.query().where({ workspace_id: workspaceId, user_id: userId }).first();

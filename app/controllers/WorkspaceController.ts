@@ -234,7 +234,7 @@ class WorkspaceController extends BaseController {
       });
     }
 
-    return jsonSuccess(res, "Undangan berhasil dikirim");
+    return res.redirect(`/workspaces/${workspaceId}`);
   }
 
   async cancelInvite(req: NaraRequest, res: NaraResponse) {
@@ -263,6 +263,14 @@ class WorkspaceController extends BaseController {
     }
 
     await WorkspaceInvitation.delete(invitationId);
+
+    const invitee = await DB.from("users").where({ email: invitation.invitee_email }).select("id").first();
+    if (invitee) {
+      await DB.from("notifications")
+        .where({ user_id: invitee.id, type: "workspace_invitation" })
+        .whereRaw(`json_extract(data, '$.token') = ?`, [invitation.token])
+        .delete();
+    }
 
     return jsonSuccess(res, "Undangan berhasil dibatalkan");
   }

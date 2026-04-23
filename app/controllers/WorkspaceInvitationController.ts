@@ -43,7 +43,7 @@ class WorkspaceInvitationController extends BaseController {
     await DB.from("notifications")
       .where({ user_id: req.user.id, type: "workspace_invitation" })
       .whereRaw(`json_extract(data, '$.token') = ?`, [token])
-      .update({ is_read: true });
+      .delete();
 
     if (body.action === "accept") {
       const alreadyMember = await WorkspaceMember.isMember(invitation.workspace_id, req.user.id);
@@ -53,11 +53,25 @@ class WorkspaceInvitationController extends BaseController {
           workspace_id: invitation.workspace_id,
           user_id: req.user.id,
           role: "member",
+          created_at: Date.now(),
         } as any);
       }
 
+      const projects = await DB.from("projects").where({ workspace_id: invitation.workspace_id }).select("id");
+      for (const project of projects) {
+        const isProjectMember = await DB.from("project_members").where({ project_id: project.id, user_id: req.user.id }).first();
+        if (!isProjectMember) {
+          await DB.table("project_members").insert({
+            id: crypto.randomUUID(),
+            project_id: project.id,
+            user_id: req.user.id,
+            role: "member",
+            created_at: Date.now(),
+          });
+        }
+      }
+
       const workspace = await Workspace.findById(invitation.workspace_id);
-      const inviter = await DB.from("users").where({ id: invitation.inviter_id }).select("name", "email").first();
 
       await Notification.createForUser(invitation.inviter_id, "invitation_accepted", {
         workspace_id: invitation.workspace_id,

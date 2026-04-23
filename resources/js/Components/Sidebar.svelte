@@ -1,7 +1,9 @@
 <script lang="ts">
-  import { inertia, page as inertiaPage } from '@inertiajs/svelte';
+  import { inertia, page as inertiaPage, router } from '@inertiajs/svelte';
+  import { fly } from 'svelte/transition';
   import DarkModeToggle from './DarkModeToggle.svelte';
   import NotificationDropdown from './NotificationDropdown.svelte';
+  import { buildCSRFHeaders, clickOutside } from './helper';
 
   interface NavProject {
     id: string;
@@ -54,6 +56,17 @@
   }
 
   let expandedWorkspaces = $state<Set<string>>(buildInitialExpanded());
+  let showUserMenu = $state(false);
+  let profileBtnEl = $state<HTMLElement | null>(null);
+  let menuPos = $state({ top: 0, left: 0, width: 0 });
+
+  function toggleUserMenu() {
+    if (!showUserMenu && profileBtnEl) {
+      const rect = profileBtnEl.getBoundingClientRect();
+      menuPos = { top: rect.top - 8, left: rect.left, width: rect.width };
+    }
+    showUserMenu = !showUserMenu;
+  }
 
   function toggleWorkspace(id: string) {
     const next = new Set(expandedWorkspaces);
@@ -63,6 +76,13 @@
       next.add(id);
     }
     expandedWorkspaces = next;
+  }
+
+  function handleLogout() {
+    showUserMenu = false;
+    router.post('/logout', {}, {
+      headers: buildCSRFHeaders()
+    });
   }
 </script>
 
@@ -188,20 +208,45 @@
       New Project
     </a>
 
-    <div class="flex items-center gap-3 px-2">
-      <div class="w-8 h-8 rounded-full bg-slate-200 dark:bg-white/5 text-slate-600 dark:text-slate-300 flex items-center justify-center font-bold text-xs border border-slate-300 dark:border-white/10 shrink-0">
-        {(($inertiaPage.props.user as any)?.name || ($inertiaPage.props.user as any)?.email || 'U')[0].toUpperCase()}
-      </div>
-      <div class="flex-1 min-w-0">
-        <p class="text-sm font-medium text-slate-700 dark:text-slate-300 truncate">
-          {($inertiaPage.props.user as any)?.name || ($inertiaPage.props.user as any)?.email || 'User'}
-        </p>
-      </div>
+    <div class="flex items-center gap-3 px-2 relative" use:clickOutside onclick_outside={() => showUserMenu = false}>
+      <button
+        bind:this={profileBtnEl}
+        onclick={toggleUserMenu}
+        class="flex items-center gap-3 flex-1 min-w-0 rounded-lg py-1 px-1 -ml-1 hover:bg-slate-100 dark:hover:bg-white/[0.05] transition-colors"
+      >
+        <div class="w-8 h-8 rounded-full bg-slate-200 dark:bg-white/5 text-slate-600 dark:text-slate-300 flex items-center justify-center font-bold text-xs border border-slate-300 dark:border-white/10 shrink-0">
+          {(($inertiaPage.props.user as any)?.name || ($inertiaPage.props.user as any)?.email || 'U')[0].toUpperCase()}
+        </div>
+        <div class="flex-1 min-w-0 text-left">
+          <p class="text-sm font-medium text-slate-700 dark:text-slate-300 truncate">
+            {($inertiaPage.props.user as any)?.name || ($inertiaPage.props.user as any)?.email || 'User'}
+          </p>
+        </div>
+      </button>
 
       <NotificationDropdown {unread_count} />
 
       <DarkModeToggle />
     </div>
+
+    {#if showUserMenu}
+      <div
+        use:clickOutside onclick_outside={() => showUserMenu = false}
+        transition:fly={{ y: 8, duration: 150 }}
+        class="fixed z-[9999] bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 rounded-xl shadow-lg overflow-hidden"
+        style="bottom: {window.innerHeight - menuPos.top}px; left: {menuPos.left}px; width: {menuPos.width}px;"
+      >
+        <button
+          onclick={handleLogout}
+          class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors w-full text-left"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+          </svg>
+          Logout
+        </button>
+      </div>
+    {/if}
   </div>
 </aside>
 

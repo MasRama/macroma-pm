@@ -280,30 +280,38 @@
   </header>
 
   <!-- Kanban Board — 3 columns with DnD -->
-  <div class="relative z-10 grid grid-cols-3 gap-5 p-8 min-h-[calc(100vh-80px)]">
+  <div class="relative z-10 grid grid-cols-3 gap-6 p-8 h-[calc(100vh-80px)]">
     {#each COLUMNS as col}
       {@const colTasks = col.ref()}
-      {@const bgClass = col.color === 'blue' ? 'bg-blue-50 border-blue-200 dark:bg-blue-500/[0.08] dark:border-blue-500/20' : col.color === 'orange' ? 'bg-orange-50 border-orange-200 dark:bg-orange-500/[0.08] dark:border-orange-500/20' : 'bg-emerald-50 border-emerald-200 dark:bg-emerald-500/[0.08] dark:border-emerald-500/20'}
-      {@const textClass = col.color === 'blue' ? 'text-blue-400' : col.color === 'orange' ? 'text-orange-400' : 'text-emerald-400'}
-      {@const badgeClass = col.color === 'blue' ? 'bg-blue-500/20 text-blue-300' : col.color === 'orange' ? 'bg-orange-500/20 text-orange-300' : 'bg-emerald-500/20 text-emerald-300'}
-      {@const addBtnClass = col.color === 'blue' ? 'border-blue-500/20 hover:border-blue-400/50 hover:text-blue-400' : col.color === 'orange' ? 'border-orange-500/20 hover:border-orange-400/50 hover:text-orange-400' : 'border-emerald-500/20 hover:border-emerald-400/50 hover:text-emerald-400'}
-      
-      <div data-testid="kanban-column-{col.id}" class="flex flex-col gap-3 backdrop-blur-sm border rounded-xl p-4 {bgClass}">
-        <!-- Column header -->
-        <div class="flex items-center justify-between mb-2">
-          <h3 class="text-sm font-semibold uppercase tracking-wider {textClass}">{col.name}</h3>
-          <span class="text-xs px-2 py-0.5 rounded-full {badgeClass}">{colTasks.length}</span>
+      {@const bgClass = col.color === 'blue' ? 'bg-blue-50/80 border-blue-200/60 dark:bg-blue-500/[0.06] dark:border-blue-500/15' : col.color === 'orange' ? 'bg-orange-50/80 border-orange-200/60 dark:bg-orange-500/[0.06] dark:border-orange-500/15' : 'bg-emerald-50/80 border-emerald-200/60 dark:bg-emerald-500/[0.06] dark:border-emerald-500/15'}
+      {@const headerBg = col.color === 'blue' ? 'from-blue-500/[0.07] to-transparent dark:from-blue-500/[0.12]' : col.color === 'orange' ? 'from-orange-500/[0.07] to-transparent dark:from-orange-500/[0.12]' : 'from-emerald-500/[0.07] to-transparent dark:from-emerald-500/[0.12]'}
+      {@const dotClass = col.color === 'blue' ? 'bg-blue-500 dark:bg-blue-400' : col.color === 'orange' ? 'bg-orange-500 dark:bg-orange-400' : 'bg-emerald-500 dark:bg-emerald-400'}
+      {@const textClass = col.color === 'blue' ? 'text-blue-600 dark:text-blue-400' : col.color === 'orange' ? 'text-orange-600 dark:text-orange-400' : 'text-emerald-600 dark:text-emerald-400'}
+      {@const badgeClass = col.color === 'blue' ? 'bg-blue-500/15 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300' : col.color === 'orange' ? 'bg-orange-500/15 text-orange-700 dark:bg-orange-500/20 dark:text-orange-300' : 'bg-emerald-500/15 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300'}
+      {@const addBtnClass = col.color === 'blue' ? 'border-blue-300/40 hover:border-blue-400/60 hover:text-blue-500 hover:bg-blue-50/50 dark:border-blue-500/20 dark:hover:border-blue-400/50 dark:hover:text-blue-400 dark:hover:bg-blue-500/[0.06]' : col.color === 'orange' ? 'border-orange-300/40 hover:border-orange-400/60 hover:text-orange-500 hover:bg-orange-50/50 dark:border-orange-500/20 dark:hover:border-orange-400/50 dark:hover:text-orange-400 dark:hover:bg-orange-500/[0.06]' : 'border-emerald-300/40 hover:border-emerald-400/60 hover:text-emerald-500 hover:bg-emerald-50/50 dark:border-emerald-500/20 dark:hover:border-emerald-400/50 dark:hover:text-emerald-400 dark:hover:bg-emerald-500/[0.06]'}
+      {@const shadowClass = col.color === 'blue' ? 'shadow-blue-500/[0.04] dark:shadow-blue-500/[0.06]' : col.color === 'orange' ? 'shadow-orange-500/[0.04] dark:shadow-orange-500/[0.06]' : 'shadow-emerald-500/[0.04] dark:shadow-emerald-500/[0.06]'}
+
+      <div data-testid="kanban-column-{col.id}" class="flex flex-col h-full backdrop-blur-md border rounded-2xl overflow-hidden shadow-lg {bgClass} {shadowClass} transition-shadow duration-300 hover:shadow-xl">
+        <!-- Column header — pinned at top -->
+        <div class="shrink-0 px-5 pt-4 pb-3 bg-gradient-to-b {headerBg} border-b border-black/[0.04] dark:border-white/[0.04]">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+              <span class="w-2.5 h-2.5 rounded-full {dotClass} shadow-sm ring-2 ring-white/50 dark:ring-white/10"></span>
+              <h3 class="text-xs font-bold uppercase tracking-widest {textClass}">{col.name}</h3>
+            </div>
+            <span class="text-[10px] font-bold px-2.5 py-1 rounded-full {badgeClass}">{colTasks.length}</span>
+          </div>
         </div>
 
-        <!-- DnD container -->
+        <!-- DnD container — scrollable area -->
         <div
-          class="flex flex-col gap-3 flex-1 min-h-[60px]"
+          class="flex-1 overflow-y-auto scroll-smooth min-h-0 p-3 flex flex-col gap-2.5 kanban-scroll"
           use:dndzone={{ items: colTasks, flipDurationMs: 150, type: 'tasks' }}
           onconsider={(e) => handleDndConsider(col.id, e)}
           onfinalize={(e) => handleDndFinalize(col.id, e)}
         >
           {#each colTasks as task (task.id)}
-            <div data-testid="task-card-{task.id}" animate:flip={{ duration: 150 }}>
+            <div data-testid="task-card-{task.id}" animate:flip={{ duration: 150 }} class="transition-transform duration-150 hover:scale-[1.01]">
               <TaskCard
                 {task}
                 assignee={getAssignee(task.assignee_id)}
@@ -314,16 +322,28 @@
           {/each}
         </div>
 
-        <!-- Add task shortcut -->
-        <button
-          onclick={() => { addTaskColumn = col.id; showAddTask = true; }}
-          class="w-full mt-1 py-2 text-xs text-slate-500 border border-dashed rounded-lg transition-all {addBtnClass}"
-        >
-          + Add Task
-        </button>
+        <!-- Add task button — pinned at bottom -->
+        <div class="shrink-0 px-3 pb-3 pt-1">
+          <button
+            onclick={() => { addTaskColumn = col.id; showAddTask = true; }}
+            class="w-full py-2.5 text-xs font-medium text-slate-400 border border-dashed rounded-xl transition-all duration-200 {addBtnClass}"
+          >
+            + Add Task
+          </button>
+        </div>
       </div>
     {/each}
   </div>
+
+  <!-- Custom scrollbar styling for Kanban columns -->
+  <style>
+    .kanban-scroll::-webkit-scrollbar { width: 5px; }
+    .kanban-scroll::-webkit-scrollbar-track { background: transparent; }
+    .kanban-scroll::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.25); border-radius: 10px; }
+    .kanban-scroll::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, 0.4); }
+    :global(.dark) .kanban-scroll::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); }
+    :global(.dark) .kanban-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
+  </style>
 
   <!-- Modals -->
   {#if showAddTask}
