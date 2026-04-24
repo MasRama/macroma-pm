@@ -9,7 +9,7 @@ export interface TaskRecord extends BaseRecord {
   description: string | null;
   priority: "low" | "medium" | "high";
   assignee_id: string | null;
-  column_id: "ongoing" | "revisi" | "done";
+  column_id: "backlog" | "ongoing" | "revisi" | "done";
   sort_order: number;
   version_major: number;
   version_minor: number;

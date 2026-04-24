@@ -9,7 +9,7 @@ export async function up(knex: Knex): Promise<void> {
     table.text('description').nullable()
     table.string('priority', 20).notNullable().defaultTo('medium')
     table.uuid('assignee_id').references('id').inTable('users').onDelete('SET NULL').nullable()
-    table.string('column_id', 50).notNullable().defaultTo('ongoing')
+    table.string('column_id', 50).notNullable().defaultTo('backlog')
     table.integer('sort_order').notNullable().defaultTo(0)
     table.integer('version_major').notNullable().defaultTo(0)
     table.integer('version_minor').notNullable().defaultTo(1)

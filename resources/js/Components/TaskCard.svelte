@@ -29,7 +29,7 @@
   }: {
     task: TaskRecord;
     assignee?: UserRecord;
-    columnColor?: 'blue' | 'orange' | 'emerald';
+    columnColor?: 'slate' | 'blue' | 'orange' | 'emerald';
     onAddLog?: (task: TaskRecord) => void;
     onOpenDetail?: (task: TaskRecord) => void;
   } = $props();
@@ -41,12 +41,14 @@
   );
 
   let themeClasses = $derived(
+    columnColor === 'slate' ? 'bg-white dark:bg-slate-950/40 border-l-2 border-l-slate-400 border border-slate-200 hover:border-slate-300 dark:border-slate-500/30 dark:hover:border-slate-400/50' :
     columnColor === 'blue' ? 'bg-white dark:bg-blue-950/40 border-l-2 border-l-blue-400 border border-blue-200 hover:border-blue-300 dark:border-blue-500/30 dark:hover:border-blue-400/50' :
     columnColor === 'orange' ? 'bg-white dark:bg-orange-950/40 border-l-2 border-l-orange-400 border border-orange-200 hover:border-orange-300 dark:border-orange-500/30 dark:hover:border-orange-400/50' :
     'bg-white dark:bg-emerald-950/40 border-l-2 border-l-emerald-400 border border-emerald-200 hover:border-emerald-300 dark:border-emerald-500/30 dark:hover:border-emerald-400/50'
   );
 
   let btnColorClass = $derived(
+    columnColor === 'slate' ? 'hover:text-slate-500 dark:hover:text-slate-300' :
     columnColor === 'blue' ? 'hover:text-blue-400' :
     columnColor === 'orange' ? 'hover:text-orange-400' :
     'hover:text-emerald-400'

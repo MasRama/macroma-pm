@@ -139,7 +139,7 @@
           </div>
           <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-5 relative z-10 group-hover:text-primary-500 dark:group-hover:text-primary-400 transition-colors duration-300 tracking-tight">Kanban Board</h3>
           <p class="text-slate-500 dark:text-slate-400 leading-relaxed relative z-10 flex-grow font-light">
-            Visualisasi alur kerja dengan 3 kolom utama: On Going, Revisi, dan Done. Drag-and-drop task antar kolom dengan memuaskan.
+            Visualisasi alur kerja dengan 4 kolom utama: Backlog, On Going, Revisi, dan Done. Drag-and-drop task antar kolom dengan memuaskan.
           </p>
         </div>
 

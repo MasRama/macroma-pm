@@ -72,6 +72,7 @@ class DashboardController extends BaseController {
       stats: {
         workspace_count: workspaces.length,
         project_count: allProjects.length,
+        task_backlog: taskCounts["backlog"] ?? 0,
         task_ongoing: taskCounts["ongoing"] ?? 0,
         task_revisi: taskCounts["revisi"] ?? 0,
         task_done: taskCounts["done"] ?? 0,

@@ -13,7 +13,7 @@
   import { buildCSRFHeaders, Toast, api } from '../Components/helper';
   import axios from 'axios';
 
-  interface TaskRecord { id: string; project_id: string; batch_id: string | null; title: string; description: string | null; priority: 'low' | 'medium' | 'high'; assignee_id: string | null; column_id: 'ongoing' | 'revisi' | 'done'; sort_order: number; version_major: number; version_minor: number; version_patch: number; created_at: number; updated_at: number; }
+  interface TaskRecord { id: string; project_id: string; batch_id: string | null; title: string; description: string | null; priority: 'low' | 'medium' | 'high'; assignee_id: string | null; column_id: 'backlog' | 'ongoing' | 'revisi' | 'done'; sort_order: number; version_major: number; version_minor: number; version_patch: number; created_at: number; updated_at: number; }
   interface BatchRecord { id: string; project_id: string; major: number; minor: number; label: string | null; is_active: boolean; version_string: string; }
   interface Member { id: string; project_id: string; user_id: string; role: string; user?: { id: string; name: string | null; email: string; avatar: string | null; } }
   interface Project { id: string; name: string; description: string | null; owner_id: string; workspace_id: string | null; }
@@ -39,7 +39,7 @@
   let tasks = $state<TaskRecord[]>([...initialTasks]);
   let selectedBatch = $state<BatchRecord | null>(activeBatch ? { ...activeBatch } : null);
   let showAddTask = $state(false);
-  let addTaskColumn = $state<string>('ongoing');
+  let addTaskColumn = $state<string>('backlog');
 
   // Sync tasks when Inertia navigates back to this page (e.g. after create task redirect)
   $effect(() => {
@@ -91,6 +91,9 @@
     }
   }
 
+  type KanbanColumn = 'backlog' | 'ongoing' | 'revisi' | 'done';
+
+  let backlogTasks = $state<TaskRecord[]>([]);
   let ongoingTasks = $state<TaskRecord[]>([]);
   let revisiTasks = $state<TaskRecord[]>([]);
   let doneTasks = $state<TaskRecord[]>([]);
@@ -99,35 +102,36 @@
     const filtered = selectedBatch 
       ? tasks.filter(t => t.batch_id === selectedBatch!.id)
       : tasks;
+    backlogTasks = filtered.filter(t => t.column_id === 'backlog').sort((a,b) => a.sort_order - b.sort_order);
     ongoingTasks = filtered.filter(t => t.column_id === 'ongoing').sort((a,b) => a.sort_order - b.sort_order);
     revisiTasks = filtered.filter(t => t.column_id === 'revisi').sort((a,b) => a.sort_order - b.sort_order);
     doneTasks = filtered.filter(t => t.column_id === 'done').sort((a,b) => a.sort_order - b.sort_order);
   });
 
-  function handleDndConsider(columnId: 'ongoing' | 'revisi' | 'done', e: CustomEvent<{ items: TaskRecord[] }>) {
-    if (columnId === 'ongoing') ongoingTasks = e.detail.items;
-    else if (columnId === 'revisi') revisiTasks = e.detail.items;
-    else if (columnId === 'done') doneTasks = e.detail.items;
+  function setColumnItems(columnId: KanbanColumn, items: TaskRecord[]) {
+    if (columnId === 'backlog') backlogTasks = items;
+    else if (columnId === 'ongoing') ongoingTasks = items;
+    else if (columnId === 'revisi') revisiTasks = items;
+    else if (columnId === 'done') doneTasks = items;
   }
 
-  function handleDndFinalize(columnId: 'ongoing' | 'revisi' | 'done', e: CustomEvent<{ items: TaskRecord[]; info: { id: string; source?: string } }>) {
+  function handleDndConsider(columnId: KanbanColumn, e: CustomEvent<{ items: TaskRecord[] }>) {
+    setColumnItems(columnId, e.detail.items);
+  }
+
+  function handleDndFinalize(columnId: KanbanColumn, e: CustomEvent<{ items: TaskRecord[]; info: { id: string; source?: string } }>) {
     const movedId = e.detail.info.id;
     const movedTask = tasks.find(t => t.id === movedId);
     if (!movedTask) return;
 
-    if (movedTask.column_id !== columnId) {
-      // Column changed — intercept, restore, show modal
-      if (columnId === 'ongoing') ongoingTasks = e.detail.items;
-      else if (columnId === 'revisi') revisiTasks = e.detail.items;
-      else if (columnId === 'done') doneTasks = e.detail.items;
+    setColumnItems(columnId, e.detail.items);
 
+    if (movedTask.column_id !== columnId) {
+      // Column changed — intercept, show modal (items already applied optimistically)
       pendingMove = { taskId: movedId, fromColumn: movedTask.column_id, toColumn: columnId, items: e.detail.items };
       moveModalTask = movedTask;
     } else {
       // Same column reorder — just update sort_order silently
-      if (columnId === 'ongoing') ongoingTasks = e.detail.items;
-      else if (columnId === 'revisi') revisiTasks = e.detail.items;
-      else if (columnId === 'done') doneTasks = e.detail.items;
       updateSortOrder(e.detail.items, columnId);
     }
   }
@@ -164,6 +168,7 @@
   function cancelMove() {
     // Restore columns from tasks state
     const filtered = selectedBatch ? tasks.filter(t => t.batch_id === selectedBatch!.id) : tasks;
+    backlogTasks = filtered.filter(t => t.column_id === 'backlog').sort((a,b) => a.sort_order - b.sort_order);
     ongoingTasks = filtered.filter(t => t.column_id === 'ongoing').sort((a,b) => a.sort_order - b.sort_order);
     revisiTasks = filtered.filter(t => t.column_id === 'revisi').sort((a,b) => a.sort_order - b.sort_order);
     doneTasks = filtered.filter(t => t.column_id === 'done').sort((a,b) => a.sort_order - b.sort_order);
@@ -216,6 +221,7 @@
   }
 
   const COLUMNS = [
+    { id: 'backlog' as const, name: 'Backlog', ref: () => backlogTasks, color: 'slate' as const },
     { id: 'ongoing' as const, name: 'On Going', ref: () => ongoingTasks, color: 'blue' as const },
     { id: 'revisi' as const, name: 'Revisi', ref: () => revisiTasks, color: 'orange' as const },
     { id: 'done' as const, name: 'Done', ref: () => doneTasks, color: 'emerald' as const },
@@ -305,7 +311,7 @@
       <!-- Add Task button -->
       <button 
         data-testid="add-task-btn-header"
-        onclick={() => { addTaskColumn = 'ongoing'; showAddTask = true; }}
+        onclick={() => { addTaskColumn = 'backlog'; showAddTask = true; }}
         class="flex items-center gap-2 bg-primary-500 hover:bg-primary-600 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
       >
         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
@@ -314,17 +320,17 @@
     </div>
   </header>
 
-  <!-- Kanban Board — 3 columns with DnD -->
-  <div class="relative z-10 grid grid-cols-3 gap-6 p-8 h-[calc(100vh-80px)]">
+  <!-- Kanban Board — 4 columns with DnD -->
+  <div class="relative z-10 grid grid-cols-4 gap-5 p-6 h-[calc(100vh-80px)]">
     {#each COLUMNS as col}
       {@const colTasks = col.ref()}
-      {@const bgClass = col.color === 'blue' ? 'bg-blue-50/80 border-blue-200/60 dark:bg-blue-500/[0.06] dark:border-blue-500/15' : col.color === 'orange' ? 'bg-orange-50/80 border-orange-200/60 dark:bg-orange-500/[0.06] dark:border-orange-500/15' : 'bg-emerald-50/80 border-emerald-200/60 dark:bg-emerald-500/[0.06] dark:border-emerald-500/15'}
-      {@const headerBg = col.color === 'blue' ? 'from-blue-500/[0.07] to-transparent dark:from-blue-500/[0.12]' : col.color === 'orange' ? 'from-orange-500/[0.07] to-transparent dark:from-orange-500/[0.12]' : 'from-emerald-500/[0.07] to-transparent dark:from-emerald-500/[0.12]'}
-      {@const dotClass = col.color === 'blue' ? 'bg-blue-500 dark:bg-blue-400' : col.color === 'orange' ? 'bg-orange-500 dark:bg-orange-400' : 'bg-emerald-500 dark:bg-emerald-400'}
-      {@const textClass = col.color === 'blue' ? 'text-blue-600 dark:text-blue-400' : col.color === 'orange' ? 'text-orange-600 dark:text-orange-400' : 'text-emerald-600 dark:text-emerald-400'}
-      {@const badgeClass = col.color === 'blue' ? 'bg-blue-500/15 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300' : col.color === 'orange' ? 'bg-orange-500/15 text-orange-700 dark:bg-orange-500/20 dark:text-orange-300' : 'bg-emerald-500/15 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300'}
-      {@const addBtnClass = col.color === 'blue' ? 'border-blue-300/40 hover:border-blue-400/60 hover:text-blue-500 hover:bg-blue-50/50 dark:border-blue-500/20 dark:hover:border-blue-400/50 dark:hover:text-blue-400 dark:hover:bg-blue-500/[0.06]' : col.color === 'orange' ? 'border-orange-300/40 hover:border-orange-400/60 hover:text-orange-500 hover:bg-orange-50/50 dark:border-orange-500/20 dark:hover:border-orange-400/50 dark:hover:text-orange-400 dark:hover:bg-orange-500/[0.06]' : 'border-emerald-300/40 hover:border-emerald-400/60 hover:text-emerald-500 hover:bg-emerald-50/50 dark:border-emerald-500/20 dark:hover:border-emerald-400/50 dark:hover:text-emerald-400 dark:hover:bg-emerald-500/[0.06]'}
-      {@const shadowClass = col.color === 'blue' ? 'shadow-blue-500/[0.04] dark:shadow-blue-500/[0.06]' : col.color === 'orange' ? 'shadow-orange-500/[0.04] dark:shadow-orange-500/[0.06]' : 'shadow-emerald-500/[0.04] dark:shadow-emerald-500/[0.06]'}
+      {@const bgClass = col.color === 'slate' ? 'bg-slate-50/80 border-slate-200/60 dark:bg-slate-500/[0.06] dark:border-slate-500/15' : col.color === 'blue' ? 'bg-blue-50/80 border-blue-200/60 dark:bg-blue-500/[0.06] dark:border-blue-500/15' : col.color === 'orange' ? 'bg-orange-50/80 border-orange-200/60 dark:bg-orange-500/[0.06] dark:border-orange-500/15' : 'bg-emerald-50/80 border-emerald-200/60 dark:bg-emerald-500/[0.06] dark:border-emerald-500/15'}
+      {@const headerBg = col.color === 'slate' ? 'from-slate-500/[0.07] to-transparent dark:from-slate-500/[0.12]' : col.color === 'blue' ? 'from-blue-500/[0.07] to-transparent dark:from-blue-500/[0.12]' : col.color === 'orange' ? 'from-orange-500/[0.07] to-transparent dark:from-orange-500/[0.12]' : 'from-emerald-500/[0.07] to-transparent dark:from-emerald-500/[0.12]'}
+      {@const dotClass = col.color === 'slate' ? 'bg-slate-500 dark:bg-slate-400' : col.color === 'blue' ? 'bg-blue-500 dark:bg-blue-400' : col.color === 'orange' ? 'bg-orange-500 dark:bg-orange-400' : 'bg-emerald-500 dark:bg-emerald-400'}
+      {@const textClass = col.color === 'slate' ? 'text-slate-600 dark:text-slate-400' : col.color === 'blue' ? 'text-blue-600 dark:text-blue-400' : col.color === 'orange' ? 'text-orange-600 dark:text-orange-400' : 'text-emerald-600 dark:text-emerald-400'}
+      {@const badgeClass = col.color === 'slate' ? 'bg-slate-500/15 text-slate-700 dark:bg-slate-500/20 dark:text-slate-300' : col.color === 'blue' ? 'bg-blue-500/15 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300' : col.color === 'orange' ? 'bg-orange-500/15 text-orange-700 dark:bg-orange-500/20 dark:text-orange-300' : 'bg-emerald-500/15 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300'}
+      {@const addBtnClass = col.color === 'slate' ? 'border-slate-300/40 hover:border-slate-400/60 hover:text-slate-600 hover:bg-slate-100/50 dark:border-slate-500/20 dark:hover:border-slate-400/50 dark:hover:text-slate-300 dark:hover:bg-slate-500/[0.06]' : col.color === 'blue' ? 'border-blue-300/40 hover:border-blue-400/60 hover:text-blue-500 hover:bg-blue-50/50 dark:border-blue-500/20 dark:hover:border-blue-400/50 dark:hover:text-blue-400 dark:hover:bg-blue-500/[0.06]' : col.color === 'orange' ? 'border-orange-300/40 hover:border-orange-400/60 hover:text-orange-500 hover:bg-orange-50/50 dark:border-orange-500/20 dark:hover:border-orange-400/50 dark:hover:text-orange-400 dark:hover:bg-orange-500/[0.06]' : 'border-emerald-300/40 hover:border-emerald-400/60 hover:text-emerald-500 hover:bg-emerald-50/50 dark:border-emerald-500/20 dark:hover:border-emerald-400/50 dark:hover:text-emerald-400 dark:hover:bg-emerald-500/[0.06]'}
+      {@const shadowClass = col.color === 'slate' ? 'shadow-slate-500/[0.04] dark:shadow-slate-500/[0.06]' : col.color === 'blue' ? 'shadow-blue-500/[0.04] dark:shadow-blue-500/[0.06]' : col.color === 'orange' ? 'shadow-orange-500/[0.04] dark:shadow-orange-500/[0.06]' : 'shadow-emerald-500/[0.04] dark:shadow-emerald-500/[0.06]'}
 
       <div data-testid="kanban-column-{col.id}" class="flex flex-col h-full backdrop-blur-md border rounded-2xl overflow-hidden shadow-lg {bgClass} {shadowClass} transition-shadow duration-300 hover:shadow-xl">
         <!-- Column header — pinned at top -->

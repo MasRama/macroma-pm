@@ -11,7 +11,7 @@
     description: string | null;
     owner_id: string;
     active_batch_label: string | null;
-    task_counts: { ongoing: number; revisi: number; done: number };
+    task_counts: { backlog: number; ongoing: number; revisi: number; done: number };
     member_count: number;
     created_at: number;
     updated_at: number;
@@ -173,6 +173,10 @@
               <div class="mt-auto space-y-5">
                 <!-- Task Stats -->
                 <div class="flex flex-wrap gap-2">
+                  <div class="flex items-center space-x-1.5 bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.05] px-2 py-1 rounded-lg" title="Backlog Tasks">
+                    <div class="w-1.5 h-1.5 rounded-full bg-slate-400 shadow-[0_0_8px_rgba(148,163,184,0.6)]"></div>
+                    <span class="text-xs text-slate-700 dark:text-slate-300 font-medium">{project.task_counts.backlog}</span>
+                  </div>
                   <div class="flex items-center space-x-1.5 bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.05] px-2 py-1 rounded-lg" title="Ongoing Tasks">
                     <div class="w-1.5 h-1.5 rounded-full bg-blue-400 shadow-[0_0_8px_rgba(96,165,250,0.6)]"></div>
                     <span class="text-xs text-slate-700 dark:text-slate-300 font-medium">{project.task_counts.ongoing}</span>

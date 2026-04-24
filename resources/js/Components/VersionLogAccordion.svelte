@@ -30,6 +30,7 @@
   }
 
   const columnNames: Record<string, string> = { 
+    backlog: 'Backlog',
     ongoing: 'On Going', 
     revisi: 'Revisi', 
     done: 'Done' 

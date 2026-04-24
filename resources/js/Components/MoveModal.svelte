@@ -26,6 +26,7 @@
   let canSubmit = $derived(note.trim().length > 0);
 
   const columnNames: Record<string, string> = {
+    backlog: 'Backlog',
     ongoing: 'On Going',
     revisi: 'Revisi',
     done: 'Done',

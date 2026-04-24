@@ -10,7 +10,7 @@ import { ProjectMember, ProjectBatch, Task, TaskLog, taskVersionString, ProjectV
 import DB from "@services/DB";
 import { logActivity } from "@helpers/activity";
 
-const VALID_COLUMNS = ["ongoing", "revisi", "done"] as const;
+const VALID_COLUMNS = ["backlog", "ongoing", "revisi", "done"] as const;
 type ColumnId = typeof VALID_COLUMNS[number];
 
 function isValidColumn(value: string): value is ColumnId {
@@ -60,7 +60,7 @@ class TaskController extends BaseController {
       ? await ProjectBatch.findById(body.batch_id)
       : await ProjectBatch.findActive(projectId);
 
-    const maxSortOrder = await Task.getMaxSortOrder(projectId, "ongoing");
+    const maxSortOrder = await Task.getMaxSortOrder(projectId, "backlog");
 
     try {
       const taskId = crypto.randomUUID();
@@ -79,7 +79,7 @@ class TaskController extends BaseController {
           description: body.description ? String(body.description).trim() : null,
           priority,
           assignee_id: body.assignee_id || null,
-          column_id: "ongoing",
+          column_id: "backlog",
           sort_order: maxSortOrder + 1,
           version_major: ver.major,
           version_minor: ver.minor,
@@ -93,7 +93,7 @@ class TaskController extends BaseController {
           task_id: taskId,
           version: newVersion,
           column_from: null,
-          column_to: "ongoing",
+          column_to: "backlog",
           note: "Tugas dibuat",
           created_by: req.user.id,
           created_at: now,
@@ -138,7 +138,7 @@ class TaskController extends BaseController {
     }
 
     if (!body.column_id || !isValidColumn(body.column_id)) {
-      return jsonError(res, "column_id must be one of: ongoing, revisi, done", 422);
+      return jsonError(res, "column_id must be one of: backlog, ongoing, revisi, done", 422);
     }
 
     if (body.column_id === task.column_id) {
@@ -187,7 +187,7 @@ class TaskController extends BaseController {
       updatedTask = await Task.findById(taskId);
       log = await TaskLog.findBy({ task_id: taskId, version: newVersion! });
 
-      const columnNames: Record<string, string> = { ongoing: "On Going", revisi: "Revisi", done: "Done" };
+      const columnNames: Record<string, string> = { backlog: "Backlog", ongoing: "On Going", revisi: "Revisi", done: "Done" };
       await logActivity({
         projectId: task.project_id,
         eventType: "task.moved",

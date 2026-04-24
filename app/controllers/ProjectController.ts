@@ -22,6 +22,7 @@ class ProjectController extends BaseController {
         const activeBatch = await ProjectBatch.findActive(project.id);
         const memberCount = await ProjectMember.count({ project_id: project.id });
 
+        const backlogCount = await Task.count({ project_id: project.id, column_id: "backlog" });
         const ongoingCount = await Task.count({ project_id: project.id, column_id: "ongoing" });
         const revisiCount = await Task.count({ project_id: project.id, column_id: "revisi" });
         const doneCount = await Task.count({ project_id: project.id, column_id: "done" });
@@ -31,7 +32,7 @@ class ProjectController extends BaseController {
           active_batch_label: activeBatch
             ? `v${activeBatch.major}.${activeBatch.minor}${activeBatch.label ? " " + activeBatch.label : ""}`
             : null,
-          task_counts: { ongoing: ongoingCount, revisi: revisiCount, done: doneCount },
+          task_counts: { backlog: backlogCount, ongoing: ongoingCount, revisi: revisiCount, done: doneCount },
           member_count: memberCount,
         };
       })
