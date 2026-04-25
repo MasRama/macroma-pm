@@ -27,13 +27,34 @@ class ProjectModel extends BaseModel<ProjectRecord> {
   }
 
   async findAllForUser(userId: string): Promise<ProjectRecord[]> {
-    const memberProjectIds = await DB.from("project_members")
-      .where("user_id", userId)
-      .select("project_id")
-      .then((rows: { project_id: string }[]) => rows.map(r => r.project_id));
+    const [memberProjectIds, workspaceIds] = await Promise.all([
+      DB.from("project_members")
+        .where("user_id", userId)
+        .select("project_id")
+        .then((rows: { project_id: string }[]) => rows.map((r) => r.project_id)),
+      DB.from("workspace_members")
+        .where("user_id", userId)
+        .select("workspace_id")
+        .then((rows: { workspace_id: string }[]) => rows.map((r) => r.workspace_id)),
+    ]);
+
+    if (memberProjectIds.length === 0 && workspaceIds.length === 0) {
+      return [];
+    }
 
     return this.query()
-      .whereIn("id", memberProjectIds)
+      .where(function () {
+        if (memberProjectIds.length > 0) {
+          this.whereIn("id", memberProjectIds);
+        }
+        if (workspaceIds.length > 0) {
+          if (memberProjectIds.length > 0) {
+            this.orWhereIn("workspace_id", workspaceIds);
+          } else {
+            this.whereIn("workspace_id", workspaceIds);
+          }
+        }
+      })
       .orderBy("created_at", "desc");
   }
 }
