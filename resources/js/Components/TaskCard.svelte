@@ -1,6 +1,4 @@
 <script lang="ts">
-  import VersionLogAccordion from './VersionLogAccordion.svelte';
-
   interface TaskRecord {
     id: string;
     title: string;
@@ -98,13 +96,5 @@
         Log
       </button>
     </div>
-  </div>
-
-  <!-- svelte-ignore a11y_no_static_element_interactions -->
-  <div
-    onmousedown={(e) => e.stopPropagation()}
-    ontouchstart={(e) => e.stopPropagation()}
-  >
-    <VersionLogAccordion taskId={task.id} />
   </div>
 </div>

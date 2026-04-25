@@ -418,6 +418,7 @@
     <TaskDetailModal
       task={detailTask}
       assignee={getAssignee(detailTask.assignee_id)}
+      currentUser={user}
       isOwner={user.id === project.owner_id}
       onClose={() => detailTask = null}
       onDeleted={(id) => {

@@ -6,7 +6,7 @@ import {
   jsonError,
   jsonServerError,
 } from "@core";
-import { ProjectMember, ProjectBatch, Task, TaskLog, taskVersionString, ProjectVersionCounter } from "@models";
+import { ProjectMember, ProjectBatch, Task, TaskLog, taskVersionString, ProjectVersionCounter, User } from "@models";
 import DB from "@services/DB";
 import { logActivity } from "@helpers/activity";
 
@@ -324,7 +324,25 @@ class TaskController extends BaseController {
 
     const logs = await TaskLog.findByTask(taskId);
 
-    return jsonSuccess(res, "Logs retrieved", { logs });
+    const creatorIds = Array.from(
+      new Set(logs.map((l) => l.created_by).filter((id): id is string => !!id))
+    );
+
+    const creators = creatorIds.length
+      ? await DB.from("users")
+          .whereIn("id", creatorIds)
+          .select("id", "name", "email", "avatar")
+      : [];
+
+    const creatorMap = new Map<string, { id: string; name: string | null; email: string; avatar: string | null }>();
+    for (const u of creators) creatorMap.set(u.id, u);
+
+    const logsWithUser = logs.map((log) => ({
+      ...log,
+      user: log.created_by ? creatorMap.get(log.created_by) ?? null : null,
+    }));
+
+    return jsonSuccess(res, "Logs retrieved", { logs: logsWithUser });
   }
 }
 
