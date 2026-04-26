@@ -7,6 +7,7 @@ import {
   jsonServerError,
 } from "@core";
 import { ProjectMember, Task, TaskComment } from "@models";
+import Realtime from "@services/Realtime";
 
 class TaskCommentController extends BaseController {
   async index(req: NaraRequest, res: NaraResponse) {
@@ -68,6 +69,16 @@ class TaskCommentController extends BaseController {
       });
 
       const created = (await TaskComment.findByTask(taskId)).find((c) => c.id === id);
+
+      // Realtime broadcast — surface new comments to anyone with this task open.
+      if (created) {
+        Realtime.publish(
+          Realtime.topics.project(task.project_id),
+          "comment.created",
+          { task_id: taskId, comment: created, actor_id: req.user.id }
+        );
+      }
+
       return jsonCreated(res, "Comment added", { comment: created });
     } catch {
       return jsonServerError(res, "Failed to add comment");
@@ -97,6 +108,13 @@ class TaskCommentController extends BaseController {
     }
 
     await TaskComment.delete(commentId);
+
+    Realtime.publish(
+      Realtime.topics.project(task.project_id),
+      "comment.deleted",
+      { task_id: comment.task_id, comment_id: commentId, actor_id: req.user.id }
+    );
+
     return jsonSuccess(res, "Comment deleted");
   }
 }

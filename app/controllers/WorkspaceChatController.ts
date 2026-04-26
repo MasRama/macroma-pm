@@ -1,6 +1,7 @@
 import type { NaraRequest, NaraResponse } from "@core";
 import { BaseController, jsonSuccess, jsonCreated, jsonError, jsonServerError } from "@core";
 import { WorkspaceMember, WorkspaceMessage } from "@models";
+import Realtime from "@services/Realtime";
 
 class WorkspaceChatController extends BaseController {
   async index(req: NaraRequest, res: NaraResponse) {
@@ -56,17 +57,24 @@ class WorkspaceChatController extends BaseController {
 
       const newMessage = await WorkspaceMessage.findById(messageId);
 
-      return jsonCreated(res, "Message terkirim", {
-        message: {
-          ...newMessage,
-          user: {
-            id: req.user.id,
-            name: (req.user as any).name ?? null,
-            email: req.user.email,
-            avatar: (req.user as any).avatar ?? null,
-          },
+      const messagePayload = {
+        ...newMessage,
+        user: {
+          id: req.user.id,
+          name: (req.user as any).name ?? null,
+          email: req.user.email,
+          avatar: (req.user as any).avatar ?? null,
         },
-      });
+      };
+
+      // Broadcast to every other client connected to this workspace channel.
+      Realtime.publish(
+        Realtime.topics.workspace(workspaceId),
+        "chat.message",
+        { message: messagePayload }
+      );
+
+      return jsonCreated(res, "Message terkirim", { message: messagePayload });
     } catch {
       return jsonServerError(res, "Gagal mengirim pesan");
     }

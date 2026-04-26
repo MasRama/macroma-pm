@@ -32,3 +32,7 @@ export type { StorageConfig, StoredFile, StoreOptions } from './Storage';
 
 // View rendering
 export { view } from './View';
+
+// Realtime (WebSocket pub/sub)
+export { default as Realtime } from './Realtime';
+export type { RealtimeMessage, RealtimePayload } from './Realtime';

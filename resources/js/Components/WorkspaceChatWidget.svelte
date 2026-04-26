@@ -3,6 +3,8 @@
   import { buildCSRFHeaders } from './helper';
   import { scale, fly } from 'svelte/transition';
   import { page as inertiaPage } from '@inertiajs/svelte';
+  import realtime, { type RealtimeIncoming } from './realtime';
+  import { onDestroy } from 'svelte';
 
   let { workspace_id, workspace_name = 'Workspace' }: {
     workspace_id: string;
@@ -34,7 +36,7 @@
   let unreadCount = $state(0);
   let chatBodyEl = $state<HTMLElement | null>(null);
   let inputEl = $state<HTMLInputElement | null>(null);
-  let pollInterval: ReturnType<typeof setInterval> | null = null;
+  let unsubscribeRealtime: (() => void) | null = null;
 
   const currentUserId = $derived(($inertiaPage.props.user as any)?.id ?? '');
 
@@ -87,6 +89,23 @@
     showDesktopNotification(fromOthers[fromOthers.length - 1]);
   }
 
+  /**
+   * Append a single live message arriving via realtime. We dedupe by id
+   * because the sender already has it in their state from the POST response.
+   */
+  function appendLiveMessage(msg: ChatMessage) {
+    if (messages.some(m => m.id === msg.id)) return;
+    messages = [...messages, msg];
+    if (msg.user_id !== currentUserId && !isOpen) {
+      unreadCount += 1;
+      playNotificationSound();
+      showDesktopNotification(msg);
+    }
+    if (isOpen) {
+      setTimeout(() => scrollToBottom('smooth'), 40);
+    }
+  }
+
   function portal(node: HTMLElement) {
     document.body.appendChild(node);
     return {
@@ -125,6 +144,19 @@
     }
   }
 
+  function handleRealtimeMessage(msg: RealtimeIncoming) {
+    if (msg.type !== 'chat.message') return;
+    const incoming = msg.payload?.message as ChatMessage | undefined;
+    if (!incoming) return;
+    if (!hasLoaded) {
+      // Initial backlog hasn't loaded yet — pull it so we don't render an
+      // orphan message on top of an empty list.
+      fetchMessages(true).then(() => appendLiveMessage(incoming));
+      return;
+    }
+    appendLiveMessage(incoming);
+  }
+
   async function sendMessage() {
     const text = inputText.trim();
     if (!text || isSending) return;
@@ -139,7 +171,9 @@
         { headers: buildCSRFHeaders() }
       );
       const newMsg: ChatMessage = res.data?.data?.message;
-      if (newMsg) {
+      if (newMsg && !messages.some(m => m.id === newMsg.id)) {
+        // Append immediately so the sender sees their message even before
+        // the realtime echo lands. The realtime handler dedupes by id.
         messages = [...messages, newMsg];
         setTimeout(() => scrollToBottom('smooth'), 40);
       }
@@ -158,37 +192,37 @@
     }
   }
 
-  function startPolling() {
-    if (pollInterval) return;
-    pollInterval = setInterval(() => fetchMessages(true), 5000);
-  }
-
-  function stopPolling() {
-    if (pollInterval) {
-      clearInterval(pollInterval);
-      pollInterval = null;
-    }
-  }
-
   function toggleChat() {
     isOpen = !isOpen;
     if (isOpen) {
       unreadCount = 0;
       requestNotificationPermission();
       if (!hasLoaded) fetchMessages();
-      startPolling();
       setTimeout(() => {
         scrollToBottom('instant');
         inputEl?.focus();
       }, 200);
-    } else {
-      stopPolling();
     }
   }
 
-  // Clean up on unmount
+  // Subscribe to realtime workspace channel for the lifetime of the widget.
+  // Notifications work even while the panel is closed.
   $effect(() => {
-    return () => stopPolling();
+    if (!workspace_id) return;
+    unsubscribeRealtime?.();
+    unsubscribeRealtime = realtime.subscribe(`workspace:${workspace_id}`, handleRealtimeMessage);
+    // Pre-load backlog in the background so unread badges work correctly
+    // before the user opens the widget for the first time.
+    if (!hasLoaded) fetchMessages(true);
+    return () => {
+      unsubscribeRealtime?.();
+      unsubscribeRealtime = null;
+    };
+  });
+
+  onDestroy(() => {
+    unsubscribeRealtime?.();
+    unsubscribeRealtime = null;
   });
 
   function getInitials(user: ChatUser): string {
@@ -387,7 +421,7 @@
             {/if}
           </button>
         </div>
-        <p class="text-[9px] text-slate-400 dark:text-slate-600 mt-1.5 text-center">Enter untuk kirim · pesan update otomatis tiap 5 detik</p>
+        <p class="text-[9px] text-slate-400 dark:text-slate-600 mt-1.5 text-center">Enter untuk kirim · pesan update realtime</p>
       </div>
     </div>
   {/if}

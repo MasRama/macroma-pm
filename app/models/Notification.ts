@@ -1,5 +1,6 @@
 import { BaseModel, BaseRecord } from "./BaseModel";
 import DB from "@services/DB";
+import Realtime from "@services/Realtime";
 
 export interface NotificationRecord extends BaseRecord {
   id: string;
@@ -44,13 +45,34 @@ class NotificationModel extends BaseModel<NotificationRecord> {
   }
 
   async createForUser(userId: string, type: string, data: Record<string, unknown>): Promise<void> {
+    const id = crypto.randomUUID();
+    const created_at = Date.now();
+    const dataString = JSON.stringify(data);
+
     await this.create({
-      id: crypto.randomUUID(),
+      id,
       user_id: userId,
       type,
-      data: JSON.stringify(data),
-      created_at: Date.now(),
+      data: dataString,
+      created_at,
     } as any);
+
+    // Realtime push to the recipient's personal channel so the bell icon
+    // updates without a refresh.
+    Realtime.publish(
+      Realtime.topics.user(userId),
+      "notification.created",
+      {
+        notification: {
+          id,
+          user_id: userId,
+          type,
+          data, // already an object — frontend expects parsed shape
+          is_read: false,
+          created_at,
+        },
+      }
+    );
   }
 }
 

@@ -31,6 +31,7 @@ import { HttpError, ValidationError, isHttpError } from "./errors";
 import { jsonError, jsonValidationError } from "./response";
 import type { NaraRequest, NaraResponse } from "./types";
 import type { FrontendAdapter } from "./adapters/types";
+import { registerRealtime } from "./realtime";
 
 // Type for HyperExpress compatible middleware
 // Uses unknown as intermediate type to handle type mismatches between
@@ -190,6 +191,10 @@ export class NaraApp {
 
     // Apply default middlewares
     this.applyDefaultMiddlewares();
+
+    // Register realtime WebSocket route. Done before mount() so the /ws
+    // upgrade endpoint is bound before any catch-all/static routes can shadow it.
+    registerRealtime(this.server);
 
     // Mount routes if provided
     if (this.options.routes) {

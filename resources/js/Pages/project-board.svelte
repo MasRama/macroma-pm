@@ -11,6 +11,8 @@
   import ActivityPanel from '../Components/ActivityPanel.svelte';
   import TaskDetailModal from '../Components/TaskDetailModal.svelte';
   import { buildCSRFHeaders, Toast, api } from '../Components/helper';
+  import realtime, { type RealtimeIncoming } from '../Components/realtime';
+  import { onDestroy } from 'svelte';
   import axios from 'axios';
 
   interface TaskRecord { id: string; project_id: string; batch_id: string | null; title: string; description: string | null; priority: 'low' | 'medium' | 'high'; assignee_id: string | null; column_id: 'backlog' | 'ongoing' | 'revisi' | 'done'; sort_order: number; version_major: number; version_minor: number; version_patch: number; created_at: number; updated_at: number; }
@@ -44,6 +46,72 @@
   // Sync tasks when Inertia navigates back to this page (e.g. after create task redirect)
   $effect(() => {
     tasks = [...initialTasks];
+  });
+
+  /**
+   * Realtime sync — subscribe to the project channel and merge incoming
+   * task events into local state without a page reload.
+   * The user that fired the action gets the same event echoed to them, so
+   * we dedupe by comparing actor_id with the current user where it matters.
+   */
+  let unsubscribeRealtime: (() => void) | null = null;
+
+  function applyRealtimeEvent(msg: RealtimeIncoming) {
+    const actorId = msg.payload?.actor_id as string | undefined;
+    const isSelf = actorId && actorId === user.id;
+
+    switch (msg.type) {
+      case 'task.created': {
+        const incoming = msg.payload?.task as TaskRecord | undefined;
+        if (!incoming) return;
+        if (tasks.some(t => t.id === incoming.id)) return;
+        tasks = [...tasks, incoming];
+        if (!isSelf) Toast(`Task baru ditambahkan: ${incoming.title}`, 'info');
+        break;
+      }
+      case 'task.moved':
+      case 'task.log_added': {
+        const incoming = msg.payload?.task as TaskRecord | undefined;
+        if (!incoming) return;
+        const idx = tasks.findIndex(t => t.id === incoming.id);
+        if (idx >= 0) {
+          tasks = tasks.map(t => t.id === incoming.id ? incoming : t);
+        } else {
+          tasks = [...tasks, incoming];
+        }
+        if (!isSelf && msg.type === 'task.moved') {
+          Toast(`Task "${incoming.title}" dipindah`, 'info');
+        }
+        break;
+      }
+      case 'task.deleted': {
+        const taskId = msg.payload?.task_id as string | undefined;
+        if (!taskId) return;
+        const target = tasks.find(t => t.id === taskId);
+        tasks = tasks.filter(t => t.id !== taskId);
+        if (detailTask?.id === taskId) detailTask = null;
+        if (!isSelf && target) Toast(`Task "${target.title}" dihapus`, 'warning');
+        break;
+      }
+      // Comments are handled inside TaskDetailModal — ignored here on purpose.
+      default:
+        break;
+    }
+  }
+
+  $effect(() => {
+    if (!project?.id) return;
+    unsubscribeRealtime?.();
+    unsubscribeRealtime = realtime.subscribe(`project:${project.id}`, applyRealtimeEvent);
+    return () => {
+      unsubscribeRealtime?.();
+      unsubscribeRealtime = null;
+    };
+  });
+
+  onDestroy(() => {
+    unsubscribeRealtime?.();
+    unsubscribeRealtime = null;
   });
 
   // Move modal state

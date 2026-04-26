@@ -72,8 +72,13 @@ export interface CSRFOptions {
 
 /**
  * Safe HTTP methods that don't require CSRF protection
+ *
+ * `UPGRADE` covers WebSocket handshake requests dispatched through
+ * hyper-express upgrade routes — those have their own auth via the session
+ * cookie inside the upgrade handler, and the SameSite=Lax cookie attribute
+ * already prevents cross-site upgrade attacks.
  */
-const SAFE_METHODS = ['GET', 'HEAD', 'OPTIONS'];
+const SAFE_METHODS = ['GET', 'HEAD', 'OPTIONS', 'UPGRADE'];
 
 /**
  * Generate a cryptographically secure random token

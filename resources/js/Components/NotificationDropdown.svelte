@@ -1,6 +1,9 @@
 <script lang="ts">
   import axios from 'axios';
   import { buildCSRFHeaders, Toast } from './helper';
+  import realtime, { type RealtimeIncoming } from './realtime';
+  import { onDestroy } from 'svelte';
+  import { page as inertiaPage } from '@inertiajs/svelte';
 
   let { unread_count = 0 }: { unread_count?: number } = $props();
   let localUnreadCount = $state(unread_count);
@@ -10,6 +13,42 @@
   let notifications = $state<any[]>([]);
   let isLoading = $state(false);
   let buttonRef = $state<HTMLButtonElement | null>(null);
+  let unsubscribeRealtime: (() => void) | null = null;
+
+  const currentUserId = $derived(($inertiaPage.props.user as any)?.id ?? '');
+
+  function handleRealtimeNotification(msg: RealtimeIncoming) {
+    if (msg.type !== 'notification.created') return;
+    const incoming = msg.payload?.notification;
+    if (!incoming) return;
+
+    // Bump unread count + prepend to list (kept at 10).
+    localUnreadCount += 1;
+    notifications = [incoming, ...notifications].slice(0, 10);
+
+    // Lightweight toast so the user notices even with the dropdown closed.
+    const summary =
+      incoming.data?.message ||
+      (incoming.type === 'workspace_invitation'
+        ? `Undangan workspace ${incoming.data?.workspace_name ?? ''}`.trim()
+        : 'Notifikasi baru');
+    Toast(summary, 'info');
+  }
+
+  $effect(() => {
+    if (!currentUserId) return;
+    unsubscribeRealtime?.();
+    unsubscribeRealtime = realtime.subscribe(`user:${currentUserId}`, handleRealtimeNotification);
+    return () => {
+      unsubscribeRealtime?.();
+      unsubscribeRealtime = null;
+    };
+  });
+
+  onDestroy(() => {
+    unsubscribeRealtime?.();
+    unsubscribeRealtime = null;
+  });
 
   // Portal action — moves element out of sidebar DOM into <body>
   function portal(node: HTMLElement) {

@@ -8,6 +8,7 @@ import {
 } from "@core";
 import { ProjectMember, ProjectBatch, Task, TaskLog, taskVersionString, ProjectVersionCounter, User } from "@models";
 import DB from "@services/DB";
+import Realtime from "@services/Realtime";
 import { logActivity } from "@helpers/activity";
 
 const VALID_COLUMNS = ["backlog", "ongoing", "revisi", "done"] as const;
@@ -109,6 +110,14 @@ class TaskController extends BaseController {
         meta: { version: newVersion },
       });
 
+      // Realtime broadcast — let other connected boards add the new task instantly.
+      const newTask = await Task.findById(taskId);
+      Realtime.publish(
+        Realtime.topics.project(projectId),
+        "task.created",
+        { task: newTask, actor_id: req.user.id }
+      );
+
       return res.redirect(`/projects/${projectId}`);
     } catch (err) {
       return jsonServerError(res, "Failed to create task");
@@ -197,6 +206,19 @@ class TaskController extends BaseController {
         meta: { from: task.column_id, to: body.column_id, note: String(body.note).trim(), version: newVersion },
       });
 
+      // Realtime broadcast — sync kanban for everyone else viewing this project.
+      Realtime.publish(
+        Realtime.topics.project(task.project_id),
+        "task.moved",
+        {
+          task: updatedTask,
+          from: task.column_id,
+          to: body.column_id,
+          version: newVersion,
+          actor_id: req.user.id,
+        }
+      );
+
       return jsonSuccess(res, "Task moved", {
         task: updatedTask,
         log,
@@ -277,6 +299,18 @@ class TaskController extends BaseController {
         meta: { note: String(body.note).trim(), version: newVersion },
       });
 
+      // Realtime broadcast — keep the version label live across boards.
+      Realtime.publish(
+        Realtime.topics.project(task.project_id),
+        "task.log_added",
+        {
+          task: updatedTask,
+          log,
+          version: newVersion,
+          actor_id: req.user.id,
+        }
+      );
+
       return jsonSuccess(res, "Log added", {
         log,
         task: updatedTask,
@@ -303,6 +337,13 @@ class TaskController extends BaseController {
     }
 
     await Task.delete(taskId);
+
+    // Realtime broadcast — drop the card from every connected board.
+    Realtime.publish(
+      Realtime.topics.project(task.project_id),
+      "task.deleted",
+      { task_id: taskId, actor_id: req.user.id }
+    );
 
     return jsonSuccess(res, "Task deleted");
   }
