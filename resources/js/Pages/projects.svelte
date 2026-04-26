@@ -11,7 +11,7 @@
     description: string | null;
     owner_id: string;
     active_batch_label: string | null;
-    task_counts: { backlog: number; ongoing: number; revisi: number; done: number };
+    task_counts: { backlog: number; ongoing: number; revisi: number; review: number; done: number };
     member_count: number;
     created_at: number;
     updated_at: number;
@@ -184,6 +184,10 @@
                   <div class="flex items-center space-x-1.5 bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.05] px-2 py-1 rounded-lg" title="Revisi Tasks">
                     <div class="w-1.5 h-1.5 rounded-full bg-orange-400 shadow-[0_0_8px_rgba(251,146,60,0.6)]"></div>
                     <span class="text-xs text-slate-700 dark:text-slate-300 font-medium">{project.task_counts.revisi}</span>
+                  </div>
+                  <div class="flex items-center space-x-1.5 bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.05] px-2 py-1 rounded-lg" title="Review Tasks">
+                    <div class="w-1.5 h-1.5 rounded-full bg-purple-400 shadow-[0_0_8px_rgba(192,132,252,0.6)]"></div>
+                    <span class="text-xs text-slate-700 dark:text-slate-300 font-medium">{project.task_counts.review}</span>
                   </div>
                   <div class="flex items-center space-x-1.5 bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.05] px-2 py-1 rounded-lg" title="Done Tasks">
                     <div class="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]"></div>

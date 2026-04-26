@@ -11,7 +11,7 @@ import DB from "@services/DB";
 import Realtime from "@services/Realtime";
 import { logActivity } from "@helpers/activity";
 
-const VALID_COLUMNS = ["backlog", "ongoing", "revisi", "done"] as const;
+const VALID_COLUMNS = ["backlog", "ongoing", "revisi", "review", "done"] as const;
 type ColumnId = typeof VALID_COLUMNS[number];
 
 function isValidColumn(value: string): value is ColumnId {
@@ -147,7 +147,7 @@ class TaskController extends BaseController {
     }
 
     if (!body.column_id || !isValidColumn(body.column_id)) {
-      return jsonError(res, "column_id must be one of: backlog, ongoing, revisi, done", 422);
+      return jsonError(res, "column_id must be one of: backlog, ongoing, revisi, review, done", 422);
     }
 
     if (body.column_id === task.column_id) {
@@ -196,7 +196,7 @@ class TaskController extends BaseController {
       updatedTask = await Task.findById(taskId);
       log = await TaskLog.findBy({ task_id: taskId, version: newVersion! });
 
-      const columnNames: Record<string, string> = { backlog: "Backlog", ongoing: "On Going", revisi: "Revisi", done: "Done" };
+      const columnNames: Record<string, string> = { backlog: "Backlog", ongoing: "On Going", revisi: "Revisi", review: "Review", done: "Done" };
       await logActivity({
         projectId: task.project_id,
         eventType: "task.moved",

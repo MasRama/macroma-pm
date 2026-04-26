@@ -87,6 +87,7 @@
     backlog: 'Backlog',
     ongoing: 'On Going',
     revisi: 'Revisi',
+    review: 'Review',
     done: 'Done',
   };
 

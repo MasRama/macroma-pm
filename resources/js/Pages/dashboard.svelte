@@ -10,6 +10,7 @@
     task_backlog: number;
     task_ongoing: number;
     task_revisi: number;
+    task_review: number;
     task_done: number;
   }
 
@@ -114,7 +115,7 @@
     }
   }
 
-  const totalTasks = $derived(stats.task_backlog + stats.task_ongoing + stats.task_revisi + stats.task_done);
+  const totalTasks = $derived(stats.task_backlog + stats.task_ongoing + stats.task_revisi + stats.task_review + stats.task_done);
 
   const donutSegments = $derived(() => {
     if (totalTasks === 0) return [];
@@ -122,6 +123,7 @@
       { label: 'Backlog', value: stats.task_backlog, color: '#64748b' },
       { label: 'Ongoing', value: stats.task_ongoing, color: '#6366f1' },
       { label: 'Revisi', value: stats.task_revisi, color: '#f59e0b' },
+      { label: 'Review', value: stats.task_review, color: '#a855f7' },
       { label: 'Done', value: stats.task_done, color: '#10b981' },
     ];
     const cx = 60;
@@ -289,6 +291,13 @@
                   <span class="text-xs text-slate-600 dark:text-slate-400">Revisi</span>
                 </div>
                 <span class="text-xs font-semibold text-slate-900 dark:text-white">{stats.task_revisi}</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <span class="w-2.5 h-2.5 rounded-sm bg-purple-500 flex-shrink-0"></span>
+                  <span class="text-xs text-slate-600 dark:text-slate-400">Review</span>
+                </div>
+                <span class="text-xs font-semibold text-slate-900 dark:text-white">{stats.task_review}</span>
               </div>
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-2">

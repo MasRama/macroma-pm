@@ -9,7 +9,7 @@
     description: string | null;
     priority: 'low' | 'medium' | 'high';
     assignee_id: string | null;
-    column_id: 'ongoing' | 'revisi' | 'done';
+    column_id: 'backlog' | 'ongoing' | 'revisi' | 'review' | 'done';
     sort_order: number;
     version_major: number;
     version_minor: number;
@@ -43,17 +43,20 @@
 
   let ongoingTasks = $state<TaskRecord[]>([]);
   let revisiTasks = $state<TaskRecord[]>([]);
+  let reviewTasks = $state<TaskRecord[]>([]);
   let doneTasks = $state<TaskRecord[]>([]);
 
   $effect(() => {
     ongoingTasks = tasks.filter(t => t.column_id === 'ongoing').sort((a, b) => a.sort_order - b.sort_order);
     revisiTasks = tasks.filter(t => t.column_id === 'revisi').sort((a, b) => a.sort_order - b.sort_order);
+    reviewTasks = tasks.filter(t => t.column_id === 'review').sort((a, b) => a.sort_order - b.sort_order);
     doneTasks = tasks.filter(t => t.column_id === 'done').sort((a, b) => a.sort_order - b.sort_order);
   });
 
   const columns = [
     { id: 'ongoing', name: 'On Going', tasks: () => ongoingTasks },
     { id: 'revisi', name: 'Revisi', tasks: () => revisiTasks },
+    { id: 'review', name: 'Review', tasks: () => reviewTasks },
     { id: 'done', name: 'Done', tasks: () => doneTasks }
   ];
 
@@ -64,7 +67,7 @@
   }
 </script>
 
-<div class="grid grid-cols-3 gap-6 p-6 h-full">
+<div class="grid grid-cols-4 gap-6 p-6 h-full">
   {#each columns as column}
     <div
       data-column={column.id}
