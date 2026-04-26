@@ -23,7 +23,8 @@
   } = $props();
 
   let note = $state('');
-  let canSubmit = $derived(note.trim().length > 0);
+  let isRevisiTarget = $derived(targetColumn === 'revisi');
+  let canSubmit = $derived(!isRevisiTarget || note.trim().length > 0);
 
   const columnNames: Record<string, string> = {
     backlog: 'Backlog',
@@ -89,12 +90,12 @@
       <textarea
         data-testid="move-modal-note"
         bind:value={note}
-        placeholder="Tambahkan catatan (wajib)..."
+        placeholder={isRevisiTarget ? 'Tambahkan catatan (wajib)...' : 'Tambahkan catatan (opsional)...'}
         class="w-full bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] rounded-xl p-4 text-sm text-slate-900 dark:text-slate-200 resize-none min-h-[100px] focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500"
-        required
+        required={isRevisiTarget}
       ></textarea>
       <div class="h-4 mt-1">
-        {#if !canSubmit && note.length > 0}
+        {#if isRevisiTarget && !canSubmit && note.length > 0}
           <p class="text-xs text-red-400" transition:fade={{duration: 150}}>Catatan wajib diisi</p>
         {/if}
       </div>

@@ -154,8 +154,8 @@ class TaskController extends BaseController {
       return jsonError(res, "Cannot move task to the same column", 400);
     }
 
-    if (!body.note || String(body.note).trim() === "") {
-      return jsonError(res, "Catatan wajib diisi saat memindah task", 422);
+    if (body.column_id === "revisi" && (!body.note || String(body.note).trim() === "")) {
+      return jsonError(res, "Catatan wajib diisi saat memindah task ke Revisi", 422);
     }
 
     const now = Date.now();
