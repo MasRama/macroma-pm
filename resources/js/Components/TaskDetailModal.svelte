@@ -58,6 +58,18 @@
   let activeTab = $state<Tab>('detail');
 
   let isDeleting = $state(false);
+  let copied = $state(false);
+
+  async function copyDescription() {
+    if (!task.description) return;
+    try {
+      await navigator.clipboard.writeText(task.description);
+      copied = true;
+      setTimeout(() => (copied = false), 1500);
+    } catch {
+      Toast('Gagal menyalin deskripsi', 'error');
+    }
+  }
 
   // Comments state
   let comments = $state<CommentRecord[]>([]);
@@ -287,7 +299,18 @@
           </div>
 
           <div>
-            <p class="text-[10px] uppercase tracking-wider font-semibold text-slate-400 dark:text-slate-500 mb-1.5">Deskripsi</p>
+            <div class="flex items-center justify-between mb-1.5">
+              <p class="text-[10px] uppercase tracking-wider font-semibold text-slate-400 dark:text-slate-500">Deskripsi</p>
+              {#if task.description}
+                <button
+                  type="button"
+                  onclick={copyDescription}
+                  class="text-[10px] font-medium text-blue-600 dark:text-blue-400 hover:underline"
+                >
+                  {copied ? 'Tersalin' : 'Salin'}
+                </button>
+              {/if}
+            </div>
             {#if task.description}
               <p class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">{task.description}</p>
             {:else}
