@@ -141,7 +141,7 @@
   <button
     bind:this={buttonRef}
     onclick={toggleDropdown}
-    class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/[0.05] transition-colors relative"
+    class="p-1.5 rounded-lg text-stone-400 hover:text-stone-600 dark:hover:text-stone-300 hover:bg-stone-100 dark:hover:bg-white/[0.05] transition-colors relative cursor-pointer"
     aria-label="Notifications"
   >
     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -149,7 +149,7 @@
     </svg>
     
     {#if localUnreadCount > 0}
-      <span class="absolute top-0 right-0 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center translate-x-1/3 -translate-y-1/3">
+      <span class="absolute top-0 right-0 w-4 h-4 bg-brand-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center translate-x-1/3 -translate-y-1/3">
         {localUnreadCount > 99 ? '99+' : localUnreadCount}
       </span>
     {/if}
@@ -160,51 +160,51 @@
       use:portal
       id="notif-dropdown-portal"
       style={getDropdownStyle()}
-      class="w-80 bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/[0.08] rounded-2xl shadow-xl dark:shadow-black/40 overflow-hidden flex flex-col max-h-[400px]"
+      class="w-80 bg-white dark:bg-stone-900 ring-1 ring-stone-900/10 dark:ring-white/10 rounded-2xl shadow-xl dark:shadow-black/40 overflow-hidden flex flex-col max-h-[400px]"
     >
-      <div class="p-3 border-b border-slate-100 dark:border-white/[0.05] flex items-center justify-between shrink-0">
-        <h3 class="font-semibold text-slate-800 dark:text-slate-100 text-sm">Notifikasi</h3>
+      <div class="p-3 border-b border-stone-100 dark:border-white/[0.05] flex items-center justify-between shrink-0">
+        <h3 class="font-bold text-stone-800 dark:text-stone-100 text-sm">Notifikasi</h3>
         <button
           onclick={markAllRead}
-          class="text-xs text-primary-500 hover:text-primary-600 dark:text-primary-400 dark:hover:text-primary-300 font-medium"
+          class="text-xs text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 font-semibold cursor-pointer"
         >
-          Tandai semua dibaca
+          Tandai dibaca
         </button>
       </div>
 
       <div class="overflow-y-auto flex-1 custom-scrollbar">
         {#if isLoading}
           <div class="p-8 flex justify-center items-center">
-            <svg class="animate-spin h-6 w-6 text-primary-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <svg class="animate-spin h-6 w-6 text-brand-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
           </div>
         {:else if notifications.length === 0}
-          <div class="p-8 text-center text-slate-500 dark:text-slate-400 text-sm">
+          <div class="p-8 text-center text-stone-500 dark:text-stone-400 text-sm">
             Tidak ada notifikasi
           </div>
         {:else}
           {#each notifications as notification}
-            <div class="p-3 hover:bg-slate-50 dark:hover:bg-white/[0.03] border-b border-slate-100 dark:border-white/[0.05] transition-colors {notification.read_at ? '' : 'bg-primary-50/50 dark:bg-primary-500/5'}">
+            <div class="p-3 hover:bg-stone-50 dark:hover:bg-white/[0.03] border-b border-stone-100 dark:border-white/[0.05] transition-colors {notification.read_at ? '' : 'bg-brand-50/50 dark:bg-brand-500/5'}">
               {#if notification.type === 'workspace_invitation'}
-                <div class="text-sm text-slate-700 dark:text-slate-300 mb-2">
-                  <span class="font-medium text-slate-900 dark:text-slate-100">{notification.data?.inviter_name || 'Seseorang'}</span>
+                <div class="text-sm text-stone-700 dark:text-stone-300 mb-2">
+                  <span class="font-semibold text-stone-900 dark:text-stone-100">{notification.data?.inviter_name || 'Seseorang'}</span>
                   mengundang Anda ke workspace
-                  <span class="font-medium text-slate-900 dark:text-slate-100">{notification.data?.workspace_name || 'Workspace'}</span>
+                  <span class="font-semibold text-stone-900 dark:text-stone-100">{notification.data?.workspace_name || 'Workspace'}</span>
                 </div>
                 {#if !notification.read_at}
                   <div class="flex gap-2 mt-2">
                     <button 
                       onclick={() => respondToInvitation(notification.data?.token, 'accept')}
-                      class="flex-1 flex justify-center items-center gap-1 text-xs px-2 py-1.5 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
+                      class="flex-1 flex justify-center items-center gap-1 text-xs px-2 py-1.5 bg-brand-500 text-white rounded-lg hover:bg-brand-400 transition-colors cursor-pointer font-semibold"
                     >
                       <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                       Terima
                     </button>
                     <button 
                       onclick={() => respondToInvitation(notification.data?.token, 'decline')}
-                      class="flex-1 flex justify-center items-center gap-1 text-xs px-2 py-1.5 bg-slate-100 dark:bg-white/[0.05] text-slate-600 dark:text-slate-400 rounded-lg hover:bg-slate-200 dark:hover:bg-white/[0.1] transition-colors"
+                      class="flex-1 flex justify-center items-center gap-1 text-xs px-2 py-1.5 bg-stone-100 dark:bg-white/[0.05] text-stone-600 dark:text-stone-400 rounded-lg hover:bg-stone-200 dark:hover:bg-white/[0.1] transition-colors cursor-pointer font-semibold"
                     >
                       <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                       Tolak
@@ -212,17 +212,17 @@
                   </div>
                 {/if}
               {:else if notification.type === 'invitation_accepted'}
-                <div class="text-sm text-slate-700 dark:text-slate-300">
-                  <span class="font-medium text-slate-900 dark:text-slate-100">{notification.data?.user_name || 'Seseorang'}</span>
+                <div class="text-sm text-stone-700 dark:text-stone-300">
+                  <span class="font-semibold text-stone-900 dark:text-stone-100">{notification.data?.user_name || 'Seseorang'}</span>
                   bergabung ke workspace
-                  <span class="font-medium text-slate-900 dark:text-slate-100">{notification.data?.workspace_name || 'Workspace'}</span>
+                  <span class="font-semibold text-stone-900 dark:text-stone-100">{notification.data?.workspace_name || 'Workspace'}</span>
                 </div>
               {:else}
-                <div class="text-sm text-slate-700 dark:text-slate-300">
+                <div class="text-sm text-stone-700 dark:text-stone-300">
                   {notification.data?.message || 'Notifikasi baru'}
                 </div>
               {/if}
-              <div class="text-[10px] text-slate-400 mt-1.5">
+              <div class="text-[10px] text-stone-400 mt-1.5">
                 {new Date(notification.created_at).toLocaleDateString()}
               </div>
             </div>
