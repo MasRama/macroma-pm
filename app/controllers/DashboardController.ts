@@ -18,6 +18,7 @@ class DashboardController extends BaseController {
     ]);
 
     const projectIds = allProjects.map((p) => p.id);
+    const workspaceIds = workspaces.map((w) => w.id);
 
     const [taskCounts, recentActivity] = await Promise.all([
       projectIds.length > 0
@@ -59,6 +60,11 @@ class DashboardController extends BaseController {
           )
       : [];
 
+    // ── 7-day trend data (real, cumulative) ───────────────────────
+    // For each of the last 7 days, count entities created up to end-of-that-day.
+    // "Selesai" = tasks with column_id='done' AND updated_at <= end-of-day.
+    const trends = await this.computeTrends(userId, projectIds, workspaceIds, 7);
+
     const projectsWithWorkspace = allProjects.map((p) => ({
       id: p.id,
       name: p.name,
@@ -78,11 +84,83 @@ class DashboardController extends BaseController {
         task_review: taskCounts["review"] ?? 0,
         task_done: taskCounts["done"] ?? 0,
       },
+      trends,
       tasks_per_project: tasksPerProject,
       recent_activity: recentActivity,
       projects: projectsWithWorkspace,
       ...nav,
     });
+  }
+
+  /**
+   * Compute 7-day cumulative trends for sparklines.
+   * Returns array of { day, workspace, project, active, done } where each
+   * value is the cumulative count up to end of that day.
+   */
+  private async computeTrends(
+    userId: string,
+    projectIds: string[],
+    workspaceIds: string[],
+    days: number
+  ): Promise<{ day: string; workspace: number; project: number; active: number; done: number }[]> {
+    const now = new Date();
+    now.setHours(23, 59, 59, 999);
+    const dayMs = 24 * 60 * 60 * 1000;
+    const result: { day: string; workspace: number; project: number; active: number; done: number }[] = [];
+
+    // Build day boundaries (oldest first)
+    const boundaries: number[] = [];
+    for (let i = days - 1; i >= 0; i--) {
+      boundaries.push(now.getTime() - i * dayMs);
+    }
+
+    for (const endTs of boundaries) {
+      const dayLabel = new Date(endTs).toLocaleDateString('id-ID', { weekday: 'short' });
+
+      // Workspace cumulative (owned by user, created <= endTs)
+      const wsCount = workspaceIds.length > 0
+        ? await DB.from("workspaces")
+            .where("owner_id", userId)
+            .where("created_at", "<=", endTs)
+            .count("* as c")
+            .then((r: any[]) => Number(r[0]?.c ?? 0))
+        : 0;
+
+      // Project cumulative (accessible to user, created <= endTs)
+      const projCount = projectIds.length > 0
+        ? await DB.from("projects")
+            .whereIn("id", projectIds)
+            .where("created_at", "<=", endTs)
+            .count("* as c")
+            .then((r: any[]) => Number(r[0]?.c ?? 0))
+        : 0;
+
+      // Active tasks (ongoing/revisi/review) with updated_at <= endTs
+      let activeCount = 0;
+      let doneCount = 0;
+      if (projectIds.length > 0) {
+        const colCounts = await DB.from("tasks")
+          .whereIn("project_id", projectIds)
+          .where("updated_at", "<=", endTs)
+          .whereIn("column_id", ["ongoing", "revisi", "review", "done"])
+          .select("column_id")
+          .count("* as c")
+          .groupBy("column_id")
+          .then((rows: { column_id: string; c: number | string }[]) =>
+            rows.reduce((acc, r) => {
+              acc[r.column_id] = Number(r.c);
+              return acc;
+            }, {} as Record<string, number>)
+          );
+
+        activeCount = (colCounts["ongoing"] ?? 0) + (colCounts["revisi"] ?? 0) + (colCounts["review"] ?? 0);
+        doneCount = colCounts["done"] ?? 0;
+      }
+
+      result.push({ day: dayLabel, workspace: wsCount, project: projCount, active: activeCount, done: doneCount });
+    }
+
+    return result;
   }
 }
 
