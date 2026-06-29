@@ -8,9 +8,24 @@ export default {
     extend: {
       fontFamily: {
         sans: ['Inter var', 'Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
+        display: ['Plus Jakarta Sans', 'Inter var', 'system-ui', 'sans-serif'],
         serif: ['Playfair Display', 'Georgia', 'Cambria', 'Times New Roman', 'Times', 'serif'],
       },
       colors: {
+        // Forest–emerald accent for landing (calm, natural, grounded)
+        brand: {
+          50: '#edfdf4',
+          100: '#d4f7e2',
+          200: '#abedc8',
+          300: '#73dda7',
+          400: '#3cc483',
+          500: '#16a766',
+          600: '#0b8552',
+          700: '#0a6a44',
+          800: '#0b5438',
+          900: '#0a4530',
+          950: '#03271c',
+        },
         // Primary brand color (Emerald/Green - main theme)
         primary: {
           50: '#ecfdf5',
