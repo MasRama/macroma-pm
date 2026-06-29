@@ -38,14 +38,14 @@
 
 <div
   data-testid="add-log-modal"
-  class="fixed inset-0 bg-black/30 dark:bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+  class="fixed inset-0 bg-stone-900/30 dark:bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
   onclick={handleBackdropClick}
   onkeydown={(e) => e.key === 'Escape' && handleBackdropClick()}
   role="presentation"
   transition:fade={{ duration: 150 }}
 >
   <div
-    class="bg-white dark:bg-surface-dark backdrop-blur-xl border border-slate-200 dark:border-white/[0.08] rounded-2xl p-6 w-full max-w-md shadow-2xl"
+    class="bg-white dark:bg-surface-dark ring-1 ring-stone-900/5 dark:ring-white/10 rounded-2xl p-6 w-full max-w-md shadow-modal"
     transition:fly={{ y: 20, duration: 200 }}
     onclick={(e) => e.stopPropagation()}
     onkeydown={(e) => e.stopPropagation()}
@@ -54,20 +54,24 @@
     tabindex="-1"
   >
     <div class="mb-6">
-      <h2 class="text-xl font-bold text-slate-900 dark:text-white mb-1 tracking-wide">Tambah Log Entry</h2>
-      <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Versi akan naik tanpa memindah task</p>
+      <div class="flex items-center gap-2 mb-1.5">
+        <span class="w-1.5 h-1.5 rounded-full bg-secondary-500"></span>
+        <span class="text-[11px] font-bold uppercase tracking-[0.2em] text-secondary-600 dark:text-secondary-400">Log entry</span>
+      </div>
+      <h2 class="text-xl font-extrabold tracking-[-0.02em] text-stone-900 dark:text-white">Tambah log entry</h2>
+      <p class="text-sm text-stone-500 dark:text-stone-400 mt-1">Versi akan naik tanpa memindah task</p>
     </div>
  
-    <div class="bg-slate-100 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] rounded-xl p-4 mb-5 shadow-inner">
-      <p class="text-sm font-medium text-slate-800 dark:text-slate-200 leading-relaxed">{task.title}</p>
+    <div class="bg-surface-input dark:bg-white/[0.04] ring-1 ring-stone-900/5 dark:ring-white/10 rounded-xl p-4 mb-5">
+      <p class="text-sm font-medium text-stone-800 dark:text-stone-200 leading-relaxed">{task.title}</p>
     </div>
  
     <div class="flex items-center gap-3 mb-5 px-1">
-      <span class="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider">Versi:</span>
+      <span class="text-[11px] font-bold uppercase tracking-[0.15em] text-stone-500 dark:text-stone-400">Versi:</span>
       <div class="flex items-center gap-2">
-        <span class="font-mono text-xs text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-white/[0.04] px-2 py-1 rounded border border-slate-200 dark:border-white/[0.08]">{currentVersion}</span>
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-slate-400 dark:text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-        <span class="font-mono text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 px-2 py-1 rounded border border-amber-200 dark:border-amber-500/20">{nextVersion}</span>
+        <span class="font-mono text-xs text-stone-600 dark:text-stone-300 bg-stone-100 dark:bg-white/[0.04] px-2 py-1 rounded ring-1 ring-stone-900/5 dark:ring-white/10">{currentVersion}</span>
+        <svg class="w-3 h-3 text-stone-400 dark:text-stone-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M12 5l7 7-7 7"/></svg>
+        <span class="font-mono text-xs text-secondary-600 dark:text-secondary-400 bg-secondary-50 dark:bg-secondary-500/10 px-2 py-1 rounded ring-1 ring-secondary-200 dark:ring-secondary-500/20">{nextVersion}</span>
       </div>
     </div>
  
@@ -76,12 +80,12 @@
         data-testid="add-log-note"
         bind:value={note}
         placeholder="Tambahkan catatan log (wajib)..."
-        class="w-full bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] rounded-xl p-4 text-sm text-slate-900 dark:text-slate-200 resize-none min-h-[100px] focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/50 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500"
+        class="w-full bg-surface-input dark:bg-white/[0.04] ring-1 ring-stone-900/10 dark:ring-white/10 rounded-xl p-4 text-sm text-stone-900 dark:text-stone-200 resize-none min-h-[100px] focus:outline-none focus-visible:ring-2 focus-visible:ring-secondary-500/60 transition-all placeholder:text-stone-400 dark:placeholder:text-stone-500"
         required
       ></textarea>
       <div class="h-4 mt-1">
         {#if !canSubmit && note.length > 0}
-          <p class="text-xs text-red-400" transition:fade={{duration: 150}}>Catatan wajib diisi</p>
+          <p class="text-xs text-danger-500 font-medium" transition:fade={{duration: 150}}>Catatan wajib diisi</p>
         {/if}
       </div>
     </div>
@@ -91,7 +95,7 @@
         type="button"
         data-testid="add-log-cancel"
         onclick={onCancel}
-        class="px-5 py-2.5 text-sm font-medium text-slate-500 dark:text-slate-300 hover:text-slate-800 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.08] rounded-xl transition-all"
+        class="px-5 py-2.5 text-sm font-semibold text-stone-500 dark:text-stone-300 hover:text-stone-900 dark:hover:text-white hover:bg-stone-100 dark:hover:bg-white/[0.08] rounded-xl transition-all duration-300 active:scale-[0.98] cursor-pointer"
       >
         Batal
       </button>
@@ -100,9 +104,9 @@
         data-testid="add-log-submit"
         onclick={handleSubmit}
         disabled={!canSubmit}
-        class="px-5 py-2.5 text-sm font-medium bg-amber-500 hover:bg-amber-400 text-[#0a0a0a] rounded-xl transition-all disabled:opacity-40 disabled:hover:bg-amber-500 disabled:cursor-not-allowed shadow-[0_0_15px_rgba(245,158,11,0.2)]"
+        class="px-5 py-2.5 text-sm font-semibold bg-secondary-500 hover:bg-secondary-400 text-white rounded-xl transition-all duration-300 active:scale-[0.98] disabled:opacity-40 disabled:hover:bg-secondary-500 disabled:cursor-not-allowed shadow-glow-amber cursor-pointer"
       >
-        Simpan Log
+        Simpan log
       </button>
     </div>
   </div>

@@ -57,14 +57,14 @@
 
 <div 
   data-testid="add-task-modal" 
-  class="fixed inset-0 bg-black/30 dark:bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+  class="fixed inset-0 bg-stone-900/30 dark:bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
   onclick={handleBackdropClick}
   onkeydown={(e) => e.key === 'Escape' && handleBackdropClick()}
   role="presentation"
   transition:fade={{ duration: 150 }}
 >
   <div 
-    class="bg-white dark:bg-surface-dark backdrop-blur-xl border border-slate-200 dark:border-white/[0.08] rounded-2xl p-6 w-full max-w-md shadow-2xl" 
+    class="bg-white dark:bg-surface-dark ring-1 ring-stone-900/5 dark:ring-white/10 rounded-2xl p-6 w-full max-w-md shadow-modal" 
     transition:fly={{ y: 20, duration: 200 }}
     onclick={(e) => e.stopPropagation()}
     onkeydown={(e) => e.stopPropagation()}
@@ -73,76 +73,80 @@
     tabindex="-1"
   >
     <div class="mb-6">
-      <h2 class="text-xl font-bold text-slate-900 dark:text-white mb-1 tracking-wide">Buat Task Baru</h2>
-      <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Tambahkan task ke backlog project ini</p>
+      <div class="flex items-center gap-2 mb-1.5">
+        <span class="w-1.5 h-1.5 rounded-full bg-brand-500"></span>
+        <span class="text-[11px] font-bold uppercase tracking-[0.2em] text-brand-600 dark:text-brand-400">Task baru</span>
+      </div>
+      <h2 class="text-xl font-extrabold tracking-[-0.02em] text-stone-900 dark:text-white">Buat task</h2>
+      <p class="text-sm text-stone-500 dark:text-stone-400 mt-1">Tambahkan task ke backlog project ini</p>
     </div>
     
     <div class="space-y-5">
       <div>
-        <label class="block text-[10px] uppercase tracking-wider font-semibold text-slate-500 dark:text-slate-400 mb-2" for="task-title">Judul <span class="text-red-400">*</span></label>
+        <label class="block text-[11px] font-bold uppercase tracking-[0.15em] text-stone-500 dark:text-stone-400 mb-2" for="task-title">Judul <span class="text-danger-500">*</span></label>
         <input 
           id="task-title" 
           data-testid="task-title-input" 
           bind:value={title} 
           type="text" 
           placeholder="Apa yang perlu dikerjakan?" 
-          class="w-full bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500" 
+          class="w-full bg-surface-input dark:bg-white/[0.04] ring-1 ring-stone-900/10 dark:ring-white/10 rounded-xl px-4 py-3 text-sm text-stone-900 dark:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/60 transition-all placeholder:text-stone-400 dark:placeholder:text-stone-500" 
           required 
         />
       </div>
       
       <div class="grid grid-cols-2 gap-4">
         <div>
-          <label class="block text-[10px] uppercase tracking-wider font-semibold text-slate-500 dark:text-slate-400 mb-2" for="task-priority">Prioritas</label>
+          <label class="block text-[11px] font-bold uppercase tracking-[0.15em] text-stone-500 dark:text-stone-400 mb-2" for="task-priority">Prioritas</label>
           <div class="relative">
             <select 
               id="task-priority" 
               bind:value={priority} 
-              class="w-full bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition-all appearance-none [&>option]:bg-white dark:[&>option]:bg-slate-900"
+              class="w-full bg-surface-input dark:bg-white/[0.04] ring-1 ring-stone-900/10 dark:ring-white/10 rounded-xl px-4 py-3 text-sm text-stone-900 dark:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/60 transition-all appearance-none cursor-pointer [&>option]:bg-white dark:[&>option]:bg-surface-dark"
             >
               <option value="low">Low</option>
               <option value="medium">Medium</option>
               <option value="high">High</option>
             </select>
-            <div class="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-slate-400 dark:text-slate-500">
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+            <div class="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-stone-400 dark:text-stone-500">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
             </div>
           </div>
         </div>
  
         <div>
-          <label class="block text-[10px] uppercase tracking-wider font-semibold text-slate-500 dark:text-slate-400 mb-2" for="task-assignee">Assignee</label>
+          <label class="block text-[11px] font-bold uppercase tracking-[0.15em] text-stone-500 dark:text-stone-400 mb-2" for="task-assignee">Assignee</label>
           <div class="relative">
             <select 
               id="task-assignee" 
               bind:value={assigneeId} 
-              class="w-full bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition-all appearance-none [&>option]:bg-white dark:[&>option]:bg-slate-900"
+              class="w-full bg-surface-input dark:bg-white/[0.04] ring-1 ring-stone-900/10 dark:ring-white/10 rounded-xl px-4 py-3 text-sm text-stone-900 dark:text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/60 transition-all appearance-none cursor-pointer [&>option]:bg-white dark:[&>option]:bg-surface-dark"
             >
               <option value="">Unassigned</option>
               {#each members as m}
                 <option value={m.user_id}>{m.user?.name || m.user?.email || m.user_id}</option>
               {/each}
             </select>
-            <div class="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-slate-400 dark:text-slate-500">
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+            <div class="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-stone-400 dark:text-stone-500">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
             </div>
           </div>
         </div>
       </div>
  
       <div>
-        <label class="block text-[10px] uppercase tracking-wider font-semibold text-slate-500 dark:text-slate-400 mb-2" for="task-desc">Deskripsi</label>
+        <label class="block text-[11px] font-bold uppercase tracking-[0.15em] text-stone-500 dark:text-stone-400 mb-2" for="task-desc">Deskripsi</label>
         <textarea 
           id="task-desc" 
           bind:value={description} 
           placeholder="Detail tambahan (opsional)..." 
-          class="w-full bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-slate-200 resize-none min-h-[100px] focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500"
+          class="w-full bg-surface-input dark:bg-white/[0.04] ring-1 ring-stone-900/10 dark:ring-white/10 rounded-xl px-4 py-3 text-sm text-stone-900 dark:text-stone-200 resize-none min-h-[100px] focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/60 transition-all placeholder:text-stone-400 dark:placeholder:text-stone-500"
         ></textarea>
       </div>
 
       <div class="h-4">
         {#if error}
-          <p class="text-red-400 text-xs" transition:fade={{duration: 150}}>{error}</p>
+          <p class="text-danger-500 text-xs font-medium" transition:fade={{duration: 150}}>{error}</p>
         {/if}
       </div>
 
@@ -150,7 +154,7 @@
         <button 
           type="button" 
           onclick={onClose} 
-          class="px-5 py-2.5 text-sm font-medium text-slate-500 dark:text-slate-300 hover:text-slate-800 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/[0.08] rounded-xl transition-all"
+          class="px-5 py-2.5 text-sm font-semibold text-stone-500 dark:text-stone-300 hover:text-stone-900 dark:hover:text-white hover:bg-stone-100 dark:hover:bg-white/[0.08] rounded-xl transition-all duration-300 active:scale-[0.98] cursor-pointer"
         >
           Batal
         </button>
@@ -159,7 +163,7 @@
           data-testid="task-submit-btn" 
           disabled={isSubmitting} 
           onclick={handleSubmit} 
-          class="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-white text-sm font-medium rounded-xl transition-all disabled:opacity-40 disabled:hover:bg-emerald-500 disabled:cursor-not-allowed shadow-[0_0_15px_rgba(16,185,129,0.2)] flex items-center gap-2"
+          class="px-5 py-2.5 bg-brand-500 hover:bg-brand-400 text-white text-sm font-semibold rounded-xl transition-all duration-300 active:scale-[0.98] disabled:opacity-40 disabled:hover:bg-brand-500 disabled:cursor-not-allowed shadow-glow-brand-sm flex items-center gap-2 cursor-pointer"
         >
           {#if isSubmitting}
             <svg class="animate-spin -ml-1 mr-1 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -168,7 +172,7 @@
             </svg>
             Menyimpan...
           {:else}
-            Buat Task
+            Buat task
           {/if}
         </button>
       </div>

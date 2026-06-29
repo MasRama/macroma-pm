@@ -90,9 +90,9 @@
   );
 
   const priorityClass = $derived(
-    task.priority === 'high' ? 'bg-red-500/15 text-red-500 border-red-500/20' :
-    task.priority === 'medium' ? 'bg-yellow-500/15 text-yellow-500 border-yellow-500/20' :
-    'bg-green-500/15 text-green-500 border-green-500/20'
+    task.priority === 'high' ? 'bg-danger-500/15 text-danger-600 dark:text-danger-400 ring-1 ring-danger-500/20' :
+    task.priority === 'medium' ? 'bg-secondary-500/15 text-secondary-600 dark:text-secondary-400 ring-1 ring-secondary-500/20' :
+    'bg-brand-500/15 text-brand-600 dark:text-brand-400 ring-1 ring-brand-500/20'
   );
 
   const columnLabel: Record<string, string> = {
@@ -223,7 +223,7 @@
 </script>
 
 <div
-  class="fixed inset-0 bg-black/40 dark:bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+  class="fixed inset-0 bg-stone-900/40 dark:bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
   onclick={onClose}
   onkeydown={(e) => e.key === 'Escape' && onClose()}
   role="presentation"
@@ -231,7 +231,7 @@
 >
   <div
     data-testid="task-detail-modal"
-    class="bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/[0.08] rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+    class="bg-white dark:bg-surface-dark ring-1 ring-stone-900/5 dark:ring-white/10 rounded-2xl w-full max-w-lg shadow-modal overflow-hidden flex flex-col max-h-[90vh]"
     transition:fly={{ y: 20, duration: 200 }}
     onclick={(e) => e.stopPropagation()}
     onkeydown={(e) => e.stopPropagation()}
@@ -239,21 +239,21 @@
     aria-modal="true"
     tabindex="-1"
   >
-    <div class="px-6 pt-6 pb-4 border-b border-slate-100 dark:border-white/[0.06] flex items-start justify-between gap-3 shrink-0">
+    <div class="px-6 pt-6 pb-4 border-b border-stone-100 dark:border-white/[0.05] flex items-start justify-between gap-3 shrink-0">
       <div class="flex-1 min-w-0">
-        <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-1">v{versionString}</p>
-        <h2 class="text-base font-semibold text-slate-900 dark:text-white leading-snug">{task.title}</h2>
+        <p class="text-[11px] font-bold uppercase tracking-[0.2em] text-stone-400 dark:text-stone-500 mb-1.5">v{versionString}</p>
+        <h2 class="text-base font-semibold text-stone-900 dark:text-white leading-snug">{task.title}</h2>
       </div>
       <button
         onclick={onClose}
-        class="shrink-0 p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/[0.05] transition-colors"
+        class="shrink-0 p-1.5 rounded-lg text-stone-400 hover:text-stone-700 dark:hover:text-white hover:bg-stone-100 dark:hover:bg-white/[0.05] transition-colors cursor-pointer"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
       </button>
     </div>
 
     <!-- Tabs -->
-    <div class="px-6 pt-3 border-b border-slate-100 dark:border-white/[0.06] shrink-0">
+    <div class="px-6 pt-3 border-b border-stone-100 dark:border-white/[0.05] shrink-0">
       <div class="flex items-center gap-1" role="tablist">
         {#each [{ id: 'detail', label: 'Detail' }, { id: 'comments', label: 'Comments' }, { id: 'history', label: 'Version History' }] as tab}
           <button
@@ -261,13 +261,13 @@
             aria-selected={activeTab === tab.id}
             data-testid="task-detail-tab-{tab.id}"
             onclick={() => selectTab(tab.id as Tab)}
-            class="px-3 py-2 text-xs font-semibold rounded-t-lg transition-colors border-b-2 -mb-px {activeTab === tab.id ? 'text-primary-600 dark:text-primary-400 border-primary-500 dark:border-primary-400' : 'text-slate-500 dark:text-slate-400 border-transparent hover:text-slate-700 dark:hover:text-slate-200'}"
+            class="px-3 py-2 text-xs font-semibold rounded-t-lg transition-colors border-b-2 -mb-px cursor-pointer {activeTab === tab.id ? 'text-brand-600 dark:text-brand-400 border-brand-500 dark:border-brand-400' : 'text-stone-500 dark:text-stone-400 border-transparent hover:text-stone-800 dark:hover:text-stone-200'}"
           >
             {tab.label}
             {#if tab.id === 'comments' && commentsLoaded}
-              <span class="ml-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-white/[0.05] text-slate-500 dark:text-slate-400">{comments.length}</span>
+              <span class="ml-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-stone-100 dark:bg-white/[0.05] text-stone-500 dark:text-stone-400">{comments.length}</span>
             {:else if tab.id === 'history' && logsLoaded}
-              <span class="ml-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-white/[0.05] text-slate-500 dark:text-slate-400">{logs.length}</span>
+              <span class="ml-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-stone-100 dark:bg-white/[0.05] text-stone-500 dark:text-stone-400">{logs.length}</span>
             {/if}
           </button>
         {/each}
@@ -278,15 +278,15 @@
       {#if activeTab === 'detail'}
         <div class="space-y-4">
           <div class="flex items-center gap-2 flex-wrap">
-            <span class="text-[10px] font-bold uppercase px-2.5 py-1 rounded-full border {priorityClass}">
+            <span class="text-[10px] font-bold uppercase px-2.5 py-1 rounded-full {priorityClass}">
               {priorityLabel}
             </span>
-            <span class="text-[10px] font-medium px-2.5 py-1 rounded-full bg-slate-100 dark:bg-white/[0.05] text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-white/[0.08]">
+            <span class="text-[10px] font-medium px-2.5 py-1 rounded-full bg-stone-100 dark:bg-white/[0.05] text-stone-500 dark:text-stone-400 ring-1 ring-stone-900/5 dark:ring-white/10">
               {columnLabel[task.column_id] ?? task.column_id}
             </span>
             {#if assignee}
-              <div class="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
-                <div class="w-5 h-5 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-[9px] font-bold overflow-hidden">
+              <div class="flex items-center gap-1.5 text-xs text-stone-500 dark:text-stone-400">
+                <div class="w-5 h-5 rounded-full bg-stone-200 dark:bg-white/10 flex items-center justify-center text-[9px] font-bold overflow-hidden ring-1 ring-stone-900/5 dark:ring-white/10">
                   {#if assignee.avatar}
                     <img src={assignee.avatar} alt={assignee.name || assignee.email} class="w-full h-full object-cover" />
                   {:else}
@@ -300,38 +300,38 @@
 
           <div>
             <div class="flex items-center justify-between mb-1.5">
-              <p class="text-[10px] uppercase tracking-wider font-semibold text-slate-400 dark:text-slate-500">Deskripsi</p>
+              <p class="text-[11px] font-bold uppercase tracking-[0.15em] text-stone-400 dark:text-stone-500">Deskripsi</p>
               {#if task.description}
                 <button
                   type="button"
                   onclick={copyDescription}
-                  class="text-[10px] font-medium text-blue-600 dark:text-blue-400 hover:underline"
+                  class="text-[11px] font-semibold text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 transition-colors cursor-pointer"
                 >
                   {copied ? 'Tersalin' : 'Salin'}
                 </button>
               {/if}
             </div>
             {#if task.description}
-              <p class="text-sm text-slate-700 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">{task.description}</p>
+              <p class="text-sm text-stone-700 dark:text-stone-300 leading-relaxed whitespace-pre-wrap">{task.description}</p>
             {:else}
-              <p class="text-sm text-slate-400 dark:text-slate-500 italic">Tidak ada deskripsi</p>
+              <p class="text-sm text-stone-400 dark:text-stone-500 italic">Tidak ada deskripsi</p>
             {/if}
           </div>
 
-          <p class="text-[11px] text-slate-400 dark:text-slate-500">
+          <p class="text-[11px] text-stone-400 dark:text-stone-500">
             Dibuat {new Date(task.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
           </p>
         </div>
       {:else if activeTab === 'comments'}
         <div data-testid="task-detail-comments" class="flex flex-col gap-3">
           {#if commentsLoading}
-            <div class="text-xs text-slate-500 animate-pulse">Loading...</div>
+            <div class="text-xs text-stone-500 animate-pulse">Loading...</div>
           {:else if comments.length === 0}
-            <div class="text-xs text-slate-500 dark:text-slate-400 italic">Belum ada komentar.</div>
+            <div class="text-xs text-stone-500 dark:text-stone-400 italic">Belum ada komentar.</div>
           {:else}
             {#each comments as comment (comment.id)}
               <div class="flex gap-2.5 group">
-                <div class="shrink-0 w-7 h-7 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-[10px] font-bold text-slate-700 dark:text-slate-200 overflow-hidden">
+                <div class="shrink-0 w-7 h-7 rounded-full bg-stone-200 dark:bg-white/10 flex items-center justify-center text-[10px] font-bold text-stone-700 dark:text-stone-200 overflow-hidden ring-1 ring-stone-900/5 dark:ring-white/10">
                   {#if comment.user?.avatar}
                     <img src={comment.user.avatar} alt={userLabel(comment.user)} class="w-full h-full object-cover" />
                   {:else}
@@ -340,20 +340,20 @@
                 </div>
                 <div class="flex-1 min-w-0">
                   <div class="flex items-center gap-2 flex-wrap">
-                    <span class="text-xs font-semibold text-slate-700 dark:text-slate-200">{userLabel(comment.user)}</span>
-                    <span class="text-[10px] text-slate-400 dark:text-slate-500">{formatDateTime(comment.created_at)}</span>
+                    <span class="text-xs font-semibold text-stone-700 dark:text-stone-200">{userLabel(comment.user)}</span>
+                    <span class="text-[10px] text-stone-400 dark:text-stone-500">{formatDateTime(comment.created_at)}</span>
                     {#if canDeleteComment(comment)}
                       <button
                         onclick={() => deleteComment(comment)}
                         disabled={deletingCommentId === comment.id}
-                        class="ml-auto text-[10px] text-slate-400 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100 disabled:opacity-50"
+                        class="ml-auto text-[10px] text-stone-400 hover:text-danger-500 transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100 disabled:opacity-50 cursor-pointer"
                         title="Hapus komentar"
                       >
                         {deletingCommentId === comment.id ? 'Menghapus...' : 'Hapus'}
                       </button>
                     {/if}
                   </div>
-                  <p class="text-sm text-slate-700 dark:text-slate-300 mt-0.5 whitespace-pre-wrap break-words">{comment.content}</p>
+                  <p class="text-sm text-stone-700 dark:text-stone-300 mt-0.5 whitespace-pre-wrap break-words">{comment.content}</p>
                 </div>
               </div>
             {/each}
@@ -362,25 +362,25 @@
       {:else if activeTab === 'history'}
         <div data-testid="task-detail-history" class="flex flex-col gap-2.5">
           {#if logsLoading}
-            <div class="text-xs text-slate-500 animate-pulse">Loading...</div>
+            <div class="text-xs text-stone-500 animate-pulse">Loading...</div>
           {:else if logs.length === 0}
-            <div class="text-xs text-slate-500 dark:text-slate-400 italic">Tidak ada log versi.</div>
+            <div class="text-xs text-stone-500 dark:text-stone-400 italic">Tidak ada log versi.</div>
           {:else}
             {#each logs as log (log.id)}
-              <div class="bg-slate-50 dark:bg-white/[0.03] border border-slate-100 dark:border-white/[0.06] p-3 rounded-lg">
+              <div class="bg-surface-input dark:bg-white/[0.03] ring-1 ring-stone-900/5 dark:ring-white/[0.06] p-3 rounded-lg">
                 <div class="flex items-center gap-2 flex-wrap">
-                  <span class="font-mono text-[10px] bg-slate-200 dark:bg-slate-700/50 text-slate-700 dark:text-slate-200 px-1.5 py-0.5 rounded">{log.version}</span>
-                  <span class="text-xs text-slate-600 dark:text-slate-300">
+                  <span class="font-mono text-[10px] bg-stone-200 dark:bg-white/10 text-stone-700 dark:text-stone-200 px-1.5 py-0.5 rounded">{log.version}</span>
+                  <span class="text-xs text-stone-600 dark:text-stone-300">
                     {log.column_from ? (columnLabel[log.column_from] ?? log.column_from) : 'Created'} &rarr; {columnLabel[log.column_to] ?? log.column_to}
                   </span>
                 </div>
                 {#if log.note}
-                  <p class="text-xs text-slate-600 dark:text-slate-400 mt-1.5 whitespace-pre-wrap break-words">{log.note}</p>
+                  <p class="text-xs text-stone-600 dark:text-stone-400 mt-1.5 whitespace-pre-wrap break-words">{log.note}</p>
                 {/if}
-                <div class="flex items-center gap-2 mt-2 text-[10px] text-slate-400 dark:text-slate-500">
+                <div class="flex items-center gap-2 mt-2 text-[10px] text-stone-400 dark:text-stone-500">
                   {#if log.user}
                     <div class="flex items-center gap-1">
-                      <div class="w-4 h-4 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-[8px] font-bold overflow-hidden">
+                      <div class="w-4 h-4 rounded-full bg-stone-200 dark:bg-white/10 flex items-center justify-center text-[8px] font-bold overflow-hidden">
                         {#if log.user.avatar}
                           <img src={log.user.avatar} alt={userLabel(log.user)} class="w-full h-full object-cover" />
                         {:else}
@@ -403,7 +403,7 @@
     {#if activeTab === 'comments'}
       <form
         onsubmit={(e) => { e.preventDefault(); postComment(); }}
-        class="px-6 py-3 border-t border-slate-100 dark:border-white/[0.06] shrink-0 flex items-end gap-2"
+        class="px-6 py-3 border-t border-stone-100 dark:border-white/[0.05] shrink-0 flex items-end gap-2"
       >
         <textarea
           data-testid="task-comment-input"
@@ -411,7 +411,7 @@
           placeholder="Tulis komentar..."
           rows="2"
           maxlength="2000"
-          class="flex-1 resize-none text-sm bg-slate-50 dark:bg-white/[0.04] border border-slate-200 dark:border-white/[0.08] rounded-lg px-3 py-2 text-slate-700 dark:text-slate-200 placeholder:text-slate-400 focus:outline-none focus:border-primary-400/60"
+          class="flex-1 resize-none text-sm bg-surface-input dark:bg-white/[0.04] ring-1 ring-stone-900/10 dark:ring-white/10 rounded-lg px-3 py-2 text-stone-700 dark:text-stone-200 placeholder:text-stone-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/60 transition-all"
           onkeydown={(e) => {
             if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
               e.preventDefault();
@@ -423,7 +423,7 @@
           type="submit"
           data-testid="task-comment-submit"
           disabled={!newComment.trim() || isPostingComment}
-          class="shrink-0 text-xs font-semibold px-3 py-2 rounded-lg bg-primary-500 hover:bg-primary-600 text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          class="shrink-0 text-xs font-semibold px-3 py-2 rounded-lg bg-brand-500 hover:bg-brand-400 text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
         >
           {isPostingComment ? '...' : 'Kirim'}
         </button>
@@ -431,18 +431,18 @@
     {/if}
 
     {#if isOwner}
-      <div class="px-6 pb-5 pt-1 flex justify-end shrink-0 border-t border-slate-100 dark:border-white/[0.06]">
+      <div class="px-6 pb-5 pt-1 flex justify-end shrink-0 border-t border-stone-100 dark:border-white/[0.05]">
         <button
           onclick={handleDelete}
           disabled={isDeleting}
-          class="flex items-center gap-1.5 text-xs font-medium px-3 py-2 rounded-lg text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 border border-red-200 dark:border-red-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          class="flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-lg text-danger-600 dark:text-danger-400 hover:bg-danger-50 dark:hover:bg-danger-500/10 ring-1 ring-danger-200 dark:ring-danger-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
         >
           {#if isDeleting}
             <svg class="animate-spin w-3.5 h-3.5" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
           {:else}
-            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2M10 11v6M14 11v6"/></svg>
           {/if}
-          Hapus Task
+          Hapus task
         </button>
       </div>
     {/if}
