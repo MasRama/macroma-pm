@@ -15,7 +15,7 @@
   }
 
   let {
-    title = 'PM Macroma',
+    title = 'Project Master',
     children,
     nav_workspaces = [],
     nav_projects_standalone = [],
@@ -38,13 +38,13 @@
 </script>
 
 <svelte:head>
-  <title>{title} — PM Macroma</title>
+  <title>{title} — Project Master</title>
 </svelte:head>
 
-<div class="flex min-h-screen bg-slate-50 dark:bg-[#020617] text-slate-900 dark:text-slate-100 transition-colors duration-300">
+<div class="flex min-h-screen bg-stone-50 dark:bg-[#16130f] text-stone-800 dark:text-stone-100 font-display transition-colors duration-300">
   <Sidebar {nav_workspaces} {nav_projects_standalone} {activeProjectId} {activeWorkspaceId} {unread_count} />
 
-  <main class="flex-1 ml-[260px] min-h-screen">
+  <main class="flex-1 ml-16 min-h-screen">
     {@render children()}
   </main>
 </div>
