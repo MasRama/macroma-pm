@@ -124,18 +124,32 @@ export default {
           900: '#064e3b',
           950: '#022c22',
         },
-        // Surface colors for backgrounds
+        // Surface colors for backgrounds (warm stone family — matches dashboard)
         surface: {
-          light: '#f8f8f8',
-          dark: '#0a0a0a',
-          card: {
-            light: '#f1f5f9',  // slate-100
-            dark: '#0f0f0f',
-          }
+          page: '#fafaf9',        // stone-50 — light page background
+          card: '#ffffff',         // white — light card background
+          input: '#f5f5f4',        // stone-100 — light input/muted background
+          muted: '#f5f5f4',        // stone-100 — light muted surface
+          dark: '#16130f',         // warm dark — matches AppLayout dark page bg
+          'dark-card': '#1c1917',  // stone-900 — solid dark card (use when translucent won't do)
+        },
+        // Semantic border tokens (warm stone family)
+        border: {
+          subtle: '#e7e5e4',       // stone-200 — default hairline border
+          muted: '#f5f5f4',        // stone-100 — muted divider
         },
       },
       boxShadow: {
         'soft': '0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 10px 20px -2px rgba(0, 0, 0, 0.04)',
+        // Brand-tinted glows (centralized — change brand color here, all glows update)
+        'glow-brand': '0 8px 20px -8px rgba(22, 167, 102, 0.5)',
+        'glow-brand-sm': '0 0 15px rgba(22, 167, 102, 0.2)',
+        'glow-amber': '0 0 15px rgba(245, 158, 11, 0.2)',
+        'glow-rose': '0 0 15px rgba(244, 63, 94, 0.2)',
+        // Modal & card elevation
+        'modal': '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+        'card-hover': '0 12px 30px -15px rgba(22, 167, 102, 0.25)',
+        'card-hover-soft': '0 8px 20px -12px rgba(22, 167, 102, 0.2)',
       },
       typography: {
         DEFAULT: {
