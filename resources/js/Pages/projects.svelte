@@ -69,148 +69,201 @@
       isCreating = false;
     }
   }
+
+  // Aggregate stats
+  const totalProjects = $derived(projects.length);
+  const totalTasks = $derived(projects.reduce((sum, p) => sum + p.task_counts.backlog + p.task_counts.ongoing + p.task_counts.revisi + p.task_counts.review + p.task_counts.done, 0));
+  const totalDone = $derived(projects.reduce((sum, p) => sum + p.task_counts.done, 0));
+
+  function projectTotal(p: ProjectWithMeta) {
+    return p.task_counts.backlog + p.task_counts.ongoing + p.task_counts.revisi + p.task_counts.review + p.task_counts.done;
+  }
+
+  function projectCompletion(p: ProjectWithMeta) {
+    const t = projectTotal(p);
+    return t > 0 ? Math.round((p.task_counts.done / t) * 100) : 0;
+  }
 </script>
 
-<AppLayout title="Projects" {nav_workspaces} {nav_projects_standalone} {unread_count} activeProjectId="">
-  <!-- Aurora blur blobs background -->
-  <div class="fixed inset-0 overflow-hidden pointer-events-none -z-10 bg-slate-50 dark:bg-[#020617]">
-    <div class="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] rounded-full bg-primary-500/10 blur-[120px] opacity-30 dark:opacity-100"></div>
-    <div class="absolute top-[20%] -right-[10%] w-[40%] h-[40%] rounded-full bg-accent-500/10 blur-[120px] opacity-30 dark:opacity-100"></div>
-    <div class="absolute bottom-[0%] left-[20%] w-[40%] h-[40%] rounded-full bg-info-500/5 blur-[120px] opacity-30 dark:opacity-100"></div>
-  </div>
+<AppLayout title="Project" {nav_workspaces} {nav_projects_standalone} {unread_count} activeProjectId="">
+  <div class="max-w-6xl mx-auto px-5 sm:px-8 lg:px-10 py-8 space-y-7">
 
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-    <!-- Page Header -->
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-      <div>
-        <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Projects</h1>
-        <p class="text-sm text-slate-500 mt-1">Manage your team projects and batches.</p>
+    <!-- ═══════════════════════════════════════════════════════════
+         HERO STRIP — title + stats + CTA
+         ═══════════════════════════════════════════════════════════ -->
+    <div class="relative" in:fly={{ y: 20, duration: 500 }}>
+      <div class="absolute inset-0 bg-[radial-gradient(50%_60%_at_10%_20%,rgba(22,167,102,0.10),transparent_60%)] dark:bg-[radial-gradient(50%_60%_at_10%_20%,rgba(22,167,102,0.14),transparent_60%)] rounded-3xl pointer-events-none"></div>
+
+      <div class="relative z-10 flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 pt-2">
+        <div>
+          <div class="flex items-center gap-2 mb-2">
+            <span class="w-1.5 h-1.5 rounded-full bg-brand-500"></span>
+            <span class="text-[11px] font-bold uppercase tracking-[0.2em] text-brand-600 dark:text-brand-400">Semua project</span>
+          </div>
+          <h1 class="text-3xl lg:text-4xl font-extrabold tracking-[-0.02em] text-stone-900 dark:text-white leading-tight">
+            Project
+          </h1>
+          <p class="text-stone-500 dark:text-stone-400 mt-2 max-w-xl leading-relaxed">Kelola semua project tim, task, dan rilis dari satu tempat.</p>
+        </div>
+
+        <div class="flex items-center gap-2.5 shrink-0">
+          <!-- Stat pills -->
+          <span class="inline-flex items-center gap-2 rounded-full bg-white dark:bg-white/5 ring-1 ring-stone-900/5 dark:ring-white/10 px-3.5 py-2 text-xs font-semibold text-stone-600 dark:text-stone-300">
+            {totalProjects} project
+          </span>
+          <span class="inline-flex items-center gap-2 rounded-full bg-white dark:bg-white/5 ring-1 ring-stone-900/5 dark:ring-white/10 px-3.5 py-2 text-xs font-semibold text-stone-600 dark:text-stone-300">
+            {totalTasks} task
+          </span>
+          <span class="inline-flex items-center gap-2 rounded-full bg-brand-50 dark:bg-brand-500/10 ring-1 ring-brand-200 dark:ring-brand-500/20 px-3.5 py-2 text-xs font-semibold text-brand-600 dark:text-brand-400">
+            {totalDone} selesai
+          </span>
+
+          <button
+            data-testid="new-project-btn"
+            onclick={() => showCreateModal = true}
+            class="group flex items-center gap-2 pl-4 pr-2.5 py-2.5 rounded-xl bg-brand-500 hover:bg-brand-400 text-white text-sm font-semibold shadow-[0_8px_20px_-8px_rgba(22,167,102,0.5)] transition-all duration-300 active:scale-[0.98] cursor-pointer"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+            Project baru
+            <span class="w-6 h-6 rounded-lg bg-white/20 flex items-center justify-center transition-transform duration-300 group-hover:translate-x-0.5">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+            </span>
+          </button>
+        </div>
       </div>
-      <button 
-        data-testid="new-project-btn" 
-        onclick={() => showCreateModal = true}
-        class="inline-flex items-center justify-center px-4 py-2.5 text-sm font-medium text-white bg-primary-500 hover:bg-primary-600 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-surface-dark focus:ring-primary-500 transition-colors"
-      >
-        <svg class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-        </svg>
-        New Project
-      </button>
     </div>
 
-    <!-- Content -->
+    <!-- ═══════════════════════════════════════════════════════════
+         PROJECT LIST — rich cards with progress
+         ═══════════════════════════════════════════════════════════ -->
     {#if projects.length === 0}
-      <!-- Empty State -->
-      <div class="flex flex-col items-center justify-center py-20 px-4 bg-white dark:bg-white/[0.04] backdrop-blur-xl border border-slate-200 dark:border-white/[0.08] rounded-2xl text-center shadow-lg">
-        <div class="w-16 h-16 bg-slate-50 dark:bg-white/[0.05] border border-slate-200 dark:border-white/[0.08] rounded-2xl flex items-center justify-center mb-5">
-          <svg class="w-8 h-8 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-          </svg>
+      <div class="flex flex-col items-center justify-center py-20 bg-white dark:bg-white/[0.04] ring-1 ring-stone-900/5 dark:ring-white/10 rounded-2xl text-center" in:fly={{ y: 20, duration: 500, delay: 80 }}>
+        <div class="w-16 h-16 rounded-2xl bg-brand-50 dark:bg-brand-500/10 flex items-center justify-center mb-5">
+          <svg class="w-8 h-8 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
         </div>
-        <h3 class="text-xl font-semibold text-slate-900 dark:text-slate-100">No projects yet</h3>
-        <p class="text-sm text-slate-500 mt-2 mb-6 max-w-sm leading-relaxed">
-          Get started by creating a new project to organize tasks, batches, and your team members.
-        </p>
-        <button 
-          onclick={() => showCreateModal = true}
-          class="inline-flex items-center px-4 py-2.5 text-sm font-medium text-slate-700 dark:text-white bg-slate-50 dark:bg-white/[0.05] hover:bg-slate-100 dark:hover:bg-white/[0.1] border border-slate-200 dark:border-white/[0.1] rounded-xl transition-all"
-        >
-          Create your first project
+        <p class="text-base font-bold text-stone-900 dark:text-white">Mulai project pertama</p>
+        <p class="text-sm text-stone-500 dark:text-stone-400 mt-1.5 mb-6 max-w-sm leading-relaxed">Buat project untuk mengelola task, versi, dan rilis tim dalam satu board.</p>
+        <button onclick={() => showCreateModal = true} class="group inline-flex items-center gap-2 pl-5 pr-2 py-2.5 rounded-xl bg-brand-500 hover:bg-brand-400 text-white text-sm font-semibold shadow-[0_8px_20px_-8px_rgba(22,167,102,0.5)] transition-all duration-300 active:scale-[0.98] cursor-pointer">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+          Buat project
+          <span class="w-6 h-6 rounded-lg bg-white/20 flex items-center justify-center transition-transform duration-300 group-hover:translate-x-0.5">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+          </span>
         </button>
       </div>
     {:else}
-      <!-- Project Grid -->
-      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-        {#each projects as project, index (project.id)}
-          {@const colorIndex = index % 4}
-          {@const borderColors = ['border-primary-500/60', 'border-accent-500/60', 'border-info-500/60', 'border-warning-500/60']}
-          {@const glowColors = ['from-primary-500/10', 'from-accent-500/10', 'from-info-500/10', 'from-warning-500/10']}
-          {@const badgeBgColors = ['bg-primary-500/10', 'bg-accent-500/10', 'bg-info-500/10', 'bg-warning-500/10']}
-          {@const badgeTextColors = ['text-primary-400', 'text-accent-400', 'text-info-400', 'text-warning-400']}
-          {@const badgeBorderColors = ['border-primary-500/20', 'border-accent-500/20', 'border-info-500/20', 'border-warning-500/20']}
+      <div class="space-y-4" in:fly={{ y: 20, duration: 500, delay: 80 }}>
+        {#each projects as project, i (project.id)}
+          {@const total = projectTotal(project)}
+          {@const completion = projectCompletion(project)}
+          {@const segments = [
+            { value: project.task_counts.backlog, bg: 'bg-stone-400' },
+            { value: project.task_counts.ongoing, bg: 'bg-brand-500' },
+            { value: project.task_counts.revisi, bg: 'bg-amber-500' },
+            { value: project.task_counts.review, bg: 'bg-teal-600' },
+            { value: project.task_counts.done, bg: 'bg-brand-700' },
+          ]}
 
-          <a 
-            use:inertia 
+          <a
+            use:inertia
             href="/projects/{project.id}"
-            data-testid="project-card" 
-            class="group relative flex flex-col h-full bg-white dark:bg-white/[0.04] backdrop-blur-xl border border-slate-200 dark:border-white/[0.08] hover:border-slate-300 dark:hover:border-white/[0.2] hover:bg-slate-50 dark:hover:bg-white/[0.07] rounded-2xl p-6 transition-all duration-300 hover:scale-[1.01] overflow-hidden cursor-pointer border-l-2 {borderColors[colorIndex]}"
+            data-testid="project-card"
+            class="group block bg-white dark:bg-white/[0.04] ring-1 ring-stone-900/5 dark:ring-white/10 hover:ring-brand-500/30 dark:hover:ring-brand-400/30 rounded-2xl p-5 sm:p-6 transition-all duration-300 hover:shadow-[0_12px_30px_-15px_rgba(22,167,102,0.25)] cursor-pointer"
           >
-            <!-- Glow effect on hover -->
-            <div class="absolute inset-0 bg-gradient-to-br {glowColors[colorIndex]} to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
-
-            <div class="relative z-10 flex flex-col h-full">
-              <div class="flex justify-between items-start mb-3 gap-3">
-                <h3 class="text-base font-semibold text-slate-900 dark:text-slate-100 group-hover:text-primary-600 dark:group-hover:text-white transition-colors line-clamp-1">{project.name}</h3>
-                <div class="flex items-center gap-1.5 shrink-0">
+            <div class="flex flex-col sm:flex-row sm:items-start gap-4 sm:gap-6">
+              <!-- Left: identity -->
+              <div class="flex-grow min-w-0">
+                <div class="flex items-center gap-2.5 mb-2">
                   {#if project.active_batch_label}
-                    <span class="text-[10px] font-mono {badgeBgColors[colorIndex]} {badgeTextColors[colorIndex]} px-2 py-0.5 rounded-full whitespace-nowrap border {badgeBorderColors[colorIndex]}">
+                    <span class="inline-flex items-center gap-1.5 rounded-full bg-brand-50 dark:bg-brand-500/10 text-brand-600 dark:text-brand-400 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ring-1 ring-brand-200 dark:ring-brand-500/20">
+                      <span class="w-1 h-1 rounded-full bg-brand-500"></span>
                       {project.active_batch_label}
                     </span>
                   {/if}
                   {#if user.id === project.owner_id}
-                    <button
-                      onclick={(e) => handleDelete(e, project.id)}
-                      disabled={deletingProjectId === project.id}
-                      class="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-lg text-slate-400 hover:text-danger-500 hover:bg-danger-500/10 disabled:opacity-40"
-                      title="Hapus project"
-                    >
-                      {#if deletingProjectId === project.id}
-                        <svg class="animate-spin w-3.5 h-3.5" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
-                      {:else}
-                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                      {/if}
-                    </button>
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-stone-400">Owner</span>
                   {/if}
                 </div>
+
+                <h3 class="text-lg font-extrabold tracking-tight text-stone-900 dark:text-white group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors line-clamp-1">
+                  {project.name}
+                </h3>
+                <p class="text-sm text-stone-500 dark:text-stone-400 mt-1 line-clamp-2 leading-relaxed">
+                  {project.description || 'Tanpa deskripsi'}
+                </p>
               </div>
-              
-              <p class="text-xs text-slate-500 mt-1 mb-6 line-clamp-2 flex-grow leading-relaxed">
-                {project.description || 'No description provided'}
-              </p>
 
-              <div class="mt-auto space-y-5">
-                <!-- Task Stats -->
-                <div class="flex flex-wrap gap-2">
-                  <div class="flex items-center space-x-1.5 bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.05] px-2 py-1 rounded-lg" title="Backlog Tasks">
-                    <div class="w-1.5 h-1.5 rounded-full bg-slate-400 shadow-[0_0_8px_rgba(148,163,184,0.6)]"></div>
-                    <span class="text-xs text-slate-700 dark:text-slate-300 font-medium">{project.task_counts.backlog}</span>
-                  </div>
-                  <div class="flex items-center space-x-1.5 bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.05] px-2 py-1 rounded-lg" title="Ongoing Tasks">
-                    <div class="w-1.5 h-1.5 rounded-full bg-blue-400 shadow-[0_0_8px_rgba(96,165,250,0.6)]"></div>
-                    <span class="text-xs text-slate-700 dark:text-slate-300 font-medium">{project.task_counts.ongoing}</span>
-                  </div>
-                  <div class="flex items-center space-x-1.5 bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.05] px-2 py-1 rounded-lg" title="Revisi Tasks">
-                    <div class="w-1.5 h-1.5 rounded-full bg-orange-400 shadow-[0_0_8px_rgba(251,146,60,0.6)]"></div>
-                    <span class="text-xs text-slate-700 dark:text-slate-300 font-medium">{project.task_counts.revisi}</span>
-                  </div>
-                  <div class="flex items-center space-x-1.5 bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.05] px-2 py-1 rounded-lg" title="Review Tasks">
-                    <div class="w-1.5 h-1.5 rounded-full bg-purple-400 shadow-[0_0_8px_rgba(192,132,252,0.6)]"></div>
-                    <span class="text-xs text-slate-700 dark:text-slate-300 font-medium">{project.task_counts.review}</span>
-                  </div>
-                  <div class="flex items-center space-x-1.5 bg-slate-50 dark:bg-white/[0.03] border border-slate-200 dark:border-white/[0.05] px-2 py-1 rounded-lg" title="Done Tasks">
-                    <div class="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]"></div>
-                    <span class="text-xs text-slate-700 dark:text-slate-300 font-medium">{project.task_counts.done}</span>
+              <!-- Right: completion ring + delete -->
+              <div class="flex items-center gap-4 shrink-0">
+                <!-- Mini completion ring -->
+                <div class="relative w-12 h-12">
+                  <svg class="w-12 h-12 -rotate-90" viewBox="0 0 48 48">
+                    <circle cx="24" cy="24" r="20" fill="none" stroke="currentColor" stroke-width="4" class="text-stone-200 dark:text-white/10"/>
+                    <circle
+                      cx="24" cy="24" r="20"
+                      fill="none"
+                      stroke="#16a766"
+                      stroke-width="4"
+                      stroke-linecap="round"
+                      stroke-dasharray={2 * Math.PI * 20}
+                      stroke-dashoffset={2 * Math.PI * 20 - (completion / 100) * 2 * Math.PI * 20}
+                      style="transition: stroke-dashoffset 0.6s cubic-bezier(0.16,1,0.3,1);"
+                    />
+                  </svg>
+                  <div class="absolute inset-0 flex items-center justify-center">
+                    <span class="text-[11px] font-bold text-stone-900 dark:text-white">{completion}%</span>
                   </div>
                 </div>
 
-                <!-- Footer (Members & Action) -->
-                <div class="flex items-center justify-between pt-4 border-t border-slate-200 dark:border-white/[0.08]">
-                  <div class="flex items-center text-xs font-medium text-slate-400">
-                    <svg class="w-4 h-4 mr-1.5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                    </svg>
-                    {project.member_count} {project.member_count === 1 ? 'member' : 'members'}
+                {#if user.id === project.owner_id}
+                  <button
+                    onclick={(e) => handleDelete(e, project.id)}
+                    disabled={deletingProjectId === project.id}
+                    class="opacity-0 group-hover:opacity-100 transition-opacity p-2 rounded-lg text-stone-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 disabled:opacity-40 cursor-pointer"
+                    title="Hapus project"
+                  >
+                    {#if deletingProjectId === project.id}
+                      <svg class="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                    {:else}
+                      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                    {/if}
+                  </button>
+                {/if}
+              </div>
+            </div>
+
+            <!-- Bottom: stacked bar + meta -->
+            <div class="mt-5 pt-5 border-t border-stone-100 dark:border-white/[0.05] flex flex-col sm:flex-row sm:items-center gap-4">
+              <!-- Stacked bar -->
+              <div class="flex-1 min-w-0">
+                {#if total > 0}
+                  <div class="flex h-2 rounded-full overflow-hidden bg-stone-100 dark:bg-white/5 mb-2.5">
+                    {#each segments as seg}
+                      {#if seg.value > 0}
+                        <div class="{seg.bg} transition-all duration-500" style="width: {(seg.value / total) * 100}%"></div>
+                      {/if}
+                    {/each}
                   </div>
-                  
-                  <div class="text-xs font-semibold text-slate-600 dark:text-slate-300 group-hover:text-primary-600 dark:group-hover:text-white transition-colors inline-flex items-center">
-                    Open Board
-                    <svg class="w-4 h-4 ml-1 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                    </svg>
-                  </div>
+                {/if}
+                <div class="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-stone-500 dark:text-stone-400">
+                  <span class="inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-sm bg-stone-400"></span>{project.task_counts.backlog} Backlog</span>
+                  <span class="inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-sm bg-brand-500"></span>{project.task_counts.ongoing} On Going</span>
+                  <span class="inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-sm bg-amber-500"></span>{project.task_counts.revisi} Revisi</span>
+                  <span class="inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-sm bg-teal-600"></span>{project.task_counts.review} Review</span>
+                  <span class="inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-sm bg-brand-700"></span>{project.task_counts.done} Done</span>
                 </div>
+              </div>
+
+              <!-- Meta: members + open -->
+              <div class="flex items-center gap-4 shrink-0">
+                <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-stone-500 dark:text-stone-400">
+                  <svg class="w-4 h-4 text-stone-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8z"/></svg>
+                  {project.member_count}
+                </span>
+                <span class="group-hover:text-brand-500 transition-colors inline-flex items-center text-xs font-semibold text-stone-600 dark:text-stone-300">
+                  Buka board
+                  <svg class="w-3.5 h-3.5 ml-1 transition-transform group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                </span>
               </div>
             </div>
           </a>
@@ -220,76 +273,52 @@
   </div>
 </AppLayout>
 
-<!-- Create Project Modal -->
 {#if showCreateModal}
-  <div class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-0">
-    <!-- Backdrop -->
-    <div 
-      class="fixed inset-0 bg-black/20 dark:bg-black/60 backdrop-blur-sm" 
-      transition:fly={{ duration: 200, opacity: 0 }}
-      onclick={() => showCreateModal = false}
-      aria-hidden="true"
-    ></div>
-
-    <!-- Modal Panel -->
-    <div 
-      class="relative bg-white dark:bg-surface-dark backdrop-blur-xl border border-slate-200 dark:border-white/10 shadow-2xl dark:shadow-black/40 rounded-2xl w-full max-w-md overflow-hidden flex flex-col"
-      transition:scale={{ duration: 200, start: 0.95 }}
-    >
-      <div class="px-6 py-5 border-b border-slate-200 dark:border-white/10">
-        <h3 class="text-lg font-semibold text-slate-900 dark:text-white">Create New Project</h3>
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div class="fixed inset-0 bg-black/20 dark:bg-black/60 backdrop-blur-sm" transition:fly={{ duration: 200, opacity: 0 }} onclick={() => showCreateModal = false} aria-hidden="true"></div>
+    <div class="relative bg-white dark:bg-stone-900 ring-1 ring-stone-900/10 dark:ring-white/10 shadow-2xl rounded-2xl w-full max-w-md overflow-hidden" transition:scale={{ duration: 200, start: 0.95 }}>
+      <div class="px-6 py-5 border-b border-stone-200 dark:border-white/10">
+        <h3 class="text-lg font-bold text-stone-900 dark:text-white">Project baru</h3>
       </div>
-      
       <div class="px-6 py-6 space-y-5">
         <div>
-          <label for="name" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Project Name</label>
-          <input 
-            type="text" 
+          <label for="name" class="block text-sm font-semibold text-stone-700 dark:text-stone-300 mb-1.5">Nama project</label>
+          <input
+            type="text"
             id="name"
-            data-testid="project-name-input" 
-            bind:value={newProjectName} 
-            placeholder="e.g. Website Redesign"
-            class="block w-full px-4 py-2.5 bg-slate-50 dark:bg-white/[0.05] border border-slate-200 dark:border-white/10 rounded-xl text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 sm:text-sm transition-colors"
+            data-testid="project-name-input"
+            bind:value={newProjectName}
+            placeholder="mis. Website Redesign"
+            class="block w-full px-4 py-2.5 bg-stone-50 dark:bg-white/[0.05] border border-stone-200 dark:border-white/10 rounded-xl text-stone-900 dark:text-stone-100 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:border-brand-400/50 sm:text-sm transition-colors"
             onkeydown={(e) => e.key === 'Enter' && handleCreate()}
           >
         </div>
-        
         <div>
-          <label for="description" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Description <span class="text-slate-500 font-normal">(Optional)</span></label>
-          <textarea 
+          <label for="description" class="block text-sm font-semibold text-stone-700 dark:text-stone-300 mb-1.5">Deskripsi <span class="text-stone-400 font-normal">(opsional)</span></label>
+          <textarea
             id="description"
-            data-testid="project-desc-input" 
-            bind:value={newProjectDesc} 
-            placeholder="What is this project about?"
+            data-testid="project-desc-input"
+            bind:value={newProjectDesc}
+            placeholder="Project ini tentang apa?"
             rows="3"
-            class="block w-full px-4 py-2.5 bg-slate-50 dark:bg-white/[0.05] border border-slate-200 dark:border-white/10 rounded-xl text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500 sm:text-sm transition-colors resize-none"
+            class="block w-full px-4 py-2.5 bg-stone-50 dark:bg-white/[0.05] border border-stone-200 dark:border-white/10 rounded-xl text-stone-900 dark:text-stone-100 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-brand-500/40 focus:border-brand-400/50 sm:text-sm transition-colors resize-none"
           ></textarea>
         </div>
       </div>
-      
-      <div class="px-6 py-5 bg-slate-50 dark:bg-white/[0.04] border-t border-slate-200 dark:border-white/10 flex items-center justify-end space-x-3">
-        <button 
-          type="button" 
-          onclick={() => showCreateModal = false}
-          class="px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white bg-transparent hover:bg-slate-100 dark:hover:bg-white/[0.05] rounded-xl transition-colors"
-        >
-          Cancel
-        </button>
-        <button 
-          type="button" 
-          data-testid="create-project-submit" 
-          onclick={handleCreate} 
+      <div class="px-6 py-5 bg-stone-50 dark:bg-white/[0.03] border-t border-stone-200 dark:border-white/10 flex items-center justify-end space-x-3">
+        <button type="button" onclick={() => showCreateModal = false} class="px-4 py-2 text-sm font-semibold text-stone-600 dark:text-stone-300 hover:text-stone-900 dark:hover:text-white bg-transparent hover:bg-stone-100 dark:hover:bg-white/[0.05] rounded-xl transition-colors cursor-pointer">Batal</button>
+        <button
+          type="button"
+          data-testid="create-project-submit"
+          onclick={handleCreate}
           disabled={!newProjectName.trim() || isCreating}
-          class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-primary-500 hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed border border-transparent rounded-xl shadow-sm transition-colors"
+          class="inline-flex items-center px-4 py-2 text-sm font-semibold text-white bg-brand-500 hover:bg-brand-400 disabled:opacity-50 rounded-xl transition-colors cursor-pointer"
         >
           {#if isCreating}
-            <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            Creating...
+            <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+            Membuat...
           {:else}
-            Create Project
+            Buat project
           {/if}
         </button>
       </div>
