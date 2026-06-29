@@ -67,33 +67,33 @@
   }
 </script>
 
-<div class="grid grid-cols-4 gap-6 p-6 h-full">
+<div class="grid grid-cols-4 gap-4 p-5 h-full">
   {#each columns as column}
+    {@const isDone = column.id === 'done'}
     <div
       data-column={column.id}
       data-testid="kanban-column-{column.id}"
-      class="flex flex-col gap-3 bg-white/5 dark:bg-white/[0.02] backdrop-blur-sm border border-white/10 rounded-xl p-4"
+      class="flex flex-col h-full min-h-0 bg-white dark:bg-white/[0.04] ring-1 ring-stone-900/5 dark:ring-white/10 rounded-2xl overflow-hidden"
     >
-      <div class="flex items-center justify-between mb-3">
-        <h3 class="text-sm font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-          {column.name}
-        </h3>
-        <span class="text-xs bg-white/10 dark:bg-white/5 px-2 py-0.5 rounded-full">
-          {column.tasks().length}
-        </span>
+      <div class="shrink-0 flex items-center justify-between px-4 pt-4 pb-3 border-b border-stone-100 dark:border-white/[0.05]">
+        <div class="flex items-center gap-2">
+          <span class="w-1.5 h-1.5 rounded-full {isDone ? 'bg-brand-700' : 'bg-stone-400'}"></span>
+          <h3 class="text-[13px] font-bold text-stone-700 dark:text-stone-200 tracking-tight">{column.name}</h3>
+        </div>
+        <span class="text-[11px] font-bold tabular-nums text-stone-400 dark:text-stone-500 bg-stone-100 dark:bg-white/5 rounded-full px-2 py-0.5">{column.tasks().length}</span>
       </div>
 
-      <div class="flex flex-col gap-3 flex-1">
+      <div class="flex-1 overflow-y-auto min-h-0 px-3 py-3 flex flex-col gap-2.5">
         {#each column.tasks() as task (task.id)}
           <TaskCard {task} assignee={getAssignee(task.assignee_id)} />
         {/each}
-        
+
         <button
           onclick={() => onAddTask?.(column.id)}
           data-testid="add-task-btn"
-          class="w-full mt-2 py-2 text-xs text-slate-400 border border-dashed border-white/10 rounded-lg hover:border-primary-400/50 hover:text-primary-400 transition-all"
+          class="w-full py-2.5 text-xs font-semibold text-stone-400 dark:text-stone-500 hover:text-brand-600 dark:hover:text-brand-400 border border-dashed border-stone-200 dark:border-white/[0.08] hover:border-brand-500/40 dark:hover:border-brand-400/40 rounded-xl transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/60 cursor-pointer"
         >
-          + Add Task
+          + Add task
         </button>
       </div>
     </div>

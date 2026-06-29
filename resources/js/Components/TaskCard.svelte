@@ -18,6 +18,8 @@
     avatar: string | null;
   }
 
+  type ColumnColor = 'slate' | 'blue' | 'orange' | 'emerald';
+
   let {
     task,
     assignee,
@@ -27,60 +29,70 @@
   }: {
     task: TaskRecord;
     assignee?: UserRecord;
-    columnColor?: 'slate' | 'blue' | 'orange' | 'emerald';
+    columnColor?: ColumnColor;
     onAddLog?: (task: TaskRecord) => void;
     onOpenDetail?: (task: TaskRecord) => void;
   } = $props();
 
-  let priorityClass = $derived(
-    task.priority === 'high' ? 'bg-red-500/20 text-red-400 border-red-500/20' :
-    task.priority === 'medium' ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/20' :
-    'bg-green-500/20 text-green-400 border-green-500/20'
+  // Priority → single dot, dashboard palette (brand/amber/rose)
+  const priorityDot = $derived(
+    task.priority === 'high'
+      ? 'bg-rose-500'
+      : task.priority === 'medium'
+        ? 'bg-amber-500'
+        : 'bg-brand-500'
   );
 
-  let themeClasses = $derived(
-    columnColor === 'slate' ? 'bg-white dark:bg-slate-950/40 border-l-2 border-l-slate-400 border border-slate-200 hover:border-slate-300 dark:border-slate-500/30 dark:hover:border-slate-400/50' :
-    columnColor === 'blue' ? 'bg-white dark:bg-blue-950/40 border-l-2 border-l-blue-400 border border-blue-200 hover:border-blue-300 dark:border-blue-500/30 dark:hover:border-blue-400/50' :
-    columnColor === 'orange' ? 'bg-white dark:bg-orange-950/40 border-l-2 border-l-orange-400 border border-orange-200 hover:border-orange-300 dark:border-orange-500/30 dark:hover:border-orange-400/50' :
-    'bg-white dark:bg-emerald-950/40 border-l-2 border-l-emerald-400 border border-emerald-200 hover:border-emerald-300 dark:border-emerald-500/30 dark:hover:border-emerald-400/50'
+  const versionString = $derived(
+    `v${task.version_major}.${task.version_minor}.${task.version_patch}`
   );
 
-  let btnColorClass = $derived(
-    columnColor === 'slate' ? 'hover:text-slate-500 dark:hover:text-slate-300' :
-    columnColor === 'blue' ? 'hover:text-blue-400' :
-    columnColor === 'orange' ? 'hover:text-orange-400' :
-    'hover:text-emerald-400'
+  const initials = $derived(
+    ((assignee?.name || assignee?.email || '?')[0] || '?').toUpperCase()
   );
 </script>
 
-<div data-task-card class="group relative backdrop-blur-sm rounded-xl p-4 transition-all duration-200 cursor-grab active:cursor-grabbing hover:-translate-y-0.5 {themeClasses}">
+<div
+  data-task-card
+  class="group relative bg-white dark:bg-white/[0.04] ring-1 ring-stone-900/5 dark:ring-white/10 hover:ring-stone-900/15 dark:hover:ring-white/20 hover:shadow-[0_8px_20px_-12px_rgba(22,167,102,0.2)] rounded-xl p-4 transition-all duration-300 cursor-grab active:cursor-grabbing active:scale-[0.99]"
+>
   <div
     role="button"
     tabindex="0"
-    class="cursor-pointer"
+    class="cursor-pointer rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-brand-500/60"
     onmousedown={(e) => e.stopPropagation()}
     ontouchstart={(e) => e.stopPropagation()}
     onclick={() => onOpenDetail?.(task)}
     onkeydown={(e) => e.key === 'Enter' && onOpenDetail?.(task)}
   >
-    <div class="flex items-center justify-between">
-      <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full border {priorityClass}">
+    <!-- Meta row: priority dot + label + version -->
+    <div class="flex items-center justify-between mb-2.5">
+      <span class="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.15em] text-stone-500 dark:text-stone-400">
+        <span class="w-1.5 h-1.5 rounded-full {priorityDot}"></span>
         {task.priority}
+      </span>
+      <span class="text-[10px] font-bold tabular-nums text-stone-400 dark:text-stone-500">
+        {versionString}
       </span>
     </div>
 
-    <p class="text-sm font-medium text-slate-800 dark:text-slate-100 mt-2 mb-3 leading-snug">
+    <!-- Title -->
+    <p class="text-sm font-semibold text-stone-900 dark:text-white leading-snug text-balance">
       {task.title}
     </p>
 
-    <div class="flex items-center justify-between mt-auto">
+    <!-- Footer: assignee + log action -->
+    <div class="flex items-center justify-between mt-3.5">
       <div class="flex items-center">
         {#if assignee}
-          <div class="w-6 h-6 rounded-full bg-slate-700 flex items-center justify-center text-[10px] font-bold text-slate-300 overflow-hidden" title={assignee.name || assignee.email}>
+          <div
+            class="w-6 h-6 rounded-full bg-stone-100 dark:bg-white/10 flex items-center justify-center text-[10px] font-bold text-stone-600 dark:text-stone-200 overflow-hidden ring-1 ring-stone-900/5 dark:ring-white/10"
+            title={assignee.name || assignee.email}
+          >
             {#if assignee.avatar}
               <img src={assignee.avatar} alt={assignee.name || assignee.email} class="w-full h-full object-cover" />
             {:else}
-              {((assignee.name || assignee.email)[0] || '').toUpperCase()}
+              {initials}
             {/if}
           </div>
         {/if}
@@ -90,9 +102,10 @@
         onmousedown={(e) => e.stopPropagation()}
         ontouchstart={(e) => e.stopPropagation()}
         onclick={(e) => { e.stopPropagation(); onAddLog?.(task); }}
-        class="opacity-0 group-hover:opacity-100 transition-opacity text-xs text-slate-400 flex items-center gap-1 {btnColorClass}"
+        class="opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity duration-200 text-[11px] font-semibold text-stone-400 hover:text-brand-600 dark:hover:text-brand-400 inline-flex items-center gap-1 rounded-lg px-1.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-brand-500/60 cursor-pointer"
+        title="Tambah log"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
         Log
       </button>
     </div>

@@ -301,162 +301,161 @@
 </script>
 
 <AppLayout title={project.name} {nav_workspaces} {nav_projects_standalone} {unread_count} activeProjectId={project.id} chat_workspace_id={chatWorkspaceId} chat_workspace_name={chatWorkspaceName}>
-  <!-- Background decorations -->
-  <div class="fixed inset-0 pointer-events-none z-0">
-    <div class="absolute top-0 right-0 w-[600px] h-[600px] bg-primary-500/20 dark:bg-primary-500/10 rounded-full blur-3xl -mr-64 -mt-64"></div>
-    <div class="absolute bottom-0 left-0 w-[400px] h-[400px] bg-accent-500/20 dark:bg-accent-500/10 rounded-full blur-3xl -ml-32 -mb-32"></div>
-    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-info-500/20 dark:bg-info-500/10 rounded-full blur-3xl"></div>
-  </div>
+  <div class="px-5 sm:px-8 lg:px-10 py-6 space-y-5" in:fly={{ y: 20, duration: 500 }}>
 
-  <!-- Header: Project name + Batch dropdown + Add task button -->
-  <header class="relative z-10 flex items-center justify-between px-8 py-5 border-b border-slate-200 dark:border-white/5">
-    <div>
-      <h1 class="text-xl font-bold text-slate-900 dark:text-white">{project.name}</h1>
-      {#if project.description}
-        <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{project.description}</p>
-      {/if}
-    </div>
-    
-    <div class="flex items-center gap-3">
-      <!-- Batch dropdown -->
-      <div class="relative">
+    <!-- ═══════════════════════════════════════════════════════════
+         HEADER CARD: project identity + batch + actions
+         ═══════════════════════════════════════════════════════════ -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-white dark:bg-white/[0.04] ring-1 ring-stone-900/5 dark:ring-white/10 rounded-2xl p-5">
+      <div class="min-w-0">
+        <div class="flex items-center gap-2 mb-1.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-brand-500"></span>
+          <span class="text-[11px] font-bold uppercase tracking-[0.2em] text-brand-600 dark:text-brand-400">Project</span>
+        </div>
+        <h1 class="text-xl font-extrabold tracking-[-0.02em] text-stone-900 dark:text-white text-balance truncate">
+          {project.name}
+        </h1>
+        {#if project.description}
+          <p class="text-sm text-stone-500 dark:text-stone-400 mt-0.5 truncate">{project.description}</p>
+        {/if}
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2 shrink-0">
+        <!-- Batch dropdown -->
         <select
           data-testid="batch-dropdown"
-          class="appearance-none bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-lg px-4 py-2 pr-8 text-sm text-slate-700 dark:text-slate-200 focus:outline-none focus:border-primary-400/50 cursor-pointer"
+          class="appearance-none bg-white dark:bg-white/5 ring-1 ring-stone-900/10 dark:ring-white/10 hover:ring-stone-900/20 dark:hover:ring-white/20 rounded-xl pl-3.5 pr-8 py-2 text-xs font-semibold text-stone-700 dark:text-stone-200 cursor-pointer transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/60"
           onchange={(e) => {
             const val = (e.currentTarget as HTMLSelectElement).value;
             switchBatch(val === '' ? null : batches.find(b => b.id === val) || null);
           }}
         >
-          <option value="">All Batches</option>
+          <option value="">All batches</option>
           {#each batches as batch}
             <option value={batch.id} selected={selectedBatch?.id === batch.id}>{batch.version_string}</option>
           {/each}
         </select>
-      </div>
 
-      {#if user.id === project.owner_id}
-        <div class="flex items-center gap-1.5">
+        {#if user.id === project.owner_id}
           <button
             onclick={() => bumpVersion(false)}
             disabled={isBumping}
             title="Bump minor version (x.N.x)"
-            class="flex items-center gap-1.5 bg-slate-100 dark:bg-white/5 hover:bg-info-500/10 dark:hover:bg-info-500/10 border border-slate-200 dark:border-white/10 hover:border-info-500/40 text-slate-600 dark:text-slate-300 hover:text-info-500 dark:hover:text-info-400 text-xs font-medium px-3 py-2 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            class="inline-flex items-center gap-1.5 bg-white dark:bg-white/5 ring-1 ring-stone-900/10 dark:ring-white/10 hover:ring-stone-900/20 dark:hover:ring-white/20 text-stone-700 dark:text-stone-200 text-xs font-semibold px-3 py-2 rounded-xl transition-all duration-300 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/60 cursor-pointer"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 11 12 6 7 11"/><polyline points="17 18 12 13 7 18"/></svg>
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 11l-5-5-5 5M17 18l-5-5-5 5"/></svg>
             Minor
           </button>
           <button
             onclick={() => bumpVersion(true)}
             disabled={isBumping}
             title="Bump major version (N.x.x)"
-            class="flex items-center gap-1.5 bg-slate-100 dark:bg-white/5 hover:bg-accent-500/10 dark:hover:bg-accent-500/10 border border-slate-200 dark:border-white/10 hover:border-accent-500/40 text-slate-600 dark:text-slate-300 hover:text-accent-500 dark:hover:text-accent-400 text-xs font-medium px-3 py-2 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            class="inline-flex items-center gap-1.5 bg-white dark:bg-white/5 ring-1 ring-stone-900/10 dark:ring-white/10 hover:ring-stone-900/20 dark:hover:ring-white/20 text-stone-700 dark:text-stone-200 text-xs font-semibold px-3 py-2 rounded-xl transition-all duration-300 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/60 cursor-pointer"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 11 12 6 7 11"/><line x1="12" y1="18" x2="12" y2="6"/></svg>
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 11l-5-5-5 5M12 18V6"/></svg>
             Major
           </button>
           <button
             onclick={handleDeleteProject}
             disabled={isDeletingProject}
             title="Hapus project"
-            class="flex items-center gap-1.5 bg-slate-100 dark:bg-white/5 hover:bg-danger-500/10 dark:hover:bg-danger-500/10 border border-slate-200 dark:border-white/10 hover:border-danger-500/40 text-slate-600 dark:text-slate-300 hover:text-danger-500 dark:hover:text-danger-400 text-xs font-medium px-3 py-2 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            class="inline-flex items-center gap-1.5 bg-white dark:bg-white/5 ring-1 ring-stone-900/10 dark:ring-white/10 hover:ring-rose-500/40 text-stone-700 dark:text-stone-200 hover:text-rose-600 dark:hover:text-rose-400 text-xs font-semibold px-3 py-2 rounded-xl transition-all duration-300 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-500/60 cursor-pointer"
           >
             {#if isDeletingProject}
               <svg class="animate-spin w-3 h-3" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
             {:else}
-              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2M10 11v6M14 11v6"/></svg>
             {/if}
             Hapus
           </button>
-        </div>
-      {/if}
+        {/if}
 
-      <button
-        onclick={() => showActivity = true}
-        title="Project Activity"
-        class="flex items-center gap-2 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white text-sm font-medium px-4 py-2 rounded-lg transition-all"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-        Activity
-      </button>
+        <button
+          onclick={() => showActivity = true}
+          title="Project activity"
+          class="inline-flex items-center gap-2 bg-white dark:bg-white/5 ring-1 ring-stone-900/10 dark:ring-white/10 hover:ring-stone-900/20 dark:hover:ring-white/20 text-stone-700 dark:text-stone-200 text-xs font-semibold px-3.5 py-2 rounded-xl transition-all duration-300 active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/60 cursor-pointer"
+        >
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+          Activity
+        </button>
 
-      <!-- Add Task button -->
-      <button 
-        data-testid="add-task-btn-header"
-        onclick={() => { addTaskColumn = 'backlog'; showAddTask = true; }}
-        class="flex items-center gap-2 bg-primary-500 hover:bg-primary-600 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
-        Tambah Task
-      </button>
+        <!-- Primary CTA — dashboard style -->
+        <button
+          data-testid="add-task-btn-header"
+          onclick={() => { addTaskColumn = 'backlog'; showAddTask = true; }}
+          class="inline-flex items-center gap-2 bg-brand-500 hover:bg-brand-400 text-white text-xs font-semibold px-4 py-2 rounded-xl shadow-[0_8px_20px_-8px_rgba(22,167,102,0.5)] transition-all duration-300 active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/60 cursor-pointer"
+        >
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+          Tambah task
+        </button>
+      </div>
     </div>
-  </header>
 
-  <!-- Kanban Board — 5 columns with DnD -->
-  <div class="relative z-10 grid grid-cols-5 gap-5 p-6 h-[calc(100vh-80px)]">
-    {#each COLUMNS as col}
-      {@const colTasks = col.ref()}
-      {@const bgClass = col.color === 'slate' ? 'bg-slate-50/80 border-slate-200/60 dark:bg-slate-500/[0.06] dark:border-slate-500/15' : col.color === 'blue' ? 'bg-blue-50/80 border-blue-200/60 dark:bg-blue-500/[0.06] dark:border-blue-500/15' : col.color === 'orange' ? 'bg-orange-50/80 border-orange-200/60 dark:bg-orange-500/[0.06] dark:border-orange-500/15' : col.color === 'purple' ? 'bg-purple-50/80 border-purple-200/60 dark:bg-purple-500/[0.06] dark:border-purple-500/15' : 'bg-emerald-50/80 border-emerald-200/60 dark:bg-emerald-500/[0.06] dark:border-emerald-500/15'}
-      {@const headerBg = col.color === 'slate' ? 'from-slate-500/[0.07] to-transparent dark:from-slate-500/[0.12]' : col.color === 'blue' ? 'from-blue-500/[0.07] to-transparent dark:from-blue-500/[0.12]' : col.color === 'orange' ? 'from-orange-500/[0.07] to-transparent dark:from-orange-500/[0.12]' : col.color === 'purple' ? 'from-purple-500/[0.07] to-transparent dark:from-purple-500/[0.12]' : 'from-emerald-500/[0.07] to-transparent dark:from-emerald-500/[0.12]'}
-      {@const dotClass = col.color === 'slate' ? 'bg-slate-500 dark:bg-slate-400' : col.color === 'blue' ? 'bg-blue-500 dark:bg-blue-400' : col.color === 'orange' ? 'bg-orange-500 dark:bg-orange-400' : col.color === 'purple' ? 'bg-purple-500 dark:bg-purple-400' : 'bg-emerald-500 dark:bg-emerald-400'}
-      {@const textClass = col.color === 'slate' ? 'text-slate-600 dark:text-slate-400' : col.color === 'blue' ? 'text-blue-600 dark:text-blue-400' : col.color === 'orange' ? 'text-orange-600 dark:text-orange-400' : col.color === 'purple' ? 'text-purple-600 dark:text-purple-400' : 'text-emerald-600 dark:text-emerald-400'}
-      {@const badgeClass = col.color === 'slate' ? 'bg-slate-500/15 text-slate-700 dark:bg-slate-500/20 dark:text-slate-300' : col.color === 'blue' ? 'bg-blue-500/15 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300' : col.color === 'orange' ? 'bg-orange-500/15 text-orange-700 dark:bg-orange-500/20 dark:text-orange-300' : col.color === 'purple' ? 'bg-purple-500/15 text-purple-700 dark:bg-purple-500/20 dark:text-purple-300' : 'bg-emerald-500/15 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300'}
-      {@const addBtnClass = col.color === 'slate' ? 'border-slate-300/40 hover:border-slate-400/60 hover:text-slate-600 hover:bg-slate-100/50 dark:border-slate-500/20 dark:hover:border-slate-400/50 dark:hover:text-slate-300 dark:hover:bg-slate-500/[0.06]' : col.color === 'blue' ? 'border-blue-300/40 hover:border-blue-400/60 hover:text-blue-500 hover:bg-blue-50/50 dark:border-blue-500/20 dark:hover:border-blue-400/50 dark:hover:text-blue-400 dark:hover:bg-blue-500/[0.06]' : col.color === 'orange' ? 'border-orange-300/40 hover:border-orange-400/60 hover:text-orange-500 hover:bg-orange-50/50 dark:border-orange-500/20 dark:hover:border-orange-400/50 dark:hover:text-orange-400 dark:hover:bg-orange-500/[0.06]' : col.color === 'purple' ? 'border-purple-300/40 hover:border-purple-400/60 hover:text-purple-500 hover:bg-purple-50/50 dark:border-purple-500/20 dark:hover:border-purple-400/50 dark:hover:text-purple-400 dark:hover:bg-purple-500/[0.06]' : 'border-emerald-300/40 hover:border-emerald-400/60 hover:text-emerald-500 hover:bg-emerald-50/50 dark:border-emerald-500/20 dark:hover:border-emerald-400/50 dark:hover:text-emerald-400 dark:hover:bg-emerald-500/[0.06]'}
-      {@const shadowClass = col.color === 'slate' ? 'shadow-slate-500/[0.04] dark:shadow-slate-500/[0.06]' : col.color === 'blue' ? 'shadow-blue-500/[0.04] dark:shadow-blue-500/[0.06]' : col.color === 'orange' ? 'shadow-orange-500/[0.04] dark:shadow-orange-500/[0.06]' : col.color === 'purple' ? 'shadow-purple-500/[0.04] dark:shadow-purple-500/[0.06]' : 'shadow-emerald-500/[0.04] dark:shadow-emerald-500/[0.06]'}
+    <!-- ═══════════════════════════════════════════════════════════
+         KANBAN BOARD — 5 columns with DnD
+         Dashboard segment colors: stone-400 / brand-500 / amber-500 / teal-600 / brand-700
+         ═══════════════════════════════════════════════════════════ -->
+    <div class="grid grid-cols-5 gap-4 h-[calc(100dvh-220px)]" in:fly={{ y: 20, duration: 500, delay: 60 }}>
+      {#each COLUMNS as col}
+        {@const colTasks = col.ref()}
+        {@const dotClass = col.color === 'slate' ? 'bg-stone-400' : col.color === 'blue' ? 'bg-brand-500' : col.color === 'orange' ? 'bg-amber-500' : col.color === 'purple' ? 'bg-teal-600' : 'bg-brand-700'}
+        {@const accentText = col.color === 'slate' ? 'text-stone-600 dark:text-stone-300' : col.color === 'blue' ? 'text-brand-600 dark:text-brand-400' : col.color === 'orange' ? 'text-amber-600 dark:text-amber-400' : col.color === 'purple' ? 'text-teal-600 dark:text-teal-400' : 'text-brand-700 dark:text-brand-300'}
 
-      <div data-testid="kanban-column-{col.id}" class="flex flex-col h-full backdrop-blur-md border rounded-2xl overflow-hidden shadow-lg {bgClass} {shadowClass} transition-shadow duration-300 hover:shadow-xl">
-        <!-- Column header — pinned at top -->
-        <div class="shrink-0 px-5 pt-4 pb-3 bg-gradient-to-b {headerBg} border-b border-black/[0.04] dark:border-white/[0.04]">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2.5">
-              <span class="w-2.5 h-2.5 rounded-full {dotClass} shadow-sm ring-2 ring-white/50 dark:ring-white/10"></span>
-              <h3 class="text-xs font-bold uppercase tracking-widest {textClass}">{col.name}</h3>
+        <div
+          data-testid="kanban-column-{col.id}"
+          class="flex flex-col h-full min-h-0 bg-white dark:bg-white/[0.04] ring-1 ring-stone-900/5 dark:ring-white/10 rounded-2xl overflow-hidden transition-all duration-300 hover:ring-stone-900/10 dark:hover:ring-white/15"
+        >
+          <!-- Column header — pinned at top -->
+          <div class="shrink-0 flex items-center justify-between px-4 pt-4 pb-3 border-b border-stone-100 dark:border-white/[0.05]">
+            <div class="flex items-center gap-2">
+              <span class="w-1.5 h-1.5 rounded-full {dotClass}"></span>
+              <h3 class="text-[13px] font-bold {accentText} tracking-tight">{col.name}</h3>
             </div>
-            <span class="text-[10px] font-bold px-2.5 py-1 rounded-full {badgeClass}">{colTasks.length}</span>
+            <span class="text-[11px] font-bold tabular-nums text-stone-400 dark:text-stone-500 bg-stone-100 dark:bg-white/5 rounded-full px-2 py-0.5">{colTasks.length}</span>
+          </div>
+
+          <!-- DnD container — scrollable area -->
+          <div
+            class="flex-1 overflow-y-auto scroll-smooth min-h-0 px-3 py-3 flex flex-col gap-2.5 kanban-scroll"
+            use:dndzone={{ items: colTasks, flipDurationMs: 150, type: 'tasks' }}
+            onconsider={(e) => handleDndConsider(col.id, e)}
+            onfinalize={(e) => handleDndFinalize(col.id, e)}
+          >
+            {#each colTasks as task (task.id)}
+              <div data-testid="task-card-{task.id}" animate:flip={{ duration: 150 }}>
+                <TaskCard
+                  {task}
+                  assignee={getAssignee(task.assignee_id)}
+                  columnColor={col.color}
+                  onAddLog={() => addLogTask = task}
+                  onOpenDetail={() => detailTask = task}
+                />
+              </div>
+            {/each}
+          </div>
+
+          <!-- Add task button — pinned at bottom -->
+          <div class="shrink-0 px-3 pb-3 pt-1">
+            <button
+              onclick={() => { addTaskColumn = col.id; showAddTask = true; }}
+              class="w-full py-2.5 text-xs font-semibold text-stone-400 dark:text-stone-500 hover:text-brand-600 dark:hover:text-brand-400 border border-dashed border-stone-200 dark:border-white/[0.08] hover:border-brand-500/40 dark:hover:border-brand-400/40 rounded-xl transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/60 cursor-pointer"
+            >
+              + Add task
+            </button>
           </div>
         </div>
-
-        <!-- DnD container — scrollable area -->
-        <div
-          class="flex-1 overflow-y-auto scroll-smooth min-h-0 p-3 flex flex-col gap-2.5 kanban-scroll"
-          use:dndzone={{ items: colTasks, flipDurationMs: 150, type: 'tasks' }}
-          onconsider={(e) => handleDndConsider(col.id, e)}
-          onfinalize={(e) => handleDndFinalize(col.id, e)}
-        >
-          {#each colTasks as task (task.id)}
-            <div data-testid="task-card-{task.id}" animate:flip={{ duration: 150 }} class="transition-transform duration-150 hover:scale-[1.01]">
-              <TaskCard
-                {task}
-                assignee={getAssignee(task.assignee_id)}
-                columnColor={col.color}
-                onAddLog={() => addLogTask = task}
-                onOpenDetail={() => detailTask = task}
-              />
-            </div>
-          {/each}
-        </div>
-
-        <!-- Add task button — pinned at bottom -->
-        <div class="shrink-0 px-3 pb-3 pt-1">
-          <button
-            onclick={() => { addTaskColumn = col.id; showAddTask = true; }}
-            class="w-full py-2.5 text-xs font-medium text-slate-400 border border-dashed rounded-xl transition-all duration-200 {addBtnClass}"
-          >
-            + Add Task
-          </button>
-        </div>
-      </div>
-    {/each}
+      {/each}
+    </div>
   </div>
 
   <!-- Custom scrollbar styling for Kanban columns -->
   <style>
-    .kanban-scroll::-webkit-scrollbar { width: 5px; }
+    .kanban-scroll::-webkit-scrollbar { width: 4px; }
     .kanban-scroll::-webkit-scrollbar-track { background: transparent; }
-    .kanban-scroll::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.25); border-radius: 10px; }
-    .kanban-scroll::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, 0.4); }
-    :global(.dark) .kanban-scroll::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); }
-    :global(.dark) .kanban-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.2); }
+    .kanban-scroll::-webkit-scrollbar-thumb { background: rgba(168, 162, 158, 0.25); border-radius: 10px; }
+    .kanban-scroll::-webkit-scrollbar-thumb:hover { background: rgba(168, 162, 158, 0.4); }
+    :global(.dark) .kanban-scroll::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.08); }
+    :global(.dark) .kanban-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.16); }
   </style>
 
   <!-- Modals -->
