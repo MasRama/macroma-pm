@@ -16,6 +16,7 @@ import ProjectMemberController from "@controllers/ProjectMemberController";
 import BatchController from "@controllers/BatchController";
 import TaskController from "@controllers/TaskController";
 import TaskCommentController from "@controllers/TaskCommentController";
+import TaskAttachmentController from "@controllers/TaskAttachmentController";
 import WorkspaceController from "@controllers/WorkspaceController";
 import WorkspaceInvitationController from "@controllers/WorkspaceInvitationController";
 import WorkspaceChatController from "@controllers/WorkspaceChatController";
@@ -96,6 +97,10 @@ Route.get("/tasks/:id/logs", [Auth], TaskController.getLogs);
 Route.get("/tasks/:id/comments", [Auth], TaskCommentController.index);
 Route.post("/tasks/:id/comments", [Auth], TaskCommentController.store);
 Route.delete("/tasks/:id/comments/:commentId", [Auth], TaskCommentController.destroy);
+
+Route.get("/tasks/:id/attachments", [Auth], TaskAttachmentController.index);
+Route.post("/tasks/:id/attachments", [Auth, strictRateLimit()], TaskAttachmentController.store);
+Route.delete("/tasks/:id/attachments/:attachmentId", [Auth], TaskAttachmentController.destroy);
 Route.get("/workspaces", [Auth], WorkspaceController.index);
 Route.post("/workspaces", [Auth], WorkspaceController.store);
 Route.get("/workspaces/:id", [Auth], WorkspaceController.show);

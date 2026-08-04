@@ -5,6 +5,8 @@ export type ActivityEventType =
   | "task.created"
   | "task.moved"
   | "task.log_added"
+  | "task.attachment_added"
+  | "task.attachment_removed"
   | "batch.created"
   | "batch.activated";
 

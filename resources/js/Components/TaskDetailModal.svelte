@@ -2,6 +2,7 @@
   import { fly, fade } from 'svelte/transition';
   import { buildCSRFHeaders, Toast, api } from './helper';
   import axios from 'axios';
+  import ImagePreviewModal from './ImagePreviewModal.svelte';
 
   interface TaskRecord {
     id: string;
@@ -45,6 +46,18 @@
     user?: { id: string; name: string | null; email: string; avatar: string | null } | null;
   }
 
+  interface AttachmentRecord {
+    id: string;
+    task_id: string;
+    url: string;
+    name: string | null;
+    mime_type: string | null;
+    size: number | null;
+    uploaded_by: string | null;
+    created_at: number;
+    user?: { id: string | null; name: string | null; email: string | null; avatar: string | null } | null;
+  }
+
   let { task, assignee, currentUser, isOwner = false, onClose, onDeleted }: {
     task: TaskRecord;
     assignee?: UserRecord;
@@ -54,11 +67,21 @@
     onDeleted: (taskId: string) => void;
   } = $props();
 
-  type Tab = 'detail' | 'comments' | 'history';
+  type Tab = 'detail' | 'comments' | 'history' | 'images';
   let activeTab = $state<Tab>('detail');
 
   let isDeleting = $state(false);
   let copied = $state(false);
+
+  // Attachments state
+  let attachments = $state<AttachmentRecord[]>([]);
+  let attachmentsLoaded = $state(false);
+  let attachmentsLoading = $state(false);
+  let isUploading = $state(false);
+  let isDragOver = $state(false);
+  let fileInput = $state<HTMLInputElement | null>(null);
+  let previewIndex = $state<number | null>(null);
+  let deletingAttachmentId = $state<string | null>(null);
 
   async function copyDescription() {
     if (!task.description) return;
@@ -151,6 +174,7 @@
     activeTab = tab;
     if (tab === 'comments') loadComments();
     else if (tab === 'history') loadLogs();
+    else if (tab === 'images') loadAttachments();
   }
 
   async function postComment() {
@@ -204,6 +228,133 @@
     return comment.user_id === currentUser.id;
   }
 
+  async function loadAttachments() {
+    if (attachmentsLoaded || attachmentsLoading) return;
+    attachmentsLoading = true;
+    try {
+      const res = await fetch(`/tasks/${task.id}/attachments`);
+      const data = await res.json();
+      attachments = data?.data?.attachments ?? [];
+      attachmentsLoaded = true;
+    } catch {
+      attachments = [];
+    } finally {
+      attachmentsLoading = false;
+    }
+  }
+
+  function triggerFileInput() {
+    fileInput?.click();
+  }
+
+  function handleFileChange(e: Event) {
+    const input = e.currentTarget as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      uploadFiles(Array.from(input.files));
+    }
+    input.value = '';
+  }
+
+  function handleDrop(e: DragEvent) {
+    e.preventDefault();
+    isDragOver = false;
+    const files = e.dataTransfer?.files;
+    if (files && files.length > 0) {
+      uploadFiles(Array.from(files));
+    }
+  }
+
+  function handleDragOver(e: DragEvent) {
+    e.preventDefault();
+    isDragOver = true;
+  }
+
+  function handleDragLeave(e: DragEvent) {
+    e.preventDefault();
+    isDragOver = false;
+  }
+
+  async function uploadFiles(files: File[]) {
+    if (isUploading) return;
+    const images = files.filter(f => f.type.startsWith('image/'));
+    if (images.length === 0) {
+      Toast('Pilih file gambar (JPEG/PNG/GIF/WebP)', 'error');
+      return;
+    }
+
+    isUploading = true;
+    const formData = new FormData();
+    for (const file of images) {
+      formData.append('files', file);
+    }
+
+    try {
+      const res = await fetch(`/tasks/${task.id}/attachments`, {
+        method: 'POST',
+        headers: { ...buildCSRFHeaders() },
+        body: formData,
+      });
+      const data = await res.json();
+      if (data.success && data.data?.attachments) {
+        attachments = [...attachments, ...data.data.attachments];
+        attachmentsLoaded = true;
+        const msg = data.data.errors?.length
+          ? `${data.data.attachments.length} gambar terupload, sebagian gagal`
+          : `${data.data.attachments.length} gambar terupload`;
+        Toast(msg, data.data.errors?.length ? 'warning' : 'success');
+      } else {
+        Toast(data.message || 'Gagal upload gambar', 'error');
+      }
+    } catch {
+      Toast('Gagal upload gambar', 'error');
+    } finally {
+      isUploading = false;
+    }
+  }
+
+  function canDeleteAttachment(att: AttachmentRecord): boolean {
+    if (isOwner) return true;
+    if (!currentUser || !att.uploaded_by) return false;
+    return att.uploaded_by === currentUser.id;
+  }
+
+  async function deleteAttachment(att: AttachmentRecord) {
+    if (!confirm('Hapus gambar ini?')) return;
+    deletingAttachmentId = att.id;
+    try {
+      const res = await fetch(`/tasks/${task.id}/attachments/${att.id}`, {
+        method: 'DELETE',
+        headers: buildCSRFHeaders(),
+      });
+      const data = await res.json();
+      if (data.success) {
+        attachments = attachments.filter(a => a.id !== att.id);
+        Toast('Gambar dihapus', 'success');
+      } else {
+        Toast(data.message || 'Gagal menghapus gambar', 'error');
+      }
+    } catch {
+      Toast('Gagal menghapus gambar', 'error');
+    } finally {
+      deletingAttachmentId = null;
+    }
+  }
+
+  function openPreview(index: number) {
+    previewIndex = index;
+  }
+
+  function closePreview() {
+    previewIndex = null;
+  }
+
+  function formatSize(bytes: number | null): string {
+    if (!bytes) return '';
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  }
+
   function formatDateTime(ts: number): string {
     return new Date(ts).toLocaleDateString('id-ID', {
       day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit',
@@ -255,7 +406,7 @@
     <!-- Tabs -->
     <div class="px-6 pt-3 border-b border-stone-100 dark:border-white/[0.05] shrink-0">
       <div class="flex items-center gap-1" role="tablist">
-        {#each [{ id: 'detail', label: 'Detail' }, { id: 'comments', label: 'Comments' }, { id: 'history', label: 'Version History' }] as tab}
+        {#each [{ id: 'detail', label: 'Detail' }, { id: 'comments', label: 'Comments' }, { id: 'history', label: 'Version History' }, { id: 'images', label: 'Images' }] as tab}
           <button
             role="tab"
             aria-selected={activeTab === tab.id}
@@ -268,6 +419,8 @@
               <span class="ml-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-stone-100 dark:bg-white/[0.05] text-stone-500 dark:text-stone-400">{comments.length}</span>
             {:else if tab.id === 'history' && logsLoaded}
               <span class="ml-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-stone-100 dark:bg-white/[0.05] text-stone-500 dark:text-stone-400">{logs.length}</span>
+            {:else if tab.id === 'images' && attachmentsLoaded}
+              <span class="ml-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-stone-100 dark:bg-white/[0.05] text-stone-500 dark:text-stone-400">{attachments.length}</span>
             {/if}
           </button>
         {/each}
@@ -397,6 +550,81 @@
             {/each}
           {/if}
         </div>
+      {:else if activeTab === 'images'}
+        <div data-testid="task-detail-images" class="flex flex-col gap-4">
+          <!-- Upload dropzone -->
+          <div
+            class="relative rounded-xl border-2 border-dashed transition-all duration-200 {isDragOver ? 'border-brand-500 bg-brand-50/50 dark:bg-brand-500/10' : 'border-stone-200 dark:border-white/[0.08] hover:border-brand-500/40 dark:hover:border-brand-400/40'}"
+            ondrop={handleDrop}
+            ondragover={handleDragOver}
+            ondragleave={handleDragLeave}
+            role="button"
+            tabindex="0"
+            onclick={triggerFileInput}
+            onkeydown={(e) => e.key === 'Enter' && triggerFileInput()}
+          >
+            <input
+              bind:this={fileInput}
+              type="file"
+              accept="image/jpeg,image/png,image/gif,image/webp"
+              multiple
+              class="hidden"
+              onchange={handleFileChange}
+            />
+            <div class="flex flex-col items-center justify-center py-6 px-4 text-center cursor-pointer">
+              {#if isUploading}
+                <svg class="animate-spin w-6 h-6 text-brand-500 mb-2" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                <p class="text-xs font-semibold text-stone-600 dark:text-stone-300">Mengupload...</p>
+              {:else}
+                <svg class="w-6 h-6 text-stone-400 dark:text-stone-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                <p class="text-xs font-semibold text-stone-600 dark:text-stone-300">Klik atau drag gambar ke sini</p>
+                <p class="text-[10px] text-stone-400 dark:text-stone-500 mt-0.5">JPEG, PNG, GIF, WebP — maks 5MB per file</p>
+              {/if}
+            </div>
+          </div>
+
+          <!-- Gallery grid -->
+          {#if attachmentsLoading}
+            <div class="text-xs text-stone-500 animate-pulse">Loading...</div>
+          {:else if attachments.length === 0}
+            <div class="text-xs text-stone-500 dark:text-stone-400 italic text-center py-6">Belum ada gambar. Upload gambar untuk task ini.</div>
+          {:else}
+            <div class="grid grid-cols-3 gap-2.5">
+              {#each attachments as att, i (att.id)}
+                <div class="group relative aspect-square rounded-lg overflow-hidden ring-1 ring-stone-900/5 dark:ring-white/10 bg-stone-100 dark:bg-white/[0.04]">
+                  <button
+                    onclick={() => openPreview(i)}
+                    class="absolute inset-0 w-full h-full cursor-zoom-in"
+                    title="Lihat gambar"
+                  >
+                    <img src={att.url} alt={att.name || 'Attachment'} class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" loading="lazy" />
+                  </button>
+                  <!-- Hover overlay -->
+                  <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none"></div>
+                  <!-- Delete button -->
+                  {#if canDeleteAttachment(att)}
+                    <button
+                      onclick={(e) => { e.stopPropagation(); deleteAttachment(att); }}
+                      disabled={deletingAttachmentId === att.id}
+                      class="absolute top-1.5 right-1.5 p-1.5 rounded-lg bg-black/50 text-white hover:bg-rose-500 transition-all opacity-0 group-hover:opacity-100 focus:opacity-100 disabled:opacity-50 cursor-pointer"
+                      title="Hapus gambar"
+                    >
+                      {#if deletingAttachmentId === att.id}
+                        <svg class="animate-spin w-3 h-3" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                      {:else}
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2M10 11v6M14 11v6"/></svg>
+                      {/if}
+                    </button>
+                  {/if}
+                  <!-- Filename tooltip on hover -->
+                  <div class="absolute bottom-0 left-0 right-0 px-2 py-1.5 text-[10px] text-white font-medium truncate opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+                    {att.name || 'Image'}
+                  </div>
+                </div>
+              {/each}
+            </div>
+          {/if}
+        </div>
       {/if}
     </div>
 
@@ -448,3 +676,11 @@
     {/if}
   </div>
 </div>
+
+{#if previewIndex !== null && attachments.length > 0}
+  <ImagePreviewModal
+    attachments={attachments}
+    startIndex={previewIndex}
+    onClose={closePreview}
+  />
+{/if}

@@ -96,6 +96,9 @@ export const UPLOAD = {
 
   /** General assets directory */
   ASSETS_DIR: 'assets',
+
+  /** Task attachment upload directory */
+  TASK_ATTACHMENT_DIR: 'task-attachments',
 } as const;
 
 // ============================================
