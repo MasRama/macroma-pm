@@ -58,11 +58,12 @@
     user?: { id: string | null; name: string | null; email: string | null; avatar: string | null } | null;
   }
 
-  let { task, assignee, currentUser, isOwner = false, onClose, onDeleted }: {
+  let { task, assignee, currentUser, isOwner = false, initialAttachmentCount = 0, onClose, onDeleted }: {
     task: TaskRecord;
     assignee?: UserRecord;
     currentUser?: UserRecord;
     isOwner?: boolean;
+    initialAttachmentCount?: number;
     onClose: () => void;
     onDeleted: (taskId: string) => void;
   } = $props();
@@ -74,6 +75,10 @@
   let copied = $state(false);
 
   // Attachments state
+  // `attachmentCount` is the live count used for the tab badge — seeded from the
+  // server-rendered count so the badge shows immediately without waiting for the
+  // first tab click. `attachments` only holds the full list (loaded lazily).
+  let attachmentCount = $state(initialAttachmentCount);
   let attachments = $state<AttachmentRecord[]>([]);
   let attachmentsLoaded = $state(false);
   let attachmentsLoading = $state(false);
@@ -235,6 +240,7 @@
       const res = await fetch(`/tasks/${task.id}/attachments`);
       const data = await res.json();
       attachments = data?.data?.attachments ?? [];
+      attachmentCount = attachments.length;
       attachmentsLoaded = true;
     } catch {
       attachments = [];
@@ -297,6 +303,7 @@
       const data = await res.json();
       if (data.success && data.data?.attachments) {
         attachments = [...attachments, ...data.data.attachments];
+        attachmentCount = attachments.length;
         attachmentsLoaded = true;
         const msg = data.data.errors?.length
           ? `${data.data.attachments.length} gambar terupload, sebagian gagal`
@@ -329,6 +336,7 @@
       const data = await res.json();
       if (data.success) {
         attachments = attachments.filter(a => a.id !== att.id);
+        attachmentCount = attachments.length;
         Toast('Gambar dihapus', 'success');
       } else {
         Toast(data.message || 'Gagal menghapus gambar', 'error');
@@ -419,8 +427,8 @@
               <span class="ml-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-stone-100 dark:bg-white/[0.05] text-stone-500 dark:text-stone-400">{comments.length}</span>
             {:else if tab.id === 'history' && logsLoaded}
               <span class="ml-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-stone-100 dark:bg-white/[0.05] text-stone-500 dark:text-stone-400">{logs.length}</span>
-            {:else if tab.id === 'images' && attachmentsLoaded}
-              <span class="ml-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-stone-100 dark:bg-white/[0.05] text-stone-500 dark:text-stone-400">{attachments.length}</span>
+            {:else if tab.id === 'images' && attachmentCount > 0}
+              <span class="ml-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-stone-100 dark:bg-white/[0.05] text-stone-500 dark:text-stone-400">{attachmentCount}</span>
             {/if}
           </button>
         {/each}

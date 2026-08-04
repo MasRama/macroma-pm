@@ -70,6 +70,23 @@ class ProjectController extends BaseController {
     const tasks = await Task.findByProject(projectId, batchId !== undefined ? batchId : undefined);
     const batches = await ProjectBatch.findByProject(projectId);
 
+    // Eager-load attachment counts for all tasks in this project (single GROUP BY query)
+    const taskIds = tasks.map((t) => t.id);
+    const attachmentCountRows: { task_id: string; count: number }[] = taskIds.length
+      ? await DB.from("task_attachments")
+          .whereIn("task_id", taskIds)
+          .groupBy("task_id")
+          .select("task_id")
+          .count("* as count")
+      : [];
+    const attachmentCountMap = new Map<string, number>(
+      attachmentCountRows.map((r) => [r.task_id, Number(r.count)])
+    );
+    const tasksWithAttachmentCount = tasks.map((t) => ({
+      ...t,
+      attachment_count: attachmentCountMap.get(t.id) ?? 0,
+    }));
+
     const memberRecords = await ProjectMember.findByProject(projectId);
 
     const userIdSet = new Set<string>(memberRecords.map((m) => m.user_id));
@@ -101,7 +118,7 @@ class ProjectController extends BaseController {
     this.requireInertia(res);
     return res.inertia("project-board", {
       project,
-      tasks,
+      tasks: tasksWithAttachmentCount,
       batches: batches.map((b) => ({
         ...b,
         version_string: `v${b.major}.${b.minor}${b.label ? " " + b.label : ""}`,

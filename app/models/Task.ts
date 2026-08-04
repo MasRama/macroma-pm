@@ -16,6 +16,8 @@ export interface TaskRecord extends BaseRecord {
   version_patch: number;
   created_at: number;
   updated_at: number;
+  /** Eager-loaded count of task_attachments. Not always present (only on board render). */
+  attachment_count?: number;
 }
 
 export function taskVersionString(task: TaskRecord): string {

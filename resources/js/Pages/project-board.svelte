@@ -15,7 +15,7 @@
   import { onDestroy } from 'svelte';
   import axios from 'axios';
 
-  interface TaskRecord { id: string; project_id: string; batch_id: string | null; title: string; description: string | null; priority: 'low' | 'medium' | 'high'; assignee_id: string | null; column_id: 'backlog' | 'ongoing' | 'revisi' | 'review' | 'done'; sort_order: number; version_major: number; version_minor: number; version_patch: number; created_at: number; updated_at: number; }
+  interface TaskRecord { id: string; project_id: string; batch_id: string | null; title: string; description: string | null; priority: 'low' | 'medium' | 'high'; assignee_id: string | null; column_id: 'backlog' | 'ongoing' | 'revisi' | 'review' | 'done'; sort_order: number; version_major: number; version_minor: number; version_patch: number; created_at: number; updated_at: number; attachment_count?: number; }
   interface BatchRecord { id: string; project_id: string; major: number; minor: number; label: string | null; is_active: boolean; version_string: string; }
   interface Member { id: string; project_id: string; user_id: string; role: string; user?: { id: string; name: string | null; email: string; avatar: string | null; } }
   interface Project { id: string; name: string; description: string | null; owner_id: string; workspace_id: string | null; }
@@ -91,6 +91,22 @@
         tasks = tasks.filter(t => t.id !== taskId);
         if (detailTask?.id === taskId) detailTask = null;
         if (!isSelf && target) Toast(`Task "${target.title}" dihapus`, 'warning');
+        break;
+      }
+      case 'task.attachment_added': {
+        const taskId = msg.payload?.task_id as string | undefined;
+        if (!taskId) return;
+        tasks = tasks.map(t => t.id === taskId
+          ? { ...t, attachment_count: (t.attachment_count ?? 0) + (msg.payload?.attachments?.length ?? 1) }
+          : t);
+        break;
+      }
+      case 'task.attachment_removed': {
+        const taskId = msg.payload?.task_id as string | undefined;
+        if (!taskId) return;
+        tasks = tasks.map(t => t.id === taskId
+          ? { ...t, attachment_count: Math.max(0, (t.attachment_count ?? 0) - 1) }
+          : t);
         break;
       }
       // Comments are handled inside TaskDetailModal — ignored here on purpose.
@@ -427,6 +443,7 @@
                   {task}
                   assignee={getAssignee(task.assignee_id)}
                   columnColor={col.color}
+                  attachmentCount={task.attachment_count ?? 0}
                   onAddLog={() => addLogTask = task}
                   onOpenDetail={() => detailTask = task}
                 />
@@ -491,6 +508,7 @@
       assignee={getAssignee(detailTask.assignee_id)}
       currentUser={user}
       isOwner={user.id === project.owner_id}
+      initialAttachmentCount={detailTask.attachment_count ?? 0}
       onClose={() => detailTask = null}
       onDeleted={(id) => {
         tasks = tasks.filter(t => t.id !== id);

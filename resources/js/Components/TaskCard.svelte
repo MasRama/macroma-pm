@@ -24,12 +24,14 @@
     task,
     assignee,
     columnColor = 'blue',
+    attachmentCount = 0,
     onAddLog,
     onOpenDetail,
   }: {
     task: TaskRecord;
     assignee?: UserRecord;
     columnColor?: ColumnColor;
+    attachmentCount?: number;
     onAddLog?: (task: TaskRecord) => void;
     onOpenDetail?: (task: TaskRecord) => void;
   } = $props();
@@ -83,7 +85,16 @@
 
     <!-- Footer: assignee + log action -->
     <div class="flex items-center justify-between mt-3.5">
-      <div class="flex items-center">
+      <div class="flex items-center gap-2">
+        {#if attachmentCount > 0}
+          <span
+            class="inline-flex items-center gap-1 text-[10px] font-semibold text-stone-400 dark:text-stone-500"
+            title={`${attachmentCount} gambar`}
+          >
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            {attachmentCount}
+          </span>
+        {/if}
         {#if assignee}
           <div
             class="w-6 h-6 rounded-full bg-stone-100 dark:bg-white/10 flex items-center justify-center text-[10px] font-bold text-stone-600 dark:text-stone-200 overflow-hidden ring-1 ring-stone-900/5 dark:ring-white/10"
