@@ -34,8 +34,7 @@
     done: 'Done',
   };
 
-  let currentVersion = $derived(`v0.0.${task.version_patch}`);
-  let nextVersion = `v0.0.?`;
+  let currentVersion = $derived(`v${task.version_major}.${task.version_minor}.${task.version_patch}`);
 
   function handleSubmit() {
     if (!canSubmit) return;
@@ -86,8 +85,9 @@
       <div class="flex items-center gap-2">
         <span class="font-mono text-xs text-stone-600 dark:text-stone-300 bg-stone-100 dark:bg-white/[0.04] px-2 py-1 rounded ring-1 ring-stone-900/5 dark:ring-white/10">{currentVersion}</span>
         <svg class="w-3 h-3 text-stone-400 dark:text-stone-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M12 5l7 7-7 7"/></svg>
-        <span class="font-mono text-xs text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-500/10 px-2 py-1 rounded ring-1 ring-brand-200 dark:ring-brand-500/20">{nextVersion}</span>
+        <span class="font-mono text-xs text-brand-600 dark:text-brand-400 bg-brand-50 dark:bg-brand-500/10 px-2 py-1 rounded ring-1 ring-brand-200 dark:ring-brand-500/20" title="Versi baru akan di-generate otomatis oleh sistem saat task dipindah">Auto</span>
       </div>
+      <span class="text-[10px] text-stone-400 dark:text-stone-500">versi baru di-generate otomatis</span>
     </div>
  
     <div class="mb-6">

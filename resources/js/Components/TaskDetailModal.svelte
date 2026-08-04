@@ -3,6 +3,7 @@
   import { buildCSRFHeaders, Toast, api } from './helper';
   import axios from 'axios';
   import ImagePreviewModal from './ImagePreviewModal.svelte';
+  import DeleteConfirmModal from './DeleteConfirmModal.svelte';
 
   interface TaskRecord {
     id: string;
@@ -72,6 +73,7 @@
   let activeTab = $state<Tab>('detail');
 
   let isDeleting = $state(false);
+  let showDeleteConfirm = $state(false);
   let copied = $state(false);
 
   // Attachments state
@@ -136,9 +138,8 @@
   );
 
   async function handleDelete() {
-    if (!confirm(`Yakin ingin menghapus task "${task.title}"?`)) return;
     isDeleting = true;
-    const result = await api(() => axios.delete(`/tasks/${task.id}`, { headers: buildCSRFHeaders() }));
+    const result = await api(() => axios.delete(`/tasks/${task.id}`, { headers: buildCSRFHeaders() }), { showSuccessToast: false });
     isDeleting = false;
     if (result.success) {
       onDeleted(task.id);
@@ -420,7 +421,7 @@
             aria-selected={activeTab === tab.id}
             data-testid="task-detail-tab-{tab.id}"
             onclick={() => selectTab(tab.id as Tab)}
-            class="px-3 py-2 text-xs font-semibold rounded-t-lg transition-colors border-b-2 -mb-px cursor-pointer {activeTab === tab.id ? 'text-brand-600 dark:text-brand-400 border-brand-500 dark:border-brand-400' : 'text-stone-500 dark:text-stone-400 border-transparent hover:text-stone-800 dark:hover:text-stone-200'}"
+            class="px-3 py-2 text-xs font-semibold transition-colors border-b-2 -mb-px cursor-pointer {activeTab === tab.id ? 'text-brand-600 dark:text-brand-400 border-brand-500 dark:border-brand-400' : 'text-stone-500 dark:text-stone-400 border-transparent hover:text-stone-800 dark:hover:text-stone-200'}"
           >
             {tab.label}
             {#if tab.id === 'comments' && commentsLoaded}
@@ -669,7 +670,7 @@
     {#if isOwner}
       <div class="px-6 pb-5 pt-1 flex justify-end shrink-0 border-t border-stone-100 dark:border-white/[0.05]">
         <button
-          onclick={handleDelete}
+          onclick={() => showDeleteConfirm = true}
           disabled={isDeleting}
           class="flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-lg text-danger-600 dark:text-danger-400 hover:bg-danger-50 dark:hover:bg-danger-500/10 ring-1 ring-danger-200 dark:ring-danger-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
         >
@@ -690,5 +691,17 @@
     attachments={attachments}
     startIndex={previewIndex}
     onClose={closePreview}
+  />
+{/if}
+
+{#if showDeleteConfirm}
+  <DeleteConfirmModal
+    title="Hapus task"
+    targetName={task.title}
+    warningText="Task ini beserta semua komentar, gambar, dan log versi akan dihapus permanen."
+    confirmLabel="Hapus task"
+    isDeleting={isDeleting}
+    onConfirm={handleDelete}
+    onCancel={() => showDeleteConfirm = false}
   />
 {/if}
