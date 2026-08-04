@@ -6,7 +6,6 @@
   import AppLayout from '../Components/AppLayout.svelte';
   import TaskCard from '../Components/TaskCard.svelte';
   import MoveModal from '../Components/MoveModal.svelte';
-  import AddLogModal from '../Components/AddLogModal.svelte';
   import AddTaskModal from '../Components/AddTaskModal.svelte';
   import ActivityPanel from '../Components/ActivityPanel.svelte';
   import TaskDetailModal from '../Components/TaskDetailModal.svelte';
@@ -69,8 +68,7 @@
         if (!isSelf) Toast(`Task baru ditambahkan: ${incoming.title}`, 'info');
         break;
       }
-      case 'task.moved':
-      case 'task.log_added': {
+      case 'task.moved': {
         const incoming = msg.payload?.task as TaskRecord | undefined;
         if (!incoming) return;
         const idx = tasks.findIndex(t => t.id === incoming.id);
@@ -79,7 +77,7 @@
         } else {
           tasks = [...tasks, incoming];
         }
-        if (!isSelf && msg.type === 'task.moved') {
+        if (!isSelf) {
           Toast(`Task "${incoming.title}" dipindah`, 'info');
         }
         break;
@@ -133,9 +131,6 @@
   // Move modal state
   let pendingMove = $state<{ taskId: string; fromColumn: string; toColumn: string; items: TaskRecord[] } | null>(null);
   let moveModalTask = $state<TaskRecord | null>(null);
-
-  // Add log modal
-  let addLogTask = $state<TaskRecord | null>(null);
 
   // Activity panel
   let showActivity = $state(false);
@@ -261,29 +256,6 @@
     doneTasks = filtered.filter(t => t.column_id === 'done').sort((a,b) => a.sort_order - b.sort_order);
     pendingMove = null;
     moveModalTask = null;
-  }
-
-  async function commitAddLog(note: string) {
-    if (!addLogTask) return;
-    const taskId = addLogTask.id;
-    addLogTask = null;
-
-    try {
-      const res = await fetch(`/tasks/${taskId}/logs`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', ...buildCSRFHeaders() },
-        body: JSON.stringify({ note }),
-      });
-      const data = await res.json();
-      if (data.success && data.data?.task) {
-        tasks = tasks.map(t => t.id === taskId ? data.data.task : t);
-        Toast('Log ditambahkan', 'success');
-      } else {
-        Toast(data.message || 'Gagal menambah log', 'error');
-      }
-    } catch {
-      Toast('Gagal menambah log', 'error');
-    }
   }
 
   async function updateSortOrder(items: TaskRecord[], columnId: string) {
@@ -444,7 +416,6 @@
                   assignee={getAssignee(task.assignee_id)}
                   columnColor={col.color}
                   attachmentCount={task.attachment_count ?? 0}
-                  onAddLog={() => addLogTask = task}
                   onOpenDetail={() => detailTask = task}
                 />
               </div>
@@ -491,14 +462,6 @@
       targetColumn={pendingMove.toColumn}
       onConfirm={commitMove}
       onCancel={cancelMove}
-    />
-  {/if}
-
-  {#if addLogTask}
-    <AddLogModal
-      task={addLogTask}
-      onConfirm={commitAddLog}
-      onCancel={() => addLogTask = null}
     />
   {/if}
 

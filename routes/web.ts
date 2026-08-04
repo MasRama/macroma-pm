@@ -91,7 +91,6 @@ Route.patch("/projects/:id/batches/:batchId/activate", [Auth], BatchController.a
 
 Route.post("/projects/:id/tasks", [Auth], TaskController.store);
 Route.patch("/tasks/:id/move", [Auth], TaskController.move);
-Route.post("/tasks/:id/logs", [Auth], TaskController.addLog);
 Route.delete("/tasks/:id", [Auth], TaskController.destroy);
 Route.get("/tasks/:id/logs", [Auth], TaskController.getLogs);
 Route.get("/tasks/:id/comments", [Auth], TaskCommentController.index);

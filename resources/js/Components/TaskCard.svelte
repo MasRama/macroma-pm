@@ -25,14 +25,12 @@
     assignee,
     columnColor = 'blue',
     attachmentCount = 0,
-    onAddLog,
     onOpenDetail,
   }: {
     task: TaskRecord;
     assignee?: UserRecord;
     columnColor?: ColumnColor;
     attachmentCount?: number;
-    onAddLog?: (task: TaskRecord) => void;
     onOpenDetail?: (task: TaskRecord) => void;
   } = $props();
 
@@ -108,17 +106,6 @@
           </div>
         {/if}
       </div>
-
-      <button
-        onmousedown={(e) => e.stopPropagation()}
-        ontouchstart={(e) => e.stopPropagation()}
-        onclick={(e) => { e.stopPropagation(); onAddLog?.(task); }}
-        class="opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity duration-200 text-[11px] font-semibold text-stone-400 hover:text-brand-600 dark:hover:text-brand-400 inline-flex items-center gap-1 rounded-lg px-1.5 py-0.5 outline-none focus-visible:ring-2 focus-visible:ring-brand-500/60 cursor-pointer"
-        title="Tambah log"
-      >
-        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
-        Log
-      </button>
     </div>
   </div>
 </div>
