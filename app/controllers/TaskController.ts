@@ -118,6 +118,12 @@ class TaskController extends BaseController {
         { task: newTask, actor_id: req.user.id }
       );
 
+      // Non-Inertia requests (e.g. fetch from AddTaskModal with attachments) get JSON
+      // so the client can grab the task id and upload images in a follow-up request.
+      if (req.headers["x-inertia"] !== "true") {
+        return jsonCreated(res, "Task created", { task: newTask });
+      }
+
       return res.redirect(`/projects/${projectId}`);
     } catch (err) {
       return jsonServerError(res, "Failed to create task");
